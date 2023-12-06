@@ -6,19 +6,25 @@ use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
 
-class ContentItem extends Component
+class SimpleInput extends Component
 {
     /**
      * Create a new component instance.
      */
     public function __construct(
-        public string $content,
-        public string $date,
-        public int $state,
-        public string $reference = ""
+        public string $type,
+        public string $name,
+        public string $label,
+        public bool $readOnly = false,
+        public string $value = ""
     )
     {
         //
+    }
+
+    public function isReadOnly(): bool
+    {
+        return $this->readOnly;
     }
 
     /**
@@ -26,6 +32,6 @@ class ContentItem extends Component
      */
     public function render(): View|Closure|string
     {
-        return view('components.content-item');
+        return view('components.simple-input');
     }
 }
