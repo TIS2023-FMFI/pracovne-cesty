@@ -67,6 +67,11 @@ return new class extends Migration {
             $table->string('cancellation_reason', 1000)->nullable();
             $table->string('note', 5000)->nullable();
             $table->string('conclusion', 5000)->nullable();
+
+
+            // Timestamp
+            $table->timestamp('created_at');
+            $table->timestamp('updated_at');
         });
     }
 

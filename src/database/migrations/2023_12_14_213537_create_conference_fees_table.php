@@ -12,11 +12,15 @@ return new class extends Migration {
     {
         Schema::create('conference_fees', static function (Blueprint $table) {
             $table->id();
+
             $table->string('organiser_name', 100);
             $table->string('organiser_address', 200);
             $table->string('ico', 8)->nullable();
             $table->string('iban', 34);
             $table->string('amount', 20);
+
+            $table->timestamp('created_at');
+            $table->timestamp('updated_at');
         });
     }
 

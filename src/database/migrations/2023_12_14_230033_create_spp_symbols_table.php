@@ -12,6 +12,7 @@ return new class extends Migration {
     {
         Schema::create('spp_symbols', static function (Blueprint $table) {
             $table->id();
+
             $table->string('spp_symbol', 20);
             $table->string('fund', 10);
             $table->string('financial_region', 10);
@@ -19,6 +20,9 @@ return new class extends Migration {
             $table->string('account', 50);
             $table->string('grantee', 100);
             $table->smallInteger('status');
+
+            $table->timestamp('created_at');
+            $table->timestamp('updated_at');
         });
     }
 

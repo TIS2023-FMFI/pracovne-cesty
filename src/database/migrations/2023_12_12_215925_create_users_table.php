@@ -19,11 +19,16 @@ return new class extends Migration {
             $table->string('department', 10);
             $table->string('email', 127)->unique();
             $table->string('address', 200);
+
             $table->unsignedSmallInteger('user_type');
             $table->string('username', 255)->unique();
             $table->string('password', 255);
+
             $table->unsignedSmallInteger('status');
             $table->dateTime('last_login')->nullable();
+
+            $table->timestamp('created_at');
+            $table->timestamp('updated_at');
         });
     }
 

@@ -12,9 +12,13 @@ return new class extends Migration {
     {
         Schema::create('expenses', static function (Blueprint $table) {
             $table->id();
+
             $table->string('amount_eur', 20);
             $table->string('amount_foreign', 20)->nullable();
             $table->boolean('reimburse')->default(false);
+
+            $table->timestamp('created_at');
+            $table->timestamp('updated_at');
         });
     }
 
