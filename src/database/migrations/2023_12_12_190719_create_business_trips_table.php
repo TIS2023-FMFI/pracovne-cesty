@@ -28,9 +28,11 @@ return new class extends Migration {
             $table->foreignIdFor(Transport::class);
 
             $table->string('place', 200);
+
             $table->string('event_url', 200)->nullable();
             $table->string('upload_name', 200)->nullable();
 
+            $table->string('sofia_id', 40)->nullable();
             $table->unsignedSmallInteger('state');
 
 
@@ -52,6 +54,8 @@ return new class extends Migration {
 
 
             // Expenses and reimbursement
+            $table->string('iban', 34);
+
             $table->foreignIdFor(ConferenceFee::class)->nullable();
             $table->foreignIdFor(Reimbursement::class)->nullable();
             $table->foreignIdFor(SppSymbol::class)->nullable();
