@@ -41,8 +41,8 @@ return new class extends Migration {
             $table->string('place_start', 200)->nullable();
             $table->string('place_end', 200)->nullable();
 
-            $table->dateTime('datetime_border_crossing_departure')->nullable();
-            $table->dateTime('datetime_border_crossing_arrival')->nullable();
+            $table->dateTime('datetime_border_crossing_start')->nullable();
+            $table->dateTime('datetime_border_crossing_end')->nullable();
 
 
             // Purpose
@@ -61,8 +61,8 @@ return new class extends Migration {
             $table->foreignIdFor(Expense::class, 'other_expense_id')->nullable();
             $table->foreignIdFor(Expense::class, 'allowance_id')->nullable();
 
-            $table->string('reimbursed_meals')->nullable();
-            $table->boolean('no_reimbursed_meals')->default(false);
+            $table->string('not_reimbursed_meals')->nullable();
+            $table->boolean('meals_reimbursement')->default(true);
 
 
             // Misc
