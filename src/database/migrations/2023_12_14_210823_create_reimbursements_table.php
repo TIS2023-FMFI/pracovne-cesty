@@ -17,8 +17,7 @@ return new class extends Migration {
             $table->foreignIdFor(SppSymbol::class);
             $table->date('reimbursement_date');
 
-            $table->timestamp('created_at');
-            $table->timestamp('updated_at');
+            $table->timestamps();
         });
     }
 

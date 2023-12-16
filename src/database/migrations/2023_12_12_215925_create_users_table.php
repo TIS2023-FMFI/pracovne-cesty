@@ -27,8 +27,7 @@ return new class extends Migration {
             $table->unsignedSmallInteger('status');
             $table->dateTime('last_login')->nullable();
 
-            $table->timestamp('created_at');
-            $table->timestamp('updated_at');
+            $table->timestamps();
         });
     }
 

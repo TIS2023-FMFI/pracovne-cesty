@@ -21,8 +21,7 @@ return new class extends Migration {
             $table->string('grantee', 100);
             $table->smallInteger('status');
 
-            $table->timestamp('created_at');
-            $table->timestamp('updated_at');
+            $table->timestamps();
         });
     }
 

@@ -19,8 +19,7 @@ return new class extends Migration {
             $table->string('iban', 34);
             $table->string('amount', 20);
 
-            $table->timestamp('created_at');
-            $table->timestamp('updated_at');
+            $table->timestamps();
         });
     }
 

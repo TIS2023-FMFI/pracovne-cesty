@@ -70,8 +70,7 @@ return new class extends Migration {
 
 
             // Timestamp
-            $table->timestamp('created_at');
-            $table->timestamp('updated_at');
+            $table->timestamps();
         });
     }
 

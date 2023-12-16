@@ -17,8 +17,7 @@ return new class extends Migration {
             $table->string('amount_foreign', 20)->nullable();
             $table->boolean('reimburse')->default(false);
 
-            $table->timestamp('created_at');
-            $table->timestamp('updated_at');
+            $table->timestamps();
         });
     }
 
