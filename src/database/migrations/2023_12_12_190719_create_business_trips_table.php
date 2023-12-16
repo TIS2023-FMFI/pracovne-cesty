@@ -48,7 +48,6 @@ return new class extends Migration {
 
 
             // Purpose
-            $table->foreignIdFor(Contribution::class);
             $table->foreignIdFor(TripPurpose::class);
             $table->string('purpose_details', 50)->nullable();
 
