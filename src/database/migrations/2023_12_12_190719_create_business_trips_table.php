@@ -31,6 +31,8 @@ return new class extends Migration {
             $table->string('event_url', 200)->nullable();
             $table->string('upload_name', 200)->nullable();
 
+            $table->unsignedSmallInteger('state');
+
 
             // Start and end of the trip
             $table->dateTime('datetime_start')->nullable();
