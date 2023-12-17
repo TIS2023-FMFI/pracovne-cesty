@@ -18,7 +18,7 @@ return new class extends Migration
 
             $table->foreignIdFor(BusinessTrip::class);
             $table->foreignIdFor(Contribution::class);
-            $table->string('detail', 200);
+            $table->string('detail', 200)->nullable();
 
             $table->timestamps();
         });
