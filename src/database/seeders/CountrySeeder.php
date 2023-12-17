@@ -41,8 +41,11 @@ class CountrySeeder extends Seeder
             'Uzbekistan', 'Vanuatu', 'Venezuela', 'Vietnam', 'Východný Timor', 'Zambia', 'Zimbabwe'
         ];
 
+        $insertMap = [];
         foreach ($countries as $country) {
-            Country::create(['name' => $country]);
+            $insertMap[] = ['name' => $country];
         }
+
+        Country::insert($insertMap);
     }
 }

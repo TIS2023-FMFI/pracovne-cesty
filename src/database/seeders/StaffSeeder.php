@@ -13,17 +13,17 @@ class StaffSeeder extends Seeder
      */
     public function run(): void
     {
-        Staff::insert([
-            [
-                'position' => PositionTitle::DEAN,
-                'position_name' => 'dekan fakulty',
-                'incumbent_name' => 'prof. RNDr. Daniel Ševčovič, DrSc.'
-            ],
-            [
-                'position' => PositionTitle::SECRETARY,
-                'position_name' => 'tajomníčka fakulty',
-                'incumbent_name' => 'PaedDr. Martina Sandanusová, PhD.'
-            ]
+        // `Staff::create` creates timestamps
+        Staff::create([
+            'position' => PositionTitle::DEAN,
+            'position_name' => 'dekan fakulty',
+            'incumbent_name' => 'prof. RNDr. Daniel Ševčovič, DrSc.'
+        ]);
+
+        Staff::create([
+            'position' => PositionTitle::SECRETARY,
+            'position_name' => 'tajomníčka fakulty',
+            'incumbent_name' => 'PaedDr. Martina Sandanusová, PhD.'
         ]);
     }
 }

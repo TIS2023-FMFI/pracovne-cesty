@@ -12,12 +12,17 @@ class TransportSeeder extends Seeder
      */
     public function run(): void
     {
+        // Options visible to all users
         Transport::insert([
-            ['name' => 'služobné auto'],
             ['name' => 'vlastné auto', 'user_visible' => true],
             ['name' => 'autobus', 'user_visible' => true],
             ['name' => 'vlak', 'user_visible' => true],
             ['name' => 'lietadlo', 'user_visible' => true],
+        ]);
+
+        // Options visible to admin only
+        Transport::insert([
+            ['name' => 'služobné auto'],
             ['name' => 'loď'],
             ['name' => 'taxi'],
             ['name' => 'bez dopravy'],
