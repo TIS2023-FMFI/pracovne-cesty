@@ -11,19 +11,26 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        // Run in the hierarchical order
         $this->call([
-            BusinessTripSeeder::class,
-            ConferenceFeeSeeder::class,
-            ContributionSeeder::class,
+            // Factory-less
             CountrySeeder::class,
-            ExpenseSeeder::class,
-            ReimbursementSeeder::class,
-            SppSymbolSeeder::class,
-            StaffSeeder::class,
             TransportSeeder::class,
-            TripContributionSeeder::class,
+            ContributionSeeder::class,
             TripPurposeSeeder::class,
-            UserSeeder::class
+            StaffSeeder::class,
+
+            // With factories
+            // Without foreign references
+            SppSymbolSeeder::class,
+            ConferenceFeeSeeder::class,
+            ExpenseSeeder::class,
+            UserSeeder::class,
+
+            // With foreign references
+            ReimbursementSeeder::class,
+            BusinessTripSeeder::class,
+            TripContributionSeeder::class
         ]);
     }
 }
