@@ -15,7 +15,7 @@ return new class extends Migration {
 
             $table->string('spp_symbol', 20);
             $table->string('fund', 10);
-            $table->string('financial_region', 10);
+            $table->string('functional_region', 10);
             $table->string('financial_centre', 10)->default('107240');
             $table->string('account', 50);
             $table->string('grantee', 100);
