@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
 
             $table->unsignedSmallInteger('position');
+            $table->string('position_name', 100);
             $table->string('incumbent_name', 200);
 
             $table->timestamps();
