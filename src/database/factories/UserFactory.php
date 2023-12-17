@@ -2,16 +2,14 @@
 
 namespace Database\Factories;
 
+use App\Enums\UserType;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 
-/**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\User>
- */
+
 class UserFactory extends Factory
 {
-    protected static ?string $password;
+    protected $model = User::class;
 
     /**
      * Define the model's default state.
@@ -20,22 +18,36 @@ class UserFactory extends Factory
      */
     public function definition(): array
     {
-        return [
-            'name' => fake()->name(),
-            'email' => fake()->unique()->safeEmail(),
-            'email_verified_at' => now(),
-            'password' => static::$password ??= Hash::make('password'),
-            'remember_token' => Str::random(10),
-        ];
-    }
+        $skFake = fake('sk_SK');
 
-    /**
-     * Indicate that the model's email address should be unverified.
-     */
-    public function unverified(): static
-    {
-        return $this->state(fn (array $attributes) => [
-            'email_verified_at' => null,
-        ]);
+        $gender = fake()->randomElement(['female', 'male']);
+
+        $titles = [];
+        for ($i = 0; $i < 3; $i++) {
+            $title = $skFake->optional()->title();
+
+            if (!is_null($title)) {
+                $titles[] = $title;
+            }
+        }
+
+        $titles = implode(', ', $titles);
+
+        return [
+            'first_name' => $skFake->firstName($gender),
+            'last_name' => $skFake->lastName($gender),
+            'academic_degrees' => $titles,
+            'personal_id' => fake()->randomNumber(8, true),
+            'department' => fake()->randomElement(['KAI', 'KDMFI', 'KI', 'KAMŠ', 'KAG', 'KMANM']),
+            'email' => $skFake->email(),
+            'address' => $skFake->address(),
+
+            'user_type' => fake()->randomElement(UserType::cases()),
+            'username' => fake()->userName(),
+            'password' => password_hash(fake()->password(), PASSWORD_BCRYPT),
+
+            'status' => fake()->numberBetween(0, 2),
+            'last_login' => fake()->dateTimeThisDecade()
+        ];
     }
 }
