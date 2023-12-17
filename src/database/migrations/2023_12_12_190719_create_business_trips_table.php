@@ -67,6 +67,9 @@ return new class extends Migration {
             $table->string('not_reimbursed_meals')->nullable();
             $table->boolean('meals_reimbursement')->default(true);
 
+            $table->string('advance_amount', '20')->nullable();
+            $table->string('expense_estimation', '20')->nullable();
+
 
             // Misc
             $table->string('cancellation_reason', 1000)->nullable();
