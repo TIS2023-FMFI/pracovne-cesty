@@ -6,14 +6,24 @@ use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
 
-class Header extends Component
+class Checkbox extends Component
 {
     /**
      * Create a new component instance.
      */
-    public function __construct()
+    public function __construct(
+        public string $name,
+        public string $label = "",
+        public bool $checked = false,
+        public string $control = ""
+    )
     {
         //
+    }
+
+    public function isChecked(): bool
+    {
+        return $this->checked;
     }
 
     /**
@@ -21,6 +31,6 @@ class Header extends Component
      */
     public function render(): View|Closure|string
     {
-        return view('components.header');
+        return view('components.checkbox');
     }
 }

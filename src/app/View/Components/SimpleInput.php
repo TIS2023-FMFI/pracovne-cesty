@@ -12,9 +12,9 @@ class SimpleInput extends Component
      * Create a new component instance.
      */
     public function __construct(
-        public string $type,
         public string $name,
         public string $label,
+        public string $type = "text",
         public bool $readOnly = false,
         public string $value = ""
     )

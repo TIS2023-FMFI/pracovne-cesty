@@ -6,19 +6,15 @@ use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
 
-class ContentItem extends Component
+class ContentSection extends Component
 {
     /**
      * Create a new component instance.
      */
     public function __construct(
-        public int $id,
-        public string $date,
-        public int $state,
-        public string $reference = ""
+        public string $title = ""
     )
     {
-        //
     }
 
     /**
@@ -26,6 +22,6 @@ class ContentItem extends Component
      */
     public function render(): View|Closure|string
     {
-        return view('components.content-item');
+        return view('components.content-section');
     }
 }
