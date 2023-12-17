@@ -16,7 +16,7 @@ return new class extends Migration {
             $table->string('last_name', 50);
             $table->string('academic_degrees', 30)->nullable();
             $table->string('personal_id', 10)->nullable();
-            $table->string('department', 10);
+            $table->string('department', 10)->default('KAI');
             $table->string('email', 127)->unique();
             $table->string('address', 200);
 
