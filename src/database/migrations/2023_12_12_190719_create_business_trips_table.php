@@ -1,7 +1,6 @@
 <?php
 
 use App\Models\ConferenceFee;
-use App\Models\Contribution;
 use App\Models\Country;
 use App\Models\Expense;
 use App\Models\Reimbursement;
@@ -56,9 +55,10 @@ return new class extends Migration {
             $table->string('iban', 34);
 
             $table->foreignIdFor(ConferenceFee::class)->nullable();
-            $table->foreignIdFor(Reimbursement::class)->nullable();
+            $table->foreignIdFor(Reimbursement::class)->nullable()->unique();
             $table->foreignIdFor(SppSymbol::class)->nullable();
 
+            // TODO: Do we want these to be unique?
             $table->foreignIdFor(Expense::class, 'accommodation_expense_id')->nullable();
             $table->foreignIdFor(Expense::class, 'travelling_expense_id')->nullable();
             $table->foreignIdFor(Expense::class, 'other_expense_id')->nullable();
