@@ -21,6 +21,8 @@ return new class extends Migration
             $table->string('detail', 200)->nullable();
 
             $table->timestamps();
+
+            $table->index(['business_trip_id', 'contribution_id']);
         });
     }
 
