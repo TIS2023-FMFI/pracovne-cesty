@@ -19,7 +19,7 @@ return new class extends Migration {
             $table->string('financial_centre', 10)->default('107240');
             $table->string('account', 50);
             $table->string('grantee', 100);
-            $table->smallInteger('status');
+            $table->unsignedSmallInteger('status');
 
             $table->timestamps();
         });
