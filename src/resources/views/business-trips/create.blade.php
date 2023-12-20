@@ -36,7 +36,7 @@
 
             <x-content-section title="Cieľ cesty">
                 <x-simple-input name="place" label="Miesto:"/>
-                <x-dropdown-input name="state" label="Štát:" :values="$countries" selected="{{old('state')}}"/>
+                <x-dropdown-input name="country" label="Štát:" :values="$countries" selected="{{old('country')}}"/>
                 <x-dropdown-input name="transport" label="Dopravný prostriedok:" :values="$transports" selected="{{old('transport')}}"/>
                 <x-simple-input name="upload_name" type="file" label="Vložte pozvánku, plagát alebo iný súbor..."/>
                 <x-dropdown-input name="trip_purpose" label="Účel cesty:" :values="$purposes" selected="{{old('purpose')}}"/>
@@ -68,7 +68,7 @@
             </x-content-section>
 
             <div>
-                <x-button>Uložiť úpravy</x-button>
+                <x-form-button>Uložiť úpravy</x-form-button>
             </div>
 
         </form>

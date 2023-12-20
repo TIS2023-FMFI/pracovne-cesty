@@ -6,18 +6,17 @@
 @endphp
 
 <x-layout>
-{{--    @auth--}}
-{{--        @auth('admin')--}}
-            <x-overview/>
-{{--        @endauth--}}
+    <x-link-button href="/trips/create">Nová tuzemská cesta</x-link-button>
+    <x-link-button href="/trips/create">Nová zahraničná cesta</x-link-button>
 
-        <x-content-box title="Pracovné cesty">
+    <x-overview/>
+
+    <x-content-box title="Pracovné cesty">
             @foreach($trips as $trip)
                 <x-content-item :id="$trip->id" :date="$trip->{'start-date'}" :state="$trip->state" > {{ $trip->number }} </x-content-item>
             @endforeach
-        </x-content-box>
+    </x-content-box>
 
-{{--    @endauth--}}
 
     @guest
         <p>Pre zobrazenie pracovných ciest a ich pridávanie či úpravu sa, prosím, prihláste.</p>

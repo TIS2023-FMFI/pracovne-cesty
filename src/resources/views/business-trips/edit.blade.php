@@ -27,17 +27,19 @@
                     <p>Začiatok cesty</p>
                     <x-simple-input name="place start" label="Miesto:"></x-simple-input>
                     <x-simple-input name="datetime_start" type="datetime-local" label="Dátum a čas:" :value="$trip->start_location"/>
+                    <x-simple-input name="datetime_border_crossing_start" type="datetime-local" label="Dátum a čas prekročenia hraníc:"/>
                 </div>
                 <div>
                     <p>Koniec cesty</p>
                     <x-simple-input name="place_end" label="Miesto:" :value="$trip->end_location"/>
                     <x-simple-input name="datetime_end" type="datetime-local" label="Dátum a čas:" :value="$trip->start_location"/>
+                    <x-simple-input name="datetime_border_crossing_end" type="datetime-local" label="Dátum a čas prekročenia hraníc:"/>
                 </div>
             </x-content-section>
 
             <x-content-section title="Cieľ cesty">
                 <x-simple-input name="place" label="Miesto:"/>
-                <x-dropdown-input name="state" label="Štát:" :values="$countries" selected="{{old('state')}}"/>
+                <x-dropdown-input name="country" label="Štát:" :values="$countries" selected="{{old('country')}}"/>
                 <x-dropdown-input name="transport" label="Dopravný prostriedok:" :values="$transports" selected="{{old('transport')}}"/>
                 <x-simple-input name="upload_name" type="file" label="Vložte pozvánku, plagát alebo iný súbor..."/>
                 <x-dropdown-input name="trip_purpose" label="Účel cesty:" :values="$purposes" selected="{{old('purpose')}}"/>
@@ -68,8 +70,16 @@
                 </div>
             </x-content-section>
 
+            <x-content-section title="Náklady">
+
+            </x-content-section>
+
+            <x-content-section title="Správa">
+                <textarea id="conclusion" name="conclusion" rows="5" cols="50"></textarea>
+            </x-content-section>
+
             <div>
-                <x-button>Uložiť úpravy</x-button>
+                <x-form-button>Uložiť úpravy</x-form-button>
             </div>
 
         </form>
