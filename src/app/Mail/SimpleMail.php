@@ -22,6 +22,7 @@ class SimpleMail extends Mailable
     public function build()
     {
         return $this->view('emails.simple')
+            ->text('emails.simple_text')
             ->subject('Pracovné cesty')
             ->with([
                 'messageText' => $this->messageText,

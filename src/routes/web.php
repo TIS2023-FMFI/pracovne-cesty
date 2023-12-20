@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/send-test-mail', function () {
     Mail::to('test@example.com')->send(new SimpleMail('Testovacia správa', 'test@example.com'));
+    //Mail::to('samuelslavik1010@gmail.com')->send(new SimpleMail('Testovacia správa', 'samuelslavik1010@gmail.com'));
     return 'E-mail bol odoslaný.';
 });
 
