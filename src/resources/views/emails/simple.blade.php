@@ -38,7 +38,7 @@
 <div class="email-container">
     <div class="header">Dôležité oznámenie</div>
     <div class="content">
-    {{ $messageText }}
+        {{ $messageText }}
     </div>
     <div class="footer">
         S pozdravom,<br>
