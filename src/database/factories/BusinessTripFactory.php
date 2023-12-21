@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\TripState;
 use App\Models\BusinessTrip;
 use App\Models\ConferenceFee;
 use App\Models\Country;
@@ -49,11 +50,11 @@ class BusinessTripFactory extends Factory
             'event_url' => fake()->optional()->url(),
             'upload_name' => fake()->randomElement([
                 null,
-                Str::random(16). '.' . fake()->fileExtension()
+                Str::random(16) . '.' . fake()->fileExtension()
             ]),
 
             'sofia_id' => fake()->optional()->numerify('##########'),
-            'state' => 0,
+            'state' => fake()->randomElement(TripState::cases()),
 
 
             'datetime_start' => $dtStart,

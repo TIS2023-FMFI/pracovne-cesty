@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\SppStatus;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 
@@ -24,7 +25,7 @@ class SppSymbolFactory extends Factory
             'financial_centre' => '107240',
             'account' => 'BÚ',
             'grantee' => fake('sk_SK')->name(),
-            'status' => fake()->numberBetween(0, 1)
+            'status' => fake()->randomElement(SppStatus::cases())
         ];
     }
 }
