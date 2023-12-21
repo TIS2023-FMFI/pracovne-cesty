@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Pracovné cesty</title>
+    <title>Žiadosť o Storno</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -36,12 +36,15 @@
 </head>
 <body>
 <div class="email-container">
-    <div class="header">Dôležité oznámenie</div>
+    <div class="header">Žiadosť o Storno Cesty</div>
     <div class="content">
+        Vážený admin, <br>
+        Bola podaná žiadosť o storno cesty. Prosím, skontrolujte a spracujte žiadosť.
         {{ $messageText }}
     </div>
     <div class="footer">
         S pozdravom,<br>
+        Tím Pracovné Cesty
     </div>
 </div>
 </body>

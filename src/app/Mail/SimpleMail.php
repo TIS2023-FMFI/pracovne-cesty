@@ -12,17 +12,21 @@ class SimpleMail extends Mailable
 
     public $messageText;
     public $recipient;
+    public $viewTemplate;
 
-    public function __construct($messageText, $recipient)
+    public function __construct($messageText, $recipient, $viewTemplate)
     {
         $this->messageText = $messageText;
         $this->recipient = $recipient;
+        $this->viewTemplate = $viewTemplate;
     }
 
     public function build()
     {
-        return $this->view('emails.simple')
-            ->text('emails.simple_text')
+        $textTemplate = $this->viewTemplate . '_text';
+
+        return $this->view($this->viewTemplate)
+            ->text($textTemplate)
             ->subject('Pracovné cesty')
             ->with([
                 'messageText' => $this->messageText,
