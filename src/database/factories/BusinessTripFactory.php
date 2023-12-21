@@ -11,7 +11,7 @@ use App\Models\Transport;
 use App\Models\TripPurpose;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Random\RandomException;
+use Illuminate\Support\Str;
 
 
 class BusinessTripFactory extends Factory
@@ -22,7 +22,6 @@ class BusinessTripFactory extends Factory
      * Define the model's default state.
      *
      * @return array<string, mixed>
-     * @throws RandomException
      */
     public function definition(): array
     {
@@ -50,7 +49,7 @@ class BusinessTripFactory extends Factory
             'event_url' => fake()->optional()->url(),
             'upload_name' => fake()->randomElement([
                 null,
-                bin2hex(random_bytes(16)) . '.' . fake()->fileExtension()
+                Str::random(16). '.' . fake()->fileExtension()
             ]),
 
             'sofia_id' => fake()->optional()->numerify('##########'),
