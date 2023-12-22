@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Expense extends Model
 {
@@ -18,50 +18,50 @@ class Expense extends Model
     /**
      * Get the business trips where the expense acts as an accommodation expense
      *
-     * @return HasMany
+     * @return HasOne
      */
-    public function accommodation(): HasMany
+    public function accommodation(): HasOne
     {
-        return $this->hasMany(BusinessTrip::class, 'accommodation_expense_id');
+        return $this->hasOne(BusinessTrip::class, 'accommodation_expense_id');
     }
 
     /**
      * Get the business trips where the expense acts as a travelling expense
      *
-     * @return HasMany
+     * @return HasOne
      */
-    public function travelling(): HasMany
+    public function travelling(): HasOne
     {
-        return $this->hasMany(BusinessTrip::class, 'travelling_expense_id');
+        return $this->hasOne(BusinessTrip::class, 'travelling_expense_id');
     }
 
 
     /**
      * Get the business trips where the expense acts as other expense
      *
-     * @return HasMany
+     * @return HasOne
      */
-    public function other(): HasMany
+    public function other(): HasOne
     {
-        return $this->hasMany(BusinessTrip::class, 'other_expense_id');
+        return $this->hasOne(BusinessTrip::class, 'other_expense_id');
     }
 
     /**
      * Get the business trips where the expense acts as an allowance
      *
-     * @return HasMany
+     * @return HasOne
      */
-    public function allowance(): HasMany
+    public function allowance(): HasOne
     {
-        return $this->hasMany(BusinessTrip::class, 'allowance_id');
+        return $this->hasOne(BusinessTrip::class, 'allowance_id');
     }
 
     /**
-     * Get the business trips associated with the expense
+     * Get the business trip associated with the expense
      *
      * @return Collection
      */
-    public function businessTrips(): Collection
+    public function businessTrip(): Collection
     {
         $trips = new Collection([]);
 

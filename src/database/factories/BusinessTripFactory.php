@@ -4,7 +4,6 @@ namespace Database\Factories;
 
 use App\Enums\TripState;
 use App\Models\BusinessTrip;
-use App\Models\ConferenceFee;
 use App\Models\Country;
 use App\Models\SppSymbol;
 use App\Models\Transport;
@@ -72,15 +71,14 @@ class BusinessTripFactory extends Factory
 
             'iban' => fake()->iban('SK'),
 
-            'conference_fee_id' => fake()->randomElement([ConferenceFee::all()->random()->id, null]),
-            'reimbursement_id' => fake()->randomElement([Reimbursement::all()->random()->id, null]),
-            'spp_symbol_id' => Reimbursement::all()->random()->id,
+            'conference_fee_id' => null,
+            'reimbursement_id' => null,
             'spp_symbol_id' => SppSymbol::all()->random()->id,
 
-            'accommodation_expense_id' => Expense::all()->random()->id,
-            'travelling_expense_id' => Expense::all()->random()->id,
-            'other_expense_id' => Expense::all()->random()->id,
-            'allowance_id' => Expense::all()->random()->id,
+            'accommodation_expense_id' => null,
+            'travelling_expense_id' => null,
+            'other_expense_id' => null,
+            'allowance_id' => null,
 
             'not_reimbursed_meals' => '',
             'meals_reimbursement' => fake()->boolean(),

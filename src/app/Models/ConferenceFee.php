@@ -4,20 +4,19 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class ConferenceFee extends Model
 {
     use HasFactory;
 
     /**
-     * Get the business trips associated with the conference fee
+     * Get the business trip associated with the conference fee
      *
-     * @return HasMany
+     * @return HasOne
      */
-    public function businessTrips(): HasMany
+    public function businessTrip(): HasOne
     {
-        // TODO: Do we accept one conference fee entity for multiple business trips?
-        return $this->hasMany(BusinessTrip::class, 'conference_fee_id');
+        return $this->hasOne(BusinessTrip::class, 'conference_fee_id');
     }
 }
