@@ -47,6 +47,16 @@ class Expense extends Model
     }
 
     /**
+     * Get the business trips where the expense acts as advance payment expense
+     *
+     * @return HasOne
+     */
+    public function advance(): HasOne
+    {
+        return $this->hasOne(BusinessTrip::class, 'advance_expense_id');
+    }
+
+    /**
      * Get the business trips where the expense acts as an allowance
      *
      * @return HasOne

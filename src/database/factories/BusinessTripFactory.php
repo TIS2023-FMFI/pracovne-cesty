@@ -78,15 +78,12 @@ class BusinessTripFactory extends Factory
             'accommodation_expense_id' => null,
             'travelling_expense_id' => null,
             'other_expense_id' => null,
+            'advance_expense_id' => null,
             'allowance_id' => null,
 
             'not_reimbursed_meals' => '',
             'meals_reimbursement' => fake()->boolean(),
 
-            'advance_amount' => fake()->randomElement([
-                null,
-                fake()->currencyCode() . ' ' . fake()->randomFloat(2, 0, 100)
-            ]),
             'expense_estimation' => fake()->randomElement([
                 null,
                 fake()->currencyCode() . ' ' . fake()->randomFloat(2, 100, 1000)

@@ -19,10 +19,11 @@ class BusinessTripSeeder extends Seeder
                 'conference_fee_id' => $sequence->index + 1,
                 'reimbursement_id' => $sequence->index + 1,
 
-                'accommodation_expense_id' => 4 * $sequence->index + 1,
-                'travelling_expense_id' => 4 * $sequence->index + 2,
-                'other_expense_id' => 4 * $sequence->index + 3,
-                'allowance_id' => 4 * $sequence->index + 4,
+                'accommodation_expense_id' => 5 * $sequence->index + 1,
+                'travelling_expense_id' => 5 * $sequence->index + 2,
+                'other_expense_id' => 5 * $sequence->index + 3,
+                'advance_expense_id' => 5 * $sequence->index + 4,
+                'allowance_id' => 5 * $sequence->index + 5,
             ])
             ->create();
     }

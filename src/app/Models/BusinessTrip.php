@@ -128,6 +128,16 @@ class BusinessTrip extends Model
     }
 
     /**
+     * Get the advance payment expense of the business trip
+     *
+     * @return BelongsTo
+     */
+    public function advanceExpense(): BelongsTo
+    {
+        return $this->belongsTo(Expense::class, 'advance_expense_id');
+    }
+
+    /**
      * Get the allowance expense of the business trip
      *
      * @return BelongsTo
@@ -202,5 +212,4 @@ class BusinessTrip extends Model
             ->where('state', TripState::COMPLETED)
             ->get();
     }
-
 }
