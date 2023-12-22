@@ -13,7 +13,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('trip_contributions', function (Blueprint $table) {
+        Schema::create('trip_contributions', static function (Blueprint $table) {
             $table->id();
 
             $table->foreignIdFor(BusinessTrip::class);
