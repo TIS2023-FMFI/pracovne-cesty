@@ -6,8 +6,7 @@ use App\Enums\TripState;
 use App\Models\BusinessTrip;
 use App\Models\ConferenceFee;
 use App\Models\Country;
-use App\Models\Expense;
-use App\Models\Reimbursement;
+use App\Models\SppSymbol;
 use App\Models\Transport;
 use App\Models\TripPurpose;
 use App\Models\User;
@@ -76,6 +75,7 @@ class BusinessTripFactory extends Factory
             'conference_fee_id' => fake()->randomElement([ConferenceFee::all()->random()->id, null]),
             'reimbursement_id' => fake()->randomElement([Reimbursement::all()->random()->id, null]),
             'spp_symbol_id' => Reimbursement::all()->random()->id,
+            'spp_symbol_id' => SppSymbol::all()->random()->id,
 
             'accommodation_expense_id' => Expense::all()->random()->id,
             'travelling_expense_id' => Expense::all()->random()->id,
