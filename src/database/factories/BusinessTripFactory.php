@@ -93,8 +93,8 @@ class BusinessTripFactory extends Factory
             ]),
 
             'cancellation_reason' => '',
-            'note' => fake()->optional()->realText(5000),
-            'conclusion' => fake()->optional()->realText(5000),
+            'note' => fake()->optional()->realText(100),
+            'conclusion' => fake()->optional()->realText(100),
         ];
     }
 }
