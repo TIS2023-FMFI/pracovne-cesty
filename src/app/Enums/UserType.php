@@ -4,6 +4,9 @@ namespace App\Enums;
 
 enum UserType: int
 {
-    case USER = 0;
-    case ADMIN = 1;
+    case EMPLOYEE = 0;
+    case PHD_STUDENT = 1;
+    case STUDENT = 2;
+    case EXTERN = 3;
+    case ADMIN = 4;
 }
