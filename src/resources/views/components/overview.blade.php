@@ -1,4 +1,4 @@
-<div>
+<div {{ $attributes }}>
     <x-content-box title="Prehľad">
         <x-overview-item content="Najnovšie"/>
         <x-overview-item content="Nepotvrdené"/>

@@ -40,9 +40,10 @@
             </ul>
         </header>
 
-        <main>
+        <div class="w-75 mx-auto">
             {{$slot}}
-        </main>
+        </div>
+
 
         <footer>
             <p>Projekt tímu z Tvorby informačných systémov pre Katedru aplikovanej informatiky FMFI, 2023</p>
