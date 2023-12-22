@@ -153,14 +153,54 @@ class BusinessTrip extends Model
 
     /**
      * Get all business trip records from the database
-     * sorted from newest to oldest by their creation timestamp
+     * sorted by the specified key
      *
      * @param array|string $columns
+     * @param string $sortBy
      * @return Collection<int, static>
      */
-    public static function sortedAll(array|string $columns = ['*']): Collection
+    public static function sortedAll(array|string $columns = ['*'], string $sortBy = 'created_at'): Collection
     {
-        // TODO: Do we want to sort by the creation or the update date?
-        return self::all($columns)->sortByDesc('created_at');
+        return self::all($columns)->sortByDesc($sortBy);
     }
+
+    /**
+     * Get all business trip records sorted
+     * from the newest to the oldest
+     *
+     * @param array|string $columns
+     * @return Collection
+     */
+    public static function newest(array|string $columns = ['*']): Collection
+    {
+        return self::sortedAll($columns, 'created_at');
+    }
+
+    /**
+     * Get all the unconfirmed business trips from the database
+     *
+     * @param array|string $columns
+     * @return Collection
+     */
+    public static function unconfirmed(array|string $columns = ['*']): Collection
+    {
+        return self::select($columns)
+            ->where('state', TripState::NEW)
+            ->get();
+    }
+
+    /**
+     * Get all the unaccounted (i.e. completed but not closed) business trips
+     * from the database
+     *
+     * @param array|string $columns
+     * @return Collection
+     */
+    public static function unaccounted(array|string $columns = ['*']): Collection
+    {
+        return self::select($columns)
+            ->where('state', TripState::COMPLETED)
+            ->get();
+    }
+
 }
