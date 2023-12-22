@@ -50,7 +50,7 @@
                 <x-dropdown-input name="spp_symbol" label="ŠPP prvok 1:" :values="$spp" selected="{{old('spp_symbol')}}"/>
                 <x-checkbox name="reimbursement" label="Refundovať" control="reimbursementShow"></x-checkbox>
                 <div x-show="reimbursementShow">
-                    <x-dropdown-input name="spp2" label="ŠPP prvok 2:" :values="$spp" selected="{{old('spp2')}}"/>
+                    <x-dropdown-input name="reimbursement_spp" label="ŠPP prvok 2:" :values="$spp" selected="{{old('reimbursement_spp')}}"/>
                     <x-simple-input name="reimbursement_date" type="date" label="Predpokladaný dátum:"/>
                 </div>
 

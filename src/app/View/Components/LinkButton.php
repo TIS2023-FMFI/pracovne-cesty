@@ -12,7 +12,8 @@ class LinkButton extends Component
      * Create a new component instance.
      */
     public function __construct(
-        public string $href,
+        public string $href = '',
+        public string $control = '',
         public string $color = 'bg-dark'
     )
     {

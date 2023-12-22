@@ -6,8 +6,15 @@
 @endphp
 
 <x-layout>
-    <x-link-button href="/trips/create">Nová tuzemská cesta</x-link-button>
-    <x-link-button href="/trips/create">Nová zahraničná cesta</x-link-button>
+    <x-link-button href="/trips/create">Pridať tuzemskú cestu</x-link-button>
+    <x-link-button href="/trips/create">Pridať zahraničnú cestú</x-link-button>
+
+    <button x-data="{}" @click="$dispatch('open-add-users')"> Pridať používateľa </button>
+    <x-modal title="Pridať použivateľov" event="open-add-users" control="usersOpen">
+        Tu je obsah popupu
+    </x-modal>
+
+
 
     <x-overview/>
 
