@@ -42,8 +42,10 @@
                 <x-dropdown-input name="contribution" label="Prínos pre fakultu:" :values="$contributions" selected="{{old('contribution')}}"/>
             </x-content-section>
 
-            <x-content-section x-data="{reimbursementShow: false}">
-                <p>V prípade refundácie, prosím, vyberte ako ŠPP prvok 2 ten prvok, z ktorého budú peniaze neskôr vrátené do ŠPP prvku 1. Ako dátum vrátenia peňazí uveďte iba orientačný, predpokladaný dátum.</p>
+            <x-content-section title="Financovanie" x-data="{reimbursementShow: false}">
+                <x-slot:description>
+                    V prípade refundácie, prosím, vyberte ako ŠPP prvok 2 ten prvok, z ktorého budú peniaze neskôr vrátené do ŠPP prvku 1. Ako dátum vrátenia peňazí uveďte iba orientačný, predpokladaný dátum.
+                </x-slot:description>
                 <x-dropdown-input name="spp_symbol" label="ŠPP prvok 1:" :values="$spp" selected="{{old('spp_symbol')}}"/>
                 <x-checkbox name="reimbursement" label="Refundovať" control="reimbursementShow"></x-checkbox>
                 <div x-show="reimbursementShow" class="col-md-12 row">
@@ -53,7 +55,7 @@
 
             </x-content-section>
 
-            <x-content-section x-data="{conferenceFeeShow: false}">
+            <x-content-section title="Úhrada konferenčného poplatku" x-data="{conferenceFeeShow: false}">
                 <x-checkbox name="conference_fee" label="Mám záujem o úhradu konferenčného poplatku pred cestou priamo z pracoviska" control="conferenceFeeShow"></x-checkbox>
                 <div x-show="conferenceFeeShow" class="col-md-12 row">
                     <x-simple-input name="organiser_name" type="text" label="Názov organizácie:"/>
