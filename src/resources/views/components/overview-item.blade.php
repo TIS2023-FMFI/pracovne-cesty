@@ -1,5 +1,7 @@
-<div style="width: 100%; padding: 11px 19px;background: white; border-bottom: 2px #D9D9D9 solid; justify-content: flex-start; align-items: center; gap: 21px; display: inline-flex">
-    <div style="flex: 1 1 0; height: 40px; color: black; font-size: 15px; font-family: Open Sans; font-weight: 400; word-wrap: break-word">
+<a
+    href="trips/"
+    class="d-flex align-items-center justify-content-between py-1 px-3 border-bottom text-decoration-none text-dark">
+    <div class="flex-grow-1">
         {{ $content }}
     </div>
-</div>
+</a>

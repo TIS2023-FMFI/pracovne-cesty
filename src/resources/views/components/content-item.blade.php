@@ -1,14 +1,12 @@
-<a href="trips/{{ $id }}" style="width: 100%; padding: 5px 19px 16px;background: white; border-bottom: 2px #D9D9D9 solid; justify-content: flex-start; align-items: center; gap: 21px; display: inline-flex">
-    <div style="flex: 1 1 0; height: 65px; color: black; font-size: 15px; font-family: Open Sans; font-weight: 400; word-wrap: break-word">
+<a
+    href="trips/{{ $id }}"
+    class="d-flex align-items-center justify-content-between py-1 px-3 border-bottom text-decoration-none text-dark">
+    <div class="flex-grow-1">
         {{ $slot }}
     </div>
-    <div style="flex: 1 1 0; height: 63px; text-align: right; color: black; font-size: 15px; font-family: Open Sans; font-weight: 400; word-wrap: break-word">
+    <div class="text-right">
         {{ $date }}
     </div>
-    <div style="width: 30px; height: 30px; position: relative">
-        <div style="width: 30px; height: 30px; left: 0px; top: 0px; position: absolute">
-            <div style="width: 30px; height: 30px; left: 0px; top: 0px; position: absolute"></div>
-            <div style="width: 22px; height: 17px; left: 4px; top: 7px; position: absolute; background: #323232"></div>
-        </div>
+    <div style="width: 30px; height: 30px; background: #323232;">
     </div>
 </a>

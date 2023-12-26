@@ -7,7 +7,7 @@
 
 <x-layout>
     <x-link-button href="/trips/create">Pridať tuzemskú cestu</x-link-button>
-    <x-link-button href="/trips/create">Pridať zahraničnú cestú</x-link-button>
+    <x-link-button href="/trips/create">Pridať zahraničnú cestu</x-link-button>
 
     <button x-data="{}" @click="$dispatch('open-add-users')">Pridať používateľa</button>
     <x-modals.add-user></x-modals.add-user>
