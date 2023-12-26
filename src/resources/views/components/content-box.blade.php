@@ -2,7 +2,7 @@
 
 <div {{ $attributes->merge(['class' => 'd-flex flex-column']) }}>
     <div class="p-3 bg-dark text-uppercase text-white font-weight-bold">{{ $title }}</div>
-    <div class="flex-grow-1 bg-white border border-top-0">
+    <div class="flex-grow-1 bg-white border border-top-0 p-4">
         {{ $slot }}
     </div>
 </div>

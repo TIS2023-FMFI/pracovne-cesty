@@ -21,17 +21,14 @@
                 <x-simple-input name="iban" label="Číslo účtu:"/>
             </x-content-section>
 
-            <x-content-section title="">
-                <div>
-                    <p>Začiatok cesty</p>
-                    <x-simple-input name="place start" label="Miesto:"></x-simple-input>
-                    <x-simple-input name="datetime_start" type="datetime-local" label="Dátum a čas:"/>
-                </div>
-                <div>
-                    <p>Koniec cesty</p>
-                    <x-simple-input name="place_end" label="Miesto:"/>
-                    <x-simple-input name="datetime_end" type="datetime-local" label="Dátum a čas:"/>
-                </div>
+            <x-content-section title="Začiatok cesty">
+                <x-simple-input name="place start" label="Miesto:"/>
+                <x-simple-input name="datetime_start" type="datetime-local" label="Dátum a čas:"/>
+            </x-content-section>
+
+            <x-content-section title="Koniec cesty">
+                <x-simple-input name="place_end" label="Miesto:"/>
+                <x-simple-input name="datetime_end" type="datetime-local" label="Dátum a čas:"/>
             </x-content-section>
 
             <x-content-section title="Cieľ cesty">

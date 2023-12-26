@@ -8,7 +8,7 @@
 @endphp
 
 <x-layout>
-    <x-content-box title="Úprava pracovnej cesty" style="width: 70%">
+    <x-content-box title="Úprava pracovnej cesty">
         <form method="POST" action="/trips/{{ $trip->id }}" enctype="multipart/form-data">
             @csrf
             @method('PUT')
@@ -22,19 +22,16 @@
                 <x-simple-input name="iban" label="Číslo účtu:"/>
             </x-content-section>
 
-            <x-content-section title="">
-                <div>
-                    <p>Začiatok cesty</p>
-                    <x-simple-input name="place start" label="Miesto:"></x-simple-input>
-                    <x-simple-input name="datetime_start" type="datetime-local" label="Dátum a čas:" :value="$trip->start_location"/>
-                    <x-simple-input name="datetime_border_crossing_start" type="datetime-local" label="Dátum a čas prekročenia hraníc:"/>
-                </div>
-                <div>
-                    <p>Koniec cesty</p>
-                    <x-simple-input name="place_end" label="Miesto:" :value="$trip->end_location"/>
-                    <x-simple-input name="datetime_end" type="datetime-local" label="Dátum a čas:" :value="$trip->start_location"/>
-                    <x-simple-input name="datetime_border_crossing_end" type="datetime-local" label="Dátum a čas prekročenia hraníc:"/>
-                </div>
+            <x-content-section title="Začiatok cesty">
+                <x-simple-input name="place start" label="Miesto:"></x-simple-input>
+                <x-simple-input name="datetime_start" type="datetime-local" label="Dátum a čas:" :value="$trip->start_location"/>
+                <x-simple-input name="datetime_border_crossing_start" type="datetime-local" label="Dátum a čas prekročenia hraníc:"/>
+            </x-content-section>
+
+            <x-content-section title="Koniec cesty">
+                <x-simple-input name="place_end" label="Miesto:" :value="$trip->end_location"/>
+                <x-simple-input name="datetime_end" type="datetime-local" label="Dátum a čas:" :value="$trip->start_location"/>
+                <x-simple-input name="datetime_border_crossing_end" type="datetime-local" label="Dátum a čas prekročenia hraníc:"/>
             </x-content-section>
 
             <x-content-section title="Cieľ cesty">
@@ -52,7 +49,7 @@
                 <p>V prípade refundácie, prosím, vyberte ako ŠPP prvok 2 ten prvok, z ktorého budú peniaze neskôr vrátené do ŠPP prvku 1. Ako dátum vrátenia peňazí uveďte iba orientačný, predpokladaný dátum.</p>
                 <x-dropdown-input name="spp_symbol" label="ŠPP prvok 1:" :values="$spp" selected="{{old('spp_symbol')}}"/>
                 <x-checkbox name="reimbursement" label="Refundovať" control="reimbursementShow"></x-checkbox>
-                <div x-show="reimbursementShow">
+                <div x-show="reimbursementShow" class="col-md-12 row">
                     <x-dropdown-input name="reimbursement_spp" label="ŠPP prvok 2:" :values="$spp" selected="{{old('reimbursement_spp')}}"/>
                     <x-simple-input name="reimbursement_date" type="date" label="Predpokladaný dátum:"/>
                 </div>
@@ -61,7 +58,7 @@
 
             <x-content-section x-data="{conferenceFeeShow: false}">
                 <x-checkbox name="conference_fee" label="Mám záujem o úhradu konferenčného poplatku pred cestou priamo z pracoviska" control="conferenceFeeShow"></x-checkbox>
-                <div x-show="conferenceFeeShow">
+                <div x-show="conferenceFeeShow" class="col-md-12 row">
                     <x-simple-input name="organiser_name" type="text" label="Názov organizácie:"/>
                     <x-simple-input name="ico" type="text" label="IČO:"/>
                     <x-simple-input name="organiser_address" type="text" label="Adresa organizácie:"/>

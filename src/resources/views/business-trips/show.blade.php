@@ -1,5 +1,5 @@
 <x-layout>
-    <x-content-box title="Detaily pracovnej cesty" style="width: 70%">
+    <x-content-box title="Detaily pracovnej cesty">
         <x-content-section title="Osobné údaje">
             <p>Meno: {{ $trip->user->first_name ?? '' }}</p>
             <p>Priezvisko: {{ $trip->user->last_name ?? '' }}</p>
