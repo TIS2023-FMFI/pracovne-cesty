@@ -8,7 +8,7 @@
 @endphp
 
 <x-layout>
-    <x-content-box title="Nová pracovná cesta" style="width: 70%">
+    <x-content-box title="Nová pracovná cesta">
         <form method="POST" action="/trips" enctype="multipart/form-data">
             @csrf
             <x-content-section title="Osobné údaje">
@@ -49,7 +49,7 @@
                 <p>V prípade refundácie, prosím, vyberte ako ŠPP prvok 2 ten prvok, z ktorého budú peniaze neskôr vrátené do ŠPP prvku 1. Ako dátum vrátenia peňazí uveďte iba orientačný, predpokladaný dátum.</p>
                 <x-dropdown-input name="spp_symbol" label="ŠPP prvok 1:" :values="$spp" selected="{{old('spp_symbol')}}"/>
                 <x-checkbox name="reimbursement" label="Refundovať" control="reimbursementShow"></x-checkbox>
-                <div x-show="reimbursementShow">
+                <div x-show="reimbursementShow" class="col-md-12 row">
                     <x-dropdown-input name="reimbursement_spp" label="ŠPP prvok 2:" :values="$spp" selected="{{old('reimbursement_spp')}}"/>
                     <x-simple-input name="reimbursement_date" type="date" label="Predpokladaný dátum:"/>
                 </div>
@@ -58,7 +58,7 @@
 
             <x-content-section x-data="{conferenceFeeShow: false}">
                 <x-checkbox name="conference_fee" label="Mám záujem o úhradu konferenčného poplatku pred cestou priamo z pracoviska" control="conferenceFeeShow"></x-checkbox>
-                <div x-show="conferenceFeeShow">
+                <div x-show="conferenceFeeShow" class="col-md-12 row">
                     <x-simple-input name="organiser_name" type="text" label="Názov organizácie:"/>
                     <x-simple-input name="ico" type="text" label="IČO:"/>
                     <x-simple-input name="organiser_address" type="text" label="Adresa organizácie:"/>
