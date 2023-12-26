@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -12,11 +11,26 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // \App\Models\User::factory(10)->create();
+        // Run in the hierarchical order
+        $this->call([
+            // Factory-less
+            CountrySeeder::class,
+            TransportSeeder::class,
+            ContributionSeeder::class,
+            TripPurposeSeeder::class,
+            StaffSeeder::class,
 
-        // \App\Models\User::factory()->create([
-        //     'name' => 'Test User',
-        //     'email' => 'test@example.com',
-        // ]);
+            // With factories
+            // Without foreign references
+            SppSymbolSeeder::class,
+            ConferenceFeeSeeder::class,
+            ExpenseSeeder::class,
+            UserSeeder::class,
+
+            // With foreign references
+            ReimbursementSeeder::class,
+            BusinessTripSeeder::class,
+            TripContributionSeeder::class
+        ]);
     }
 }
