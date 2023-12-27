@@ -51,7 +51,7 @@
                 </x-slot:description>
                 <x-dropdown-input name="spp_symbol" label="ŠPP prvok 1:" :values="$spp" selected="{{old('spp_symbol')}}"/>
                 <x-checkbox name="reimbursement" label="Refundovať" control="reimbursementShow"></x-checkbox>
-                <div x-show="reimbursementShow" class="col-md-12 row">
+                <div x-show="reimbursementShow" class="col-md-12 row mt-3">
                     <x-dropdown-input name="reimbursement_spp" label="ŠPP prvok 2:" :values="$spp" selected="{{old('reimbursement_spp')}}"/>
                     <x-simple-input name="reimbursement_date" type="date" label="Predpokladaný dátum:"/>
                 </div>
@@ -70,6 +70,42 @@
             </x-content-section>
 
             <x-content-section title="Náklady">
+                <div class="container mt-4">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Dátum</th>
+                                <th>Raňajky</th>
+                                <th>Obed</th>
+                                <th>Večera</th>
+                            </tr>
+                        </thead>
+                        <tbody x-data="{checkBreakfast: false, checkLunch: false, checkDinner: false}">
+                        <tr>
+                            <td>Všetky</td>
+                            <td><input type="checkbox" x-model="checkBreakfast"></td>
+                            <td><input type="checkbox" x-model="checkLunch"></td>
+                            <td><input type="checkbox" x-model="checkDinner"></td>
+                        </tr>
+
+                        @for ($i = 0; $i < 10; $i++)
+                            <tr>
+                                <td>{{ $i }}</td>
+                                <td>
+                                    <input type="checkbox" x-bind:checked="checkBreakfast">
+                                </td>
+                                <td>
+                                    <input type="checkbox" x-bind:checked="checkLunch">
+                                </td>
+                                <td>
+                                    <input type="checkbox" x-bind:checked="checkDinner">
+                                </td>
+                            </tr>
+                        @endfor
+                        </tbody>
+                    </table>
+                </div>
+
 
             </x-content-section>
 
