@@ -13,10 +13,10 @@ class SimpleInput extends Component
      */
     public function __construct(
         public string $name,
-        public string $label,
-        public string $type = "text",
+        public string $label = '',
+        public string $type = 'text',
         public bool $readOnly = false,
-        public string $value = ""
+        public string $value = ''
     )
     {
         //

@@ -69,45 +69,95 @@
                 </div>
             </x-content-section>
 
-            <x-content-section title="Náklady">
-                <div class="container mt-4">
+            @php
+                $expenses = ['travelling' => 'Cestovné', 'accommodation' => 'Ubytovanie', 'allowance' => 'Záloha za cestu', 'advance' => 'Vložné', 'other' => 'Iné']
+            @endphp
+            <x-content-section title="Náklady" x-data="{notReimbursedMealsHide: false}">
+                <div class="container">
                     <table class="table">
                         <thead>
+                            <tr>
+                                <th></th>
+                                <th>Suma v EUR</th>
+                                <th>Suma v cudzej mene</th>
+                                <th></th>
+                            </tr>
+
+                            @foreach($expenses as $expense => $label)
+                                <tr>
+                                    <td>
+                                        {{ $label }}
+                                    </td>
+                                    <td>
+                                        <x-simple-input name="{{ $expense }}_expense_eur"></x-simple-input>
+                                    </td>
+                                    <td>
+                                        <x-simple-input name="{{ $expense }}_expense_foreign"></x-simple-input>
+                                    </td>
+                                    <td>
+                                        <x-checkbox name="{{ $expense }}_expense_reimburse" label="Nenárokujem si"></x-checkbox>
+                                    </td>
+                                </tr>
+                            @endforeach
+
+                            <tr>
+                                <td>
+                                    Stravné
+                                </td>
+                                <td>
+                                    <x-checkbox name="meals_reimbursed" label="Nenárokujem si vôbec" control="notReimbursedMealsHide"></x-checkbox>
+                                </td>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+
+                <x-content-section title="Zrážky zo stravného" x-show="!notReimbursedMealsHide">
+                    <x-slot:description>
+                        Vyberte, prosím, ktoré jedlá si <b>nežiadate</b> preplatiť.
+                    </x-slot:description>
+
+                    <div class="container">
+                        <table class="table">
+                            <thead>
                             <tr>
                                 <th>Dátum</th>
                                 <th>Raňajky</th>
                                 <th>Obed</th>
                                 <th>Večera</th>
                             </tr>
-                        </thead>
-                        <tbody x-data="{checkBreakfast: false, checkLunch: false, checkDinner: false}">
-                        <tr>
-                            <td>Všetky</td>
-                            <td><input type="checkbox" x-model="checkBreakfast"></td>
-                            <td><input type="checkbox" x-model="checkLunch"></td>
-                            <td><input type="checkbox" x-model="checkDinner"></td>
-                        </tr>
-
-                        @for ($i = 0; $i < 10; $i++)
+                            </thead>
+                            <tbody x-data="{checkBreakfast: false, checkLunch: false, checkDinner: false}">
                             <tr>
-                                <td>{{ $i }}</td>
-                                <td>
-                                    <input type="checkbox" x-bind:checked="checkBreakfast">
-                                </td>
-                                <td>
-                                    <input type="checkbox" x-bind:checked="checkLunch">
-                                </td>
-                                <td>
-                                    <input type="checkbox" x-bind:checked="checkDinner">
-                                </td>
+                                <td>Všetky</td>
+                                <td><input type="checkbox" x-model="checkBreakfast"></td>
+                                <td><input type="checkbox" x-model="checkLunch"></td>
+                                <td><input type="checkbox" x-model="checkDinner"></td>
                             </tr>
-                        @endfor
-                        </tbody>
-                    </table>
-                </div>
 
+                            @for ($i = 0; $i < 5; $i++)
+                                <tr>
+                                    <td>{{ $i }}</td>
+                                    <td>
+                                        <input type="checkbox" x-bind:checked="checkBreakfast">
+                                    </td>
+                                    <td>
+                                        <input type="checkbox" x-bind:checked="checkLunch">
+                                    </td>
+                                    <td>
+                                        <input type="checkbox" x-bind:checked="checkDinner">
+                                    </td>
+                                </tr>
+                            @endfor
+
+                            </tbody>
+                        </table>
+                    </div>
+                </x-content-section>
 
             </x-content-section>
+
+
 
             <x-content-section title="Správa">
                 <x-textarea name="conclusion" label="Výsledky cesty:" ></x-textarea>
@@ -118,6 +168,14 @@
             </div>
 
         </form>
+
+        <x-content-section>
+            <form method="POST" action="/trips/{{ $trip->id }}/">
+                @csrf
+                <textarea id="note" name="note" rows="4" cols="50"></textarea>
+                <x-button>Pridať poznámku</x-button>
+            </form>
+        </x-content-section>
 
     </x-content-box>
 </x-layout>
