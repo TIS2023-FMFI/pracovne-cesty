@@ -40,7 +40,7 @@
                 <x-dropdown-input name="transport" label="Dopravný prostriedok:" :values="$transports" selected="{{old('transport')}}"/>
                 <x-simple-input name="upload_name" type="file" label="Vložte pozvánku, plagát alebo iný súbor..."/>
                 <x-dropdown-input name="trip_purpose" label="Účel cesty:" :values="$purposes" selected="{{old('purpose')}}"/>
-                <textarea id="purpose_details" name="purpose_details" rows="4" cols="30"></textarea>
+                <x-textarea name="purpose_details"></x-textarea>
                 <x-simple-input name="event_url" label="Link na udalosť:"/>
                 <x-dropdown-input name="contribution" label="Prínos pre fakultu:" :values="$contributions" selected="{{old('contribution')}}"/>
             </x-content-section>
@@ -110,7 +110,7 @@
             </x-content-section>
 
             <x-content-section title="Správa">
-                <textarea id="conclusion" name="conclusion" rows="5" cols="50"></textarea>
+                <x-textarea name="conclusion" label="Výsledky cesty:" ></x-textarea>
             </x-content-section>
 
             <div>
