@@ -4,6 +4,6 @@
         <x-content-section>
             <x-simple-input name="email" label="E-mail:"></x-simple-input>
         </x-content-section>
-        <x-form-button>Pridať používateľa</x-form-button>
+        <x-button>Pridať používateľa</x-button>
     </form>
 </x-modal>
