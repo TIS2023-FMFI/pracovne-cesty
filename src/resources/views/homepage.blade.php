@@ -9,11 +9,11 @@
     <x-link-button href="/trips/create">Pridať tuzemskú cestu</x-link-button>
     <x-link-button href="/trips/create">Pridať zahraničnú cestu</x-link-button>
 
-    <button x-data="{}" @click="$dispatch('open-add-users')">Pridať používateľa</button>
-    <x-modals.add-user></x-modals.add-user>
+    <x-button event="open-add-users">Pridať používateľov</x-button>
+    <x-button event="open-spp-manager">ŠPP prvky</x-button>
 
-    <button x-data="{}" @click="$dispatch('open-spp-manager')">ŠPP prvky</button>
-    <x-modals.spp-manager></x-modals.spp-manager>
+    <x-modals.add-user/>
+    <x-modals.spp-manager/>
 
     <div class="row">
         <x-overview class="col-md-4"/>

@@ -67,7 +67,7 @@
             </x-content-section>
 
             <div>
-                <x-form-button>Uložiť úpravy</x-form-button>
+                <x-button>Uložiť úpravy</x-button>
             </div>
 
         </form>

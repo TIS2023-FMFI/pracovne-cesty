@@ -6,13 +6,14 @@ use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
 
-class FormButton extends Component
+class Button extends Component
 {
     /**
      * Create a new component instance.
      */
     public function __construct(
-        public string $color = 'bg-dark'
+        public string $color = 'bg-dark',
+        public string $event =''
 
     )
     {
@@ -24,6 +25,6 @@ class FormButton extends Component
      */
     public function render(): View|Closure|string
     {
-        return view('components.form-button');
+        return view('components.button');
     }
 }
