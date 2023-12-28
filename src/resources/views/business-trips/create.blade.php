@@ -1,10 +1,14 @@
 @php
-    $countries = ['Slovensko', 'Česko', 'Rakúsko'];
-    $transports = ['auto', 'lietadlo', 'vlak'];
-    $purposes = ['konferencia', 'výskum', 'stretnutie'];
-    $contributions = ['prínos1', 'prínos2'];
-    $spp = ['spp1', 'spp2'];
-
+    use App\Models\Country;
+    use App\Models\Transport;
+    use App\Models\TripPurpose;
+    use App\Models\TripContribution;
+    use App\Models\SppSymbol;;
+    $countries = Country::all()->pluck('name', 'id')->toArray();
+    $transports = Transport::all()->pluck('name', 'id')->toArray();
+    $purposes = TripPurpose::all()->pluck('name', 'id')->toArray();;
+    $contributions = TripContribution::all()->pluck('name', 'id')->toArray();
+    $spp_symbols = SppSymbol::all()->pluck('spp_symbol', 'id')->toArray();;
 @endphp
 
 <x-layout>
@@ -46,10 +50,10 @@
                 <x-slot:description>
                     V prípade refundácie, prosím, vyberte ako ŠPP prvok 2 ten prvok, z ktorého budú peniaze neskôr vrátené do ŠPP prvku 1. Ako dátum vrátenia peňazí uveďte iba orientačný, predpokladaný dátum.
                 </x-slot:description>
-                <x-dropdown-input name="spp_symbol" label="ŠPP prvok 1:" :values="$spp" selected="{{old('spp_symbol')}}"/>
+                <x-dropdown-input name="spp_symbol" label="ŠPP prvok 1:" :values="$spp_symbols" selected="{{old('spp_symbol')}}"/>
                 <x-checkbox name="reimbursement" label="Refundovať" control="reimbursementShow"></x-checkbox>
                 <div x-show="reimbursementShow" class="col-md-12 row">
-                    <x-dropdown-input name="reimbursement_spp" label="ŠPP prvok 2:" :values="$spp" selected="{{old('reimbursement_spp')}}"/>
+                    <x-dropdown-input name="reimbursement_spp" label="ŠPP prvok 2:" :values="$spp_symbols" selected="{{old('reimbursement_spp')}}"/>
                     <x-simple-input name="reimbursement_date" type="date" label="Predpokladaný dátum:"/>
                 </div>
 
@@ -66,7 +70,7 @@
                 </div>
             </x-content-section>
 
-            <div>
+            <div class="container">
                 <x-button>Uložiť úpravy</x-button>
             </div>
 
