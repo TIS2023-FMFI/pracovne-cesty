@@ -9,6 +9,7 @@
 
 <x-layout>
     <x-content-box title="Úprava pracovnej cesty">
+        <div class="container">Stav cesty:</div>
         <form method="POST" action="/trips/{{ $trip->id }}" enctype="multipart/form-data">
             @csrf
             @method('PUT')
