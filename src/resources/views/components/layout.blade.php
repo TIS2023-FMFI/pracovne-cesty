@@ -22,9 +22,7 @@
                     <li>
                         <form method="POST" action="/logout">
                             @csrf
-                            <button type="submit">
-                                <i></i> Odhlásiť sa
-                            </button>
+                            <button> <i></i> Odhlásiť sa </button>
                         </form>
                     </li>
                 @else
@@ -38,9 +36,14 @@
                     </li>
                 @endauth
             </ul>
+
+            <div class="container py-3">
+                <h1 class="text-white fw-bold text-uppercase">Pracovné cesty</h1>
+                <h2 class="text-white fw-bold text-uppercase">Katedra aplikovanej informatiky</h2>
+            </div>
         </header>
 
-        <div class="w-75 mx-auto">
+        <div class="w-75 mx-auto my-5">
             {{$slot}}
         </div>
 
