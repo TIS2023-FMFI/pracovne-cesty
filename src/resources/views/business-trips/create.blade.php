@@ -2,12 +2,12 @@
     use App\Models\Country;
     use App\Models\Transport;
     use App\Models\TripPurpose;
-    use App\Models\TripContribution;
+    use App\Models\Contribution;
     use App\Models\SppSymbol;;
     $countries = Country::all()->pluck('name', 'id')->toArray();
     $transports = Transport::all()->pluck('name', 'id')->toArray();
     $purposes = TripPurpose::all()->pluck('name', 'id')->toArray();;
-    $contributions = TripContribution::all()->pluck('name', 'id')->toArray();
+    $contributions = Contribution::all()->pluck('name', 'id')->toArray();
     $spp_symbols = SppSymbol::all()->pluck('spp_symbol', 'id')->toArray();;
 @endphp
 
@@ -26,7 +26,7 @@
             </x-content-section>
 
             <x-content-section title="Začiatok cesty">
-                <x-simple-input name="place start" label="Miesto:"/>
+                <x-simple-input name="place_start" label="Miesto:"/>
                 <x-simple-input name="datetime_start" type="datetime-local" label="Dátum a čas:"/>
             </x-content-section>
 
@@ -41,9 +41,23 @@
                 <x-dropdown-input name="transport" label="Dopravný prostriedok:" :values="$transports" selected="{{old('transport')}}"/>
                 <x-simple-input name="upload_name" type="file" label="Vložte pozvánku, plagát alebo iný súbor..."/>
                 <x-dropdown-input name="trip_purpose" label="Účel cesty:" :values="$purposes" selected="{{old('purpose')}}"/>
-                <textarea id="purpose_details" name="purpose_details" rows="4" cols="30"></textarea>
+                <x-textarea name="purpose_details" label="Špecifikácia účelu:"></x-textarea>
                 <x-simple-input name="event_url" label="Link na udalosť:"/>
-                <x-dropdown-input name="contribution" label="Prínos pre fakultu:" :values="$contributions" selected="{{old('contribution')}}"/>
+            </x-content-section>
+
+            <x-content-section title="Prínos pre fakultu">
+                @foreach($contributions as $id => $name)
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <div class="input-group-text">
+                                <input type="checkbox">
+                            </div>
+                            <span class="input-group-text">{{ $name }}</span>
+                        </div>
+                        <input type="text" name="contribution_{{ $id }}" class="form-control">
+                    </div>
+                @endforeach
+
             </x-content-section>
 
             <x-content-section title="Financovanie" x-data="{reimbursementShow: false}">
@@ -53,7 +67,7 @@
                 <x-dropdown-input name="spp_symbol" label="ŠPP prvok 1:" :values="$spp_symbols" selected="{{old('spp_symbol')}}"/>
                 <x-checkbox name="reimbursement" label="Refundovať" control="reimbursementShow"></x-checkbox>
                 <div x-show="reimbursementShow" class="col-md-12 row">
-                    <x-dropdown-input name="reimbursement_spp" label="ŠPP prvok 2:" :values="$spp_symbols" selected="{{old('reimbursement_spp')}}"/>
+                    <x-dropdown-input name="reimbursement_spp_symbol" label="ŠPP prvok 2:" :values="$spp_symbols" selected="{{old('reimbursement_spp')}}"/>
                     <x-simple-input name="reimbursement_date" type="date" label="Predpokladaný dátum:"/>
                 </div>
 
