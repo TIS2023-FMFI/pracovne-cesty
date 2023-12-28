@@ -43,9 +43,9 @@
             </div>
         </header>
 
-        <div class="w-75 mx-auto my-5">
+        <main class="container my-5">
             {{$slot}}
-        </div>
+        </main>
 
 
         <footer>
