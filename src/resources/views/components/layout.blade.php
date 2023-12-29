@@ -38,8 +38,8 @@
             </ul>
 
             <div class="container py-3">
-                <h1 class="text-white fw-bold text-uppercase">Pracovné cesty</h1>
-                <h2 class="text-white fw-bold text-uppercase">Katedra aplikovanej informatiky</h2>
+                <h1 class="text-white text-uppercase">Pracovné cesty</h1>
+                <h2 class="text-white text-uppercase">Katedra aplikovanej informatiky</h2>
             </div>
         </header>
 

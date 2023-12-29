@@ -6,11 +6,12 @@
 @endphp
 
 <x-layout>
-    <x-link-button href="/trips/create">Pridať tuzemskú cestu</x-link-button>
-    <x-link-button href="/trips/create">Pridať zahraničnú cestu</x-link-button>
-
-    <x-button event="open-add-users">Pridať používateľov</x-button>
-    <x-button event="open-spp-manager">ŠPP prvky</x-button>
+    <div class="mb-4">
+        <x-link-button href="/trips/create">Pridať tuzemskú cestu</x-link-button>
+        <x-link-button href="/trips/create">Pridať zahraničnú cestu</x-link-button>
+        <x-button event="open-add-users">Pridať používateľov</x-button>
+        <x-button event="open-spp-manager">ŠPP prvky</x-button>
+    </div>
 
     <x-modals.add-user/>
     <x-modals.spp-manager/>

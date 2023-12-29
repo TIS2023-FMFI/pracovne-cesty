@@ -173,7 +173,7 @@
         <x-content-section>
             <form method="POST" action="/trips/{{ $trip->id }}/">
                 @csrf
-                <textarea id="note" name="note" rows="4" cols="50"></textarea>
+                <x-textarea name="note"></x-textarea>
                 <x-button>Pridať poznámku</x-button>
             </form>
         </x-content-section>
