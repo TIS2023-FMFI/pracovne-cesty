@@ -52,22 +52,22 @@
                 </x-slot:description>
                 <x-dropdown-input name="spp_symbol" label="ŠPP prvok 1:" :values="$spp" selected="{{old('spp_symbol')}}"/>
                 <x-checkbox name="reimbursement" label="Refundovať" control="reimbursementShow"></x-checkbox>
-                <div x-show="reimbursementShow" class="col-md-12 row mt-3">
+                <x-hideable-section control="reimbursementShow">
                     <x-dropdown-input name="reimbursement_spp" label="ŠPP prvok 2:" :values="$spp" selected="{{old('reimbursement_spp')}}"/>
                     <x-simple-input name="reimbursement_date" type="date" label="Predpokladaný dátum:"/>
-                </div>
+                </x-hideable-section>
 
             </x-content-section>
 
             <x-content-section title="Úhrada konferenčného poplatku" x-data="{conferenceFeeShow: false}">
                 <x-checkbox name="conference_fee" label="Mám záujem o úhradu konferenčného poplatku pred cestou priamo z pracoviska" control="conferenceFeeShow"></x-checkbox>
-                <div x-show="conferenceFeeShow" class="col-md-12 row">
+                <x-hideable-section control="conferenceFeeShow">
                     <x-simple-input name="organiser_name" type="text" label="Názov organizácie:"/>
                     <x-simple-input name="ico" type="text" label="IČO:"/>
                     <x-simple-input name="organiser_address" type="text" label="Adresa organizácie:"/>
                     <x-simple-input name="organiser_iban" type="text" label="Číslo účtu organizácie:"/>
                     <x-simple-input name="amount" type="text" label="Suma:"/>
-                </div>
+                </x-hideable-section>
             </x-content-section>
 
             @php
