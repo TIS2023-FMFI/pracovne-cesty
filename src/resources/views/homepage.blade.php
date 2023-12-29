@@ -1,8 +1,8 @@
 @php
-    $trips = [
-        (object) ['id' => 1, 'number' => 0712, 'start-date' => '02.12.2023', 'end-date' => '05.12.2023', 'state' => 0],
-        (object) ['id' => 2, 'number' => 0715, 'start-date' => '20.12.2023', 'end-date' => '25.12.2023', 'state' => 0]
-    ];
+    use App\Models\BusinessTrip;
+    use App\Models\User;
+    $trips = BusinessTrip::all();
+    $users = User::all();
 @endphp
 
 <x-layout>
@@ -17,11 +17,23 @@
     <x-modals.spp-manager/>
 
     <div class="row">
-        <x-overview class="col-md-4"/>
+        <x-content-box title="Prehľad" class="col-md-4">
+            <x-overview-item content="Najnovšie"/>
+            <x-overview-item content="Nepotvrdené"/>
+            <x-overview-item content="Nevyúčtované"/>
+            <x-overview-item/>
+
+            @foreach($users as $user)
+                <x-overview-item :content="$user->first_name.' '.$user->last_name" :reference="'users/'.$user->id"></x-overview-item>
+            @endforeach
+
+
+        </x-content-box>
+
 
         <x-content-box title="Pracovné cesty" class="col-md-8">
             @foreach($trips as $trip)
-                <x-content-item :id="$trip->id" :date="$trip->{'start-date'}" :state="$trip->state" > {{ $trip->number }} </x-content-item>
+                <x-content-item :id="$trip->id" :sofia-id="$trip->sofia_id == null ? '0000' : $trip->sofia_id" :state="$trip->state" :user="$trip->user->last_name" :place="$trip->place" :purpose="$trip->tripPurpose->name" :date="$trip->datetime_start"/>
             @endforeach
         </x-content-box>
     </div>

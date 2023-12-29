@@ -12,8 +12,8 @@ class OverviewItem extends Component
      * Create a new component instance.
      */
     public function __construct(
-        public string $content,
-        public string $reference = ""
+        public string $content ='',
+        public string $reference = ''
     )
     {
         //
