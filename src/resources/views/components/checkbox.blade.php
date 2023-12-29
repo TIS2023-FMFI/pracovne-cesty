@@ -1,14 +1,14 @@
-<div class="col-md-12 form-check">
+<div class="col-md-12 custom-control custom-checkbox">
     <input
         type="checkbox"
         id="{{ $name }}"
         name="{{ $name }}"
         {{ $isChecked() ? 'checked' : '' }}
         {{ $control != "" ? 'x-model='.$control : '' }}
-        class="form-check-input"
+        class="custom-control-input"
 
     />
     @if($label != '')
-        <label for="{{ $name }}" class="form-check-label">{{ $label }}</label>
+        <label for="{{ $name }}" class="custom-control-label">{{ $label }}</label>
     @endif
 </div>

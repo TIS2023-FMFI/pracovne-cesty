@@ -78,7 +78,7 @@
                     <table class="table">
                         <thead>
                             <tr>
-                                <th></th>
+                                <th>Druh nákladov</th>
                                 <th>Suma v EUR</th>
                                 <th>Suma v cudzej mene</th>
                                 <th></th>
@@ -90,10 +90,10 @@
                                         {{ $label }}
                                     </td>
                                     <td>
-                                        <x-simple-input name="{{ $expense }}_expense_eur"></x-simple-input>
+                                        <x-simple-input name="{{ $expense }}_expense_eur" size="long"></x-simple-input>
                                     </td>
                                     <td>
-                                        <x-simple-input name="{{ $expense }}_expense_foreign"></x-simple-input>
+                                        <x-simple-input name="{{ $expense }}_expense_foreign" size="long"></x-simple-input>
                                     </td>
                                     <td>
                                         <x-checkbox name="{{ $expense }}_expense_reimburse" label="Nenárokujem si"></x-checkbox>

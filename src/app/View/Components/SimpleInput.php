@@ -16,7 +16,8 @@ class SimpleInput extends Component
         public string $label = '',
         public string $type = 'text',
         public bool $readOnly = false,
-        public string $value = ''
+        public string $value = '',
+        public string $size = 'short'
     )
     {
         //
@@ -25,6 +26,11 @@ class SimpleInput extends Component
     public function isReadOnly(): bool
     {
         return $this->readOnly;
+    }
+
+    public function getSize(): string
+    {
+        return $this->size == 'short' ? 'col-md-6' : ($this->size == 'long' ? 'col-md-12' : '');
     }
 
     /**

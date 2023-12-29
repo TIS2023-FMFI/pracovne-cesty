@@ -54,7 +54,7 @@
                             </div>
                             <span class="input-group-text">{{ $name }}</span>
                         </div>
-                        <input type="text" name="contribution_{{ $id }}" class="form-control">
+                        <input type="text" name="contribution_{{ $id }}_detail" class="form-control">
                     </div>
                 @endforeach
 
