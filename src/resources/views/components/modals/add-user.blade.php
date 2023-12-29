@@ -2,8 +2,13 @@
     <form action="users/add">
         @csrf
         <x-content-section>
-            <x-simple-input name="email" label="E-mail:" size="long"></x-simple-input>
+            <x-slot:description>
+                Môžete zadať ľubovoľný počet emailových adries oddelených bodkočiarkami.
+            </x-slot:description>
+            <x-textarea name="email" label="Emailové adresy:" size="long"></x-textarea>
         </x-content-section>
-        <x-button>Pridať používateľa</x-button>
+        <div class="d-flex justify-content-end">
+            <x-button>Pridať</x-button>
+        </div>
     </form>
 </x-modal>

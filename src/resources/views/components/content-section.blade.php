@@ -1,4 +1,4 @@
-<fieldset {{ $attributes->merge(['class' => 'border-bottom pb-4 m-4']) }}>
+<fieldset {{ $attributes->merge(['class' => 'border-bottom pb-4 mb-4']) }}>
     @if($title != '')
         <b>{{ $title }}</b>
     @endif
