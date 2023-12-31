@@ -14,12 +14,6 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/send-test-mail', function () {
-    //Mail::to('externist@example.com')->send(new SimpleMail('Vitajte v našom systéme', 'externist@example.com', 'emails.registration_externist'));
-    Mail::to('slavik45@uniba.sk')->send(new SimpleMail('Vitajte v našom systéme', 'slavik45@uniba.sk', 'emails.registration_externist'));
-    return 'E-mail bol odoslaný.';
-});
-
 Route::get('/', function () {
     return view('welcome');
 });
