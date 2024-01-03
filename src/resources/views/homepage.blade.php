@@ -11,10 +11,12 @@
         <x-link-button href="/trips/create">Pridať zahraničnú cestu</x-link-button>
         <x-button event="open-add-users">Pridať používateľov</x-button>
         <x-button event="open-spp-manager">ŠPP prvky</x-button>
+        <x-button event="open-register-form">Registrácia</x-button>
     </div>
 
     <x-modals.add-user/>
     <x-modals.spp-manager/>
+    <x-modals.register/>
 
     <div class="row">
         <x-content-box title="Prehľad" class="col-md-4">
