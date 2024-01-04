@@ -14,8 +14,8 @@ class DropdownInput extends Component
     public function __construct(
         public string $name,
         public array $values,
-        public string $label,
-        public string $selected = "",
+        public string $label ='',
+        public string $selected = '',
         public bool $disabled = false
     )
     {

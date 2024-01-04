@@ -6,7 +6,7 @@
 @endphp
 
 <x-layout>
-    <div class="mb-4">
+    <div class="container mb-4">
         <x-link-button href="/trips/create">Pridať tuzemskú cestu</x-link-button>
         <x-link-button href="/trips/create">Pridať zahraničnú cestu</x-link-button>
         <x-button event="open-add-users">Pridať používateľov</x-button>
@@ -18,27 +18,30 @@
     <x-modals.spp-manager/>
     <x-modals.register/>
 
-    <div class="row">
-        <x-content-box title="Prehľad" class="col-md-4">
-            <x-overview-item content="Najnovšie"/>
-            <x-overview-item content="Nepotvrdené"/>
-            <x-overview-item content="Nevyúčtované"/>
-            <x-overview-item/>
+    <div class="container">
+        <div class="row">
+            <x-content-box title="Prehľad" class="col-md-4">
+                <x-overview-item content="Najnovšie"/>
+                <x-overview-item content="Nepotvrdené"/>
+                <x-overview-item content="Nevyúčtované"/>
+                <x-overview-item/>
 
-            @foreach($users as $user)
-                <x-overview-item :content="$user->first_name.' '.$user->last_name" :reference="'users/'.$user->id"></x-overview-item>
-            @endforeach
-
-
-        </x-content-box>
+                @foreach($users as $user)
+                    <x-overview-item :content="$user->first_name.' '.$user->last_name" :reference="'users/'.$user->id"></x-overview-item>
+                @endforeach
 
 
-        <x-content-box title="Pracovné cesty" class="col-md-8">
-            @foreach($trips as $trip)
-                <x-content-item :id="$trip->id" :sofia-id="$trip->sofia_id == null ? '0000' : $trip->sofia_id" :state="$trip->state" :user="$trip->user->last_name" :place="$trip->place" :purpose="$trip->tripPurpose->name" :date="$trip->datetime_start"/>
-            @endforeach
-        </x-content-box>
+            </x-content-box>
+
+
+            <x-content-box title="Pracovné cesty" class="col-md-8">
+                @foreach($trips as $trip)
+                    <x-content-item :id="$trip->id" :sofia-id="$trip->sofia_id == null ? '0000' : $trip->sofia_id" :state="$trip->state" :user="$trip->user->last_name" :place="$trip->place" :purpose="$trip->tripPurpose->name" :date="$trip->datetime_start"/>
+                @endforeach
+            </x-content-box>
+        </div>
     </div>
+
 
 
 

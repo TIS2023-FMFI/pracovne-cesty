@@ -8,10 +8,8 @@
             <div class="mb-4">{{ $description }}</div>
         @endif
 
-            <div class="container">
-            <div class="row ">
-                {{ $slot }}
-            </div>
+        <div class="container">
+            {{ $slot }}
         </div>
     </div>
 
