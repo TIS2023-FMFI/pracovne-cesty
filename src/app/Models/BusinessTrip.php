@@ -142,7 +142,7 @@ class BusinessTrip extends Model
      *
      * @return BelongsTo
      */
-    public function allowance(): BelongsTo
+    public function allowanceExpense(): BelongsTo
     {
         return $this->belongsTo(Expense::class, 'allowance_id');
     }
