@@ -70,7 +70,7 @@ return new class extends Migration {
             $table->foreignIdFor(Expense::class, 'advance_expense_id')
                 ->nullable()
                 ->unique();
-            $table->foreignIdFor(Expense::class, 'allowance_id')
+            $table->foreignIdFor(Expense::class, 'allowance_expense_id')
                 ->nullable()
                 ->unique();
 
