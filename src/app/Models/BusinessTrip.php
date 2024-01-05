@@ -144,7 +144,7 @@ class BusinessTrip extends Model
      */
     public function allowanceExpense(): BelongsTo
     {
-        return $this->belongsTo(Expense::class, 'allowance_id');
+        return $this->belongsTo(Expense::class, 'allowance_expense_id');
     }
 
     /**

@@ -63,7 +63,7 @@ class Expense extends Model
      */
     public function allowance(): HasOne
     {
-        return $this->hasOne(BusinessTrip::class, 'allowance_id');
+        return $this->hasOne(BusinessTrip::class, 'allowance_expense_id');
     }
 
     /**

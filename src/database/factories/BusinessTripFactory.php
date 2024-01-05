@@ -79,7 +79,7 @@ class BusinessTripFactory extends Factory
             'travelling_expense_id' => null,
             'other_expense_id' => null,
             'advance_expense_id' => null,
-            'allowance_id' => null,
+            'allowance_expense_id' => null,
 
             'not_reimbursed_meals' => '',
             'meals_reimbursement' => fake()->boolean(),
