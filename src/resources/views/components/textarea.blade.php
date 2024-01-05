@@ -4,6 +4,7 @@
             class="form-control"
             id="{{ $name }}"
             name="{{ $name }}"
+            rows="3"
             {{ $isReadOnly() ? 'readonly' : '' }}
         >{{ $value == '' ? old($name) : $value }}</textarea>
 </div>

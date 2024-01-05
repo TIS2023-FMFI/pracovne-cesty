@@ -46,20 +46,19 @@
                 </div>
             </x-content-section>
 
-            <div class="container p-0">
-                <div class="row">
-                    <div class="col">
-                        <x-content-section title="Začiatok cesty">
-                            <x-simple-input name="place start" label="Miesto"/>
-                            <x-simple-input name="datetime_start" type="datetime-local" label="Dátum a čas"/>
-                        </x-content-section>
-                    </div>
-                    <div class="col">
-                        <x-content-section title="Koniec cesty">
-                            <x-simple-input name="place_end" label="Miesto"/>
-                            <x-simple-input name="datetime_end" type="datetime-local" label="Dátum a čas"/>
-                        </x-content-section>
-                    </div>
+
+            <div class="form-row">
+                <div class="col">
+                    <x-content-section title="Začiatok cesty">
+                        <x-simple-input name="place start" label="Miesto"/>
+                        <x-simple-input name="datetime_start" type="datetime-local" label="Dátum a čas"/>
+                    </x-content-section>
+                </div>
+                <div class="col">
+                    <x-content-section title="Koniec cesty">
+                        <x-simple-input name="place_end" label="Miesto"/>
+                        <x-simple-input name="datetime_end" type="datetime-local" label="Dátum a čas"/>
+                    </x-content-section>
                 </div>
             </div>
 

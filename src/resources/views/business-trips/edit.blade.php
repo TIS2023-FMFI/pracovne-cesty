@@ -13,12 +13,12 @@
 
 <x-layout>
     <x-content-box title="{{ $trip->tripPurpose->name.' '.$trip->place }}">
-{{--        <div class="container">Stav cesty: {{ $trip->state }}</div>--}}
+        {{--        <div class="container">Stav cesty: {{ $trip->state }}</div>--}}
         <form method="POST" action="/trips/{{ $trip->id }}" enctype="multipart/form-data">
             @csrf
             @method('PUT')
             <x-content-section title="Osobné údaje">
-                <div class="row">
+                <div class="form-row">
                     <div class="col">
                         <x-simple-input name="first_name" label="Meno" :value="$trip->user->first_name"/>
                     </div>
@@ -53,16 +53,22 @@
                 <div class="row">
                     <div class="col">
                         <x-content-section title="Začiatok cesty">
-                            <x-simple-input name="place start" label="Miesto:" :value="$trip->place_start"/>
-                            <x-simple-input name="datetime_start" type="datetime-local" label="Dátum a čas:" :value="$trip->datetime_start"/>
-                            <x-simple-input name="datetime_border_crossing_start" type="datetime-local" label="Dátum a čas prekročenia hraníc:" :value="$trip->datetime_border_crossing_start"/>
+                            <x-simple-input name="place start" label="Miesto" :value="$trip->place_start"/>
+                            <x-simple-input name="datetime_start" type="datetime-local" label="Dátum a čas"
+                                            :value="$trip->datetime_start"/>
+                            <x-simple-input name="datetime_border_crossing_start" type="datetime-local"
+                                            label="Dátum a čas prekročenia hraníc"
+                                            :value="$trip->datetime_border_crossing_start ?? ''"/>
                         </x-content-section>
                     </div>
                     <div class="col">
                         <x-content-section title="Koniec cesty">
-                            <x-simple-input name="place_end" label="Miesto:" :value="$trip->place_end"/>
-                            <x-simple-input name="datetime_end" type="datetime-local" label="Dátum a čas:" :value="$trip->datetime_end"/>
-                            <x-simple-input name="datetime_border_crossing_end" type="datetime-local" label="Dátum a čas prekročenia hraníc:" :value="$trip->datetime_border_crossing_end"/>
+                            <x-simple-input name="place_end" label="Miesto" :value="$trip->place_end"/>
+                            <x-simple-input name="datetime_end" type="datetime-local" label="Dátum a čas"
+                                            :value="$trip->datetime_end"/>
+                            <x-simple-input name="datetime_border_crossing_end" type="datetime-local"
+                                            label="Dátum a čas prekročenia hraníc"
+                                            :value="$trip->datetime_border_crossing_end ?? ''"/>
                         </x-content-section>
                     </div>
                 </div>
@@ -74,20 +80,24 @@
                         <x-simple-input name="place" label="Miesto" :value="$trip->place"/>
                     </div>
                     <div class="col">
-                        <x-dropdown-input name="country" label="Štát" :values="$countries" :selected="$trip->country_id"/>
+                        <x-dropdown-input name="country" label="Štát" :values="$countries"
+                                          :selected="$trip->country_id"/>
                     </div>
                 </div>
                 <div class="form-row">
                     <div class="col">
-                        <x-dropdown-input name="trip_purpose" label="Účel cesty" :values="$purposes" :selected="$trip->trip_purpose_id"/>
+                        <x-dropdown-input name="trip_purpose" label="Účel cesty" :values="$purposes"
+                                          :selected="$trip->trip_purpose_id"/>
                     </div>
                     <div class="col">
-                        <x-textarea name="purpose_details" label="Špecifikácia účelu" :value="$trip->purpose_details"></x-textarea>
+                        <x-textarea name="purpose_details" label="Špecifikácia účelu"
+                                    :value="$trip->purpose_details ?? ''"></x-textarea>
                     </div>
                 </div>
                 <div class="form-row">
                     <div class="col">
-                        <x-simple-input name="upload_name" type="file" label="Vložte pozvánku, plagát alebo iný súbor..."/>
+                        <x-simple-input name="upload_name" type="file"
+                                        label="Vložte pozvánku, plagát alebo iný súbor..."/>
                     </div>
                     <div class="col">
                         <x-simple-input name="event_url" label="Link na udalosť" :value="$trip->event_url ?? ''"/>
@@ -95,7 +105,8 @@
                 </div>
                 <div class="form-row">
                     <div class="col-sm-6">
-                        <x-dropdown-input name="transport" label="Dopravný prostriedok" :values="$transports" :selected="$trip->transport_id"/>
+                        <x-dropdown-input name="transport" label="Dopravný prostriedok" :values="$transports"
+                                          :selected="$trip->transport_id"/>
                     </div>
                 </div>
             </x-content-section>
@@ -116,29 +127,36 @@
             </x-content-section>
 
             @php
-                $isReimbursed = $trip->spp_symbol_id != null;
+                $isReimbursed = $trip->reimbursement != null;
+                $spp2 = $isReimbursed ? $trip->reimbursement->spp_symbol_id : '';
+                $reimbursementDate = $isReimbursed ? $trip->reimbursement->reimbursement_date : '';
             @endphp
 
             <x-content-section title="Financovanie" x-data="{reimbursementShow: {{ $isReimbursed }} }">
                 <x-slot:description>
-                    V prípade refundácie, prosím, vyberte ako ŠPP prvok 2 ten prvok, z ktorého budú peniaze neskôr vrátené do ŠPP prvku 1. Ako dátum vrátenia peňazí uveďte iba orientačný, predpokladaný dátum.
+                    V prípade refundácie, prosím, vyberte ako ŠPP prvok 2 ten prvok, z ktorého budú peniaze neskôr
+                    vrátené do ŠPP prvku 1. Ako dátum vrátenia peňazí uveďte iba orientačný, predpokladaný dátum.
                 </x-slot:description>
                 <div class="form-row align-items-center">
                     <div class="col">
-                        <x-dropdown-input name="spp_symbol" label="ŠPP prvok 1:" :values="$spp_symbols" :selected="$trip->spp_symbol_id"/>
+                        <x-dropdown-input name="spp_symbol" label="ŠPP prvok 1:" :values="$spp_symbols"
+                                          :selected="$trip->spp_symbol_id"/>
                     </div>
                     <div class="col">
-                        <x-checkbox name="reimbursement" label="Refundovať" control="reimbursementShow" :checked="$isReimbursed"></x-checkbox>
+                        <x-checkbox name="reimbursement" label="Refundovať" control="reimbursementShow"
+                                    :checked="$isReimbursed"></x-checkbox>
                     </div>
                 </div>
 
                 <x-hideable-section control="reimbursementShow">
                     <div class="form-row">
                         <div class="col">
-                            <x-dropdown-input name="reimbursement_spp" label="ŠPP prvok 2" :values="$spp_symbols" :selected="$trip->reimbursement->spp_symbol_id"/>
+                            <x-dropdown-input name="reimbursement_spp" label="ŠPP prvok 2" :values="$spp_symbols"
+                                              :selected="$spp2"/>
                         </div>
                         <div class="col">
-                            <x-simple-input name="reimbursement_date" type="date" label="Dátum vrátenia peňazí" :value="$trip->reimbursement->reimbursement_date"/>
+                            <x-simple-input name="reimbursement_date" type="date" label="Dátum vrátenia peňazí"
+                                            :value="$reimbursementDate"/>
                         </div>
                     </div>
                 </x-hideable-section>
@@ -146,26 +164,39 @@
 
             @php
                 $wantsConferenceFee = $trip->conference_fee_id != null;
+                $organiser = $wantsConferenceFee ? $trip->conferenceFee->organiser_name : '';
+                $ico = $wantsConferenceFee ? $trip->conferenceFee->ico : '';
+                $address = $wantsConferenceFee ? $trip->conferenceFee->organiser_address : '';
+                $iban = $wantsConferenceFee ? $trip->conferenceFee->iban : '';
+                $amount = $wantsConferenceFee ? $trip->conferenceFee->amount : '';
             @endphp
 
-            <x-content-section title="Úhrada konferenčného poplatku" x-data="{conferenceFeeShow: {{ $wantsConferenceFee }} }">
-                <x-checkbox name="conference_fee" label="Mám záujem o úhradu konferenčného poplatku pred cestou priamo z pracoviska" control="conferenceFeeShow" :checked="$wantsConferenceFee"></x-checkbox>
+            <x-content-section title="Úhrada konferenčného poplatku"
+                               x-data="{conferenceFeeShow: {{ $wantsConferenceFee }} }">
+                <x-checkbox name="conference_fee"
+                            label="Mám záujem o úhradu konferenčného poplatku pred cestou priamo z pracoviska"
+                            control="conferenceFeeShow" :checked="$wantsConferenceFee"></x-checkbox>
                 <x-hideable-section control="conferenceFeeShow">
                     <div class="form-row">
                         <div class="col">
-                            <x-simple-input name="organiser_name" type="text" label="Názov organizácie" :value="$trip->conferenceFee->organiser_name"/>
+                            <x-simple-input name="organiser_name" type="text" label="Názov organizácie"
+                                            :value="$organiser"/>
                         </div>
                         <div class="col">
-                            <x-simple-input name="ico" type="text" label="IČO" :value="$trip->conferenceFee->ico ?? ''"/>
+                            <x-simple-input name="ico" type="text" label="IČO"
+                                            :value="$ico ?? ''"/>
                         </div>
                     </div>
-                    <x-simple-input name="organiser_address" type="text" label="Adresa organizácie" :value="$trip->conferenceFee->organiser_address"/>
+                    <x-simple-input name="organiser_address" type="text" label="Adresa organizácie"
+                                    :value="$address"/>
                     <div class="form-row">
                         <div class="col">
-                            <x-simple-input name="organiser_iban" type="text" label="Číslo účtu organizácie" :value="$trip->conferenceFee->iban"/>
+                            <x-simple-input name="organiser_iban" type="text" label="Číslo účtu organizácie"
+                                            :value="$iban"/>
                         </div>
                         <div class="col">
-                            <x-simple-input name="amount" type="text" label="Suma" :value="$trip->conferenceFee->amount"/>
+                            <x-simple-input name="amount" type="text" label="Suma"
+                                            :value="$amount"/>
                         </div>
                     </div>
 
@@ -173,49 +204,62 @@
             </x-content-section>
 
             @php
-                $expenses = ['travelling' => 'Cestovné', 'accommodation' => 'Ubytovanie', 'allowance' => 'Záloha za cestu', 'advance' => 'Vložné', 'other' => 'Iné']
+                $expenses = ['travelling' => 'Cestovné', 'accommodation' => 'Ubytovanie', 'allowance' => 'Záloha za cestu', 'advance' => 'Vložné', 'other' => 'Iné'];
+                $mealsReimbursement = $trip->meals_reimbursement ?? true;
+                $doesNotWantMeals = !$mealsReimbursement;
             @endphp
-            <x-content-section title="Náklady" x-data="{notReimbursedMealsHide: false}">
-                <div class="container">
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>Druh nákladov</th>
-                                <th>Suma v EUR</th>
-                                <th>Suma v cudzej mene</th>
-                                <th></th>
-                            </tr>
+            <x-content-section title="Náklady" x-data="{mealsTableHide: {{ $doesNotWantMeals }} }">
+                <x-slot:description>
+                    Pre každý druh nákladov môžete použiť aj oba stĺpce naraz. Ak si preplatenie nejakého druhu nákladov nenárokujete, nezabudnite to, prosím, uviesť.
+                </x-slot:description>
 
-                            @foreach($expenses as $expense => $label)
-                                <tr>
-                                    <td>
-                                        {{ $label }}
-                                    </td>
-                                    <td>
-                                        <x-simple-input name="{{ $expense }}_expense_eur" size="long"></x-simple-input>
-                                    </td>
-                                    <td>
-                                        <x-simple-input name="{{ $expense }}_expense_foreign" size="long"></x-simple-input>
-                                    </td>
-                                    <td>
-                                        <x-checkbox name="{{ $expense }}_expense_reimburse" label="Nenárokujem si"></x-checkbox>
-                                    </td>
-                                </tr>
-                            @endforeach
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>Druh nákladov</th>
+                        <th>Suma v EUR</th>
+                        <th>Suma v cudzej mene</th>
+                        <th></th>
+                    </tr>
+                    </thead>
 
-                            <tr>
-                                <td>
-                                    Stravné
-                                </td>
-                                <td>
-                                    <x-checkbox name="meals_reimbursed" label="Nenárokujem si vôbec" control="notReimbursedMealsHide"></x-checkbox>
-                                </td>
-                            </tr>
-                        </thead>
-                    </table>
-                </div>
+                    @foreach($expenses as $expenseName => $label)
+                        @php
+                            $expense = $trip->{$expenseName . 'Expense'};
+                            $amountEur = $expense->amount_eur ?? '';
+                            $amountForeign = $expense->amount_foreign ?? '';
+                            $reimburse = $expense->reimburse ?? false;
+                        @endphp
+                        <tr>
+                            <td>
+                                {{ $label }}
+                            </td>
+                            <td>
+                                <x-simple-input name="{{ $expenseName }}_expense_eur"
+                                                :value="$amountEur ?? ''"></x-simple-input>
+                            </td>
+                            <td>
+                                <x-simple-input name="{{ $expenseName }}_expense_foreign" :value="$amountForeign ?? ''"></x-simple-input>
+                            </td>
+                            <td>
+                                <x-checkbox name="{{ $expenseName }}_expense_reimburse" :checked="$reimburse" label="Nenárokujem si"></x-checkbox>
+                            </td>
+                        </tr>
+                    @endforeach
 
-                <x-content-section title="Zrážky zo stravného" x-show="!notReimbursedMealsHide">
+                    <tr>
+                        <td>
+                            Stravné
+                        </td>
+                        <td>
+                            <x-checkbox name="no_meals_reimbursed" label="Nenárokujem si vôbec" :checked="$doesNotWantMeals" control="mealsTableHide"/>
+                        </td>
+                        <td colspan="2"></td>
+                    </tr>
+                </table>
+
+
+                <x-content-section title="Zrážky zo stravného" x-show="!mealsTableHide">
                     <x-slot:description>
                         Vyberte, prosím, ktoré jedlá si <b>nežiadate</b> preplatiť.
                     </x-slot:description>
@@ -262,7 +306,7 @@
 
 
             <x-content-section title="Správa">
-                <x-textarea name="conclusion" label="Výsledky cesty:" ></x-textarea>
+                <x-textarea name="conclusion" label="Výsledky cesty:" :value="$trip->conclusion ?? ''"></x-textarea>
             </x-content-section>
 
             <div class="d-flex justify-content-end">
