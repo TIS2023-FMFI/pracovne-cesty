@@ -10,12 +10,11 @@
         <x-link-button href="/trips/create">Pridať tuzemskú cestu</x-link-button>
         <x-link-button href="/trips/create">Pridať zahraničnú cestu</x-link-button>
         <x-button color="btn-danger" event="open-add-users">Pridať používateľov</x-button>
-        <x-button color="btn-danger" event="open-spp-manager">ŠPP prvky</x-button>
+        <x-link-button href="/spp">ŠPP prvky</x-link-button>
         <x-button event="open-register-form">Registrácia</x-button>
     </div>
 
     <x-modals.add-user/>
-    <x-modals.spp-manager/>
     <x-modals.register/>
 
 
