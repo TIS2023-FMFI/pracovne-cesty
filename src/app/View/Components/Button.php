@@ -12,7 +12,7 @@ class Button extends Component
      * Create a new component instance.
      */
     public function __construct(
-        public string $color = 'bg-dark',
+        public string $color = 'btn-dark',
         public string $event =''
 
     )
