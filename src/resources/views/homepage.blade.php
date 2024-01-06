@@ -20,9 +20,9 @@
 
     <div class="row">
         <x-content-box title="Prehľad" class="col-md-4">
-            <x-overview-item content="Najnovšie"/>
-            <x-overview-item content="Nepotvrdené"/>
-            <x-overview-item content="Nevyúčtované"/>
+            <x-overview-item content="Najnovšie" reference="/?filter=newest"/>
+            <x-overview-item content="Nepotvrdené" reference="/?filter=unconfirmed"/>
+            <x-overview-item content="Nevyúčtované" reference="/?filter=unaccounted"/>
             <x-overview-item/>
 
             @foreach($users as $user)
