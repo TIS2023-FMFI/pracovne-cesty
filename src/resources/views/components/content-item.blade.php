@@ -20,7 +20,8 @@
                 {{ $date }}
             </div>
             <div class="col-1">
-                <div style="width: 30px; height: 30px; background: #323232;">
+                <div style="width: 30px; height: 30px;">
+                    <i class="fa-solid fa-{{ $getIcon() }}"></i>
                 </div>
             </div>
         </div>

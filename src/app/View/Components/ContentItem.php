@@ -26,6 +26,23 @@ class ContentItem extends Component
         //
     }
 
+    public function getIcon(): string {
+        switch ($this->state) {
+            case TripState::NEW:
+                return 'sun';
+            case TripState::CONFIRMED:
+                return 'file-circle-plus';
+            case TripState::COMPLETED:
+                return 'file-circle-check';
+            case TripState::CLOSED:
+                return 'circle-check';
+            case TripState::CANCELLATION_REQUEST:
+                return 'file-circle-xmark';
+            case TripState::CANCELLED:
+                return 'circle-xmark';
+        }
+    }
+
     /**
      * Get the view / contents that represent the component.
      */
