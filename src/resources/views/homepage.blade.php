@@ -1,7 +1,7 @@
 @php
     use App\Models\BusinessTrip;
     use App\Models\User;
-    $trips = BusinessTrip::all();
+    $trips = BusinessTrip::paginate(15);
     $users = User::all();
 @endphp
 
@@ -43,6 +43,10 @@
                 @endphp
                 <x-content-item :id="$trip->id" :sofia-id="$sofiaId" :state="$trip->state" :user="$fullName" :place="$trip->place" :purpose="$trip->tripPurpose->name" :date="$dates"/>
             @endforeach
+            <div class="d-flex justify-content-end">
+                {{$trips->links()}}
+            </div>
+
         </x-content-box>
     </div>
 
