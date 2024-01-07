@@ -156,7 +156,7 @@
                         </div>
                         <div class="col">
                             <x-simple-input name="reimbursement_date" type="date" label="Dátum vrátenia peňazí"
-                                            :value="$reimbursementDate"/>
+                                            :value="$reimbursementDate->format('Y-m-d')"/>
                         </div>
                     </div>
                 </x-hideable-section>
@@ -306,7 +306,7 @@
 
 
             <x-content-section title="Správa">
-                <x-textarea name="conclusion" label="Výsledky cesty:" :value="$trip->conclusion ?? ''"></x-textarea>
+                <x-textarea name="conclusion" label="Výsledky cesty" :value="$trip->conclusion ?? ''"></x-textarea>
             </x-content-section>
 
             <div class="d-flex justify-content-end">
@@ -314,17 +314,53 @@
             </div>
 
         </form>
+    </x-content-box>
 
-        <x-content-section>
+    <x-content-box title="Ďalšie možnosti">
+        <x-content-section title="Poznámka pre administrátora">
+            <x-slot:description>
+                Tu môžete k pracovnej ceste pridať poznámku pre administrátora, ktorý bude upozornený mailom, poznámka zostane viditeľná aj pre Vás.
+            </x-slot:description>
             <form method="POST" action="/trips/{{ $trip->id }}/">
                 @csrf
-                <x-textarea name="note"></x-textarea>
-                <x-button>Pridať poznámku</x-button>
+                <div class="form-row align-items-end">
+                    <div class="col-9">
+                        <x-textarea name="note" label="Poznámka"></x-textarea>
+                    </div>
+                    <div class="col-3 my-3 ">
+                        <x-button>Pridať poznámku</x-button>
+                    </div>
+                </div>
             </form>
         </x-content-section>
 
-        <x-content-section title="Dokumenty">
+        <x-content-section title="Žiadosť o storno">
+            <x-slot:description>
+                Môžete požiadať o storno pracovnej cesty, musíte však uviesť dôvod storna. Cesta bude stornovaná až po schválení administrátorom.
+            </x-slot:description>
+            <form method="POST" action="/trips/{{ $trip->id }}/">
+                @csrf
+                <div class="form-row align-items-end">
+                    <div class="col-9">
+                        <x-textarea name="cancellation_reason" label="Dôvod storna"></x-textarea>
+                    </div>
+                    <div class="col-3 my-3">
+                        <x-button color="btn-danger">Odoslať žiadosť</x-button>
+                    </div>
+                </div>
+            </form>
+        </x-content-section>
 
+        <x-content-section title="Dokumenty na stiahnutie">
+            <div>
+                <div>
+                    <a href="/export/{{ $trip->id }}?fileType=" class="text-decoration-none text-dark">
+                        <i class="fa-solid fa-file-pdf fa-2xl"></i>
+                        <div>Správa zo zahraničnej pracovnej cesty</div>
+                    </a>
+                </div>
+
+            </div>
         </x-content-section>
 
     </x-content-box>
