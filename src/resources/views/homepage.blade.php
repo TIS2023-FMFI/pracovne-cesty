@@ -9,8 +9,8 @@
     <div class="mb-4">
         <x-link-button href="/trips/create">Pridať tuzemskú cestu</x-link-button>
         <x-link-button href="/trips/create">Pridať zahraničnú cestu</x-link-button>
-        <x-button color="btn-danger" event="open-add-users">Pridať používateľov</x-button>
-        <x-link-button href="/spp">ŠPP prvky</x-link-button>
+        <x-button color="danger" event="open-add-users">Pridať používateľov</x-button>
+        <x-link-button color="danger" href="/spp">ŠPP prvky</x-link-button>
         <x-button event="open-register-form">Registrácia</x-button>
     </div>
 
@@ -19,35 +19,38 @@
 
 
     <div class="row">
-        <x-content-box title="Prehľad" class="col-md-4">
-            <x-overview-item content="Najnovšie" reference="/?filter=newest"/>
-            <x-overview-item content="Nepotvrdené" reference="/?filter=unconfirmed"/>
-            <x-overview-item content="Nevyúčtované" reference="/?filter=unaccounted"/>
-            <x-overview-item/>
+        <div class="col-md-4">
+            <x-content-box title="Prehľad">
+                <x-overview-item content="Najnovšie" reference="/?filter=newest"/>
+                <x-overview-item content="Nepotvrdené" reference="/?filter=unconfirmed"/>
+                <x-overview-item content="Nevyúčtované" reference="/?filter=unaccounted"/>
+                <x-overview-item/>
 
-            @foreach($users as $user)
-                <x-overview-item :content="$user->first_name.' '.$user->last_name" :reference="'users/'.$user->id"></x-overview-item>
-            @endforeach
+                @foreach($users as $user)
+                    <x-overview-item :content="$user->first_name.' '.$user->last_name" :reference="'users/'.$user->id"></x-overview-item>
+                @endforeach
+            </x-content-box>
+        </div>
 
 
-        </x-content-box>
+        <div class="col-md-8">
+            <x-content-box title="Pracovné cesty" >
+                @foreach($trips as $trip)
+                    @php
+                        $user = $trip->user;
+                        $fullName = $user->first_name.' '.$user->last_name;
+                        $sofiaId = $trip->sofia_id == null ? '0000' : $trip->sofia_id;
+                        $dates = $trip->datetime_start->format('d.m.Y').'-'.$trip->datetime_end->format('d.m.Y');
+                    @endphp
+                    <x-content-item :id="$trip->id" :sofia-id="$sofiaId" :state="$trip->state" :user="$fullName" :place="$trip->place" :purpose="$trip->tripPurpose->name" :date="$dates"/>
+                @endforeach
 
+                    <div class="d-flex justify-content-end">
+                    {{$trips->links()}}
+                </div>
+            </x-content-box>
+        </div>
 
-        <x-content-box title="Pracovné cesty" class="col-md-8">
-            @foreach($trips as $trip)
-                @php
-                    $user = $trip->user;
-                    $fullName = $user->first_name.' '.$user->last_name;
-                    $sofiaId = $trip->sofia_id == null ? '0000' : $trip->sofia_id;
-                    $dates = $trip->datetime_start->format('d.m.Y').'-'.$trip->datetime_end->format('d.m.Y');
-                @endphp
-                <x-content-item :id="$trip->id" :sofia-id="$sofiaId" :state="$trip->state" :user="$fullName" :place="$trip->place" :purpose="$trip->tripPurpose->name" :date="$dates"/>
-            @endforeach
-            <div class="d-flex justify-content-end">
-                {{$trips->links()}}
-            </div>
-
-        </x-content-box>
     </div>
 
 
