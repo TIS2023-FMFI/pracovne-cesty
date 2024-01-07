@@ -1,0 +1,11 @@
+.header-top-panel {
+    background-color: rgba(0, 0, 0, 0.5); /* Change the alpha value (0.5) for the desired transparency */
+}
+
+.header-h1 {
+}
+
+.header {
+    background-image: url(https://pritomnost.dai.fmph.uniba.sk/image/dai-header80.jpg);
+
+}
