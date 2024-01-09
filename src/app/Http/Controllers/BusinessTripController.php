@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use mikehaertl\pdftk\Pdf;
+use App\Models\BusinessTrip;
+use App\Enums\DocumentType;
 
 class BusinessTripController extends Controller
 {
@@ -77,4 +80,36 @@ class BusinessTripController extends Controller
     public function close() {
 
     }
+    public function exportPdf(Request $request, $tripId, $documentType)
+    {
+        $trip = BusinessTrip::find($tripId);
+        if (!$trip && $tripId != 0) {
+            return response()->json(['error' => 'Business trip not found'], 404);
+        }
+
+        $templatePath = storage_path('app/pdf_templates/' . DocumentType::from($documentType)->value);
+
+        $pdf = new Pdf($templatePath);
+
+        $outputPath = storage_path('app/output_pdf/' . 'output_' . time() . '.pdf');
+
+        $data = [];
+        switch ($documentType) {
+            case DocumentType::FOREIGN_TRIP_AFFIDAVIT:
+                $data = [
+                    'numberOfCommand' => '123', // Príklad hodnoty, nahraďte reálnymi údajmi
+                    'totalTime' => '48 hodín', // Príklad hodnoty, nahraďte reálnymi údajmi
+                    'placeOfResidence' => $trip->destination, // Predpokladáme, že destinácia cesty je miesto pobytu
+                    'nameOfDeclarator' => $trip->user->name, // Meno používateľa z modelu BusinessTrip
+                ];
+                break;
+        }
+
+        $pdf->fillForm($data)
+            ->flatten()
+            ->saveAs($outputPath);
+
+        return response()->download($outputPath)->deleteFileAfterSend(true);
+    }
+
 }
