@@ -189,6 +189,20 @@ class BusinessTrip extends Model
     }
 
     /**
+     * Get all business trips in the specified state
+     *
+     * @param TripState $state
+     * @param array|string $columns
+     * @return Collection
+     */
+    protected static function getByState(TripState $state, array|string $columns = ['*']): Collection
+    {
+        return self::select($columns)
+            ->where('state', $state)
+            ->get();
+    }
+
+    /**
      * Get all the unconfirmed business trips from the database
      *
      * @param array|string $columns
@@ -196,9 +210,7 @@ class BusinessTrip extends Model
      */
     public static function unconfirmed(array|string $columns = ['*']): Collection
     {
-        return self::select($columns)
-            ->where('state', TripState::NEW)
-            ->get();
+        return self::getByState(TripState::NEW);
     }
 
     /**
@@ -210,13 +222,11 @@ class BusinessTrip extends Model
      */
     public static function unaccounted(array|string $columns = ['*']): Collection
     {
-        return self::select($columns)
-            ->where('state', TripState::COMPLETED)
-            ->get();
+        return self::getByState(TripState::COMPLETED);
     }
 
     /**
-     * Get all the business trips of the specified type
+     * Get all business trips of the specified type
      *
      * @param TripType $type
      * @param array|string $columns
