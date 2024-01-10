@@ -23,7 +23,10 @@ return new class extends Migration {
 
             // General details
             $table->foreignIdFor(User::class);
+
+            $table->unsignedSmallInteger('type');
             $table->foreignIdFor(Country::class);
+
             $table->foreignIdFor(Transport::class);
 
             $table->string('place', 200);
