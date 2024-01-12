@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\TripState;
+use App\Enums\TripType;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -14,6 +15,7 @@ class BusinessTrip extends Model
     use HasFactory;
 
     protected $casts = [
+        'type' => TripType::class,
         'state' => TripState::class,
 
         'datetime_start' => 'datetime',
@@ -187,6 +189,20 @@ class BusinessTrip extends Model
     }
 
     /**
+     * Get all business trips in the specified state
+     *
+     * @param TripState $state
+     * @param array|string $columns
+     * @return Collection
+     */
+    protected static function getByState(TripState $state, array|string $columns = ['*']): Collection
+    {
+        return self::select($columns)
+            ->where('state', $state)
+            ->get();
+    }
+
+    /**
      * Get all the unconfirmed business trips from the database
      *
      * @param array|string $columns
@@ -194,9 +210,7 @@ class BusinessTrip extends Model
      */
     public static function unconfirmed(array|string $columns = ['*']): Collection
     {
-        return self::select($columns)
-            ->where('state', TripState::NEW)
-            ->get();
+        return self::getByState(TripState::NEW);
     }
 
     /**
@@ -208,8 +222,42 @@ class BusinessTrip extends Model
      */
     public static function unaccounted(array|string $columns = ['*']): Collection
     {
+        return self::getByState(TripState::COMPLETED);
+    }
+
+    /**
+     * Get all business trips of the specified type
+     *
+     * @param TripType $type
+     * @param array|string $columns
+     * @return Collection
+     */
+    protected static function getByType(TripType $type, array|string $columns = ['*']): Collection
+    {
         return self::select($columns)
-            ->where('state', TripState::COMPLETED)
+            ->where('type', $type)
             ->get();
+    }
+
+    /**
+     * Get domestic business trips
+     *
+     * @param array|string $columns
+     * @return Collection
+     */
+    public static function domestic(array|string $columns = ['*']): Collection
+    {
+        return self::getByType(TripType::DOMESTIC, $columns);
+    }
+
+    /**
+     * Get foreign business trips
+     *
+     * @param array|string $columns
+     * @return Collection
+     */
+    public static function foreign(array|string $columns = ['*']): Collection
+    {
+        return self::getByType(TripType::FOREIGN, $columns);
     }
 }
