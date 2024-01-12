@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\BusinessTripController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -46,4 +47,23 @@ Route::controller(BusinessTripController::class)
 
         // TODO: How to show index?
         // TODO: Cancel, confirm, close under a single route?
+    });
+
+// User management
+// TODO: Decide which middleware to use where
+Route::controller(UserController::class)
+    ->group(static function () {
+        // Log user in
+        // Intended for the login button
+        Route::post('/', 'authenticate');
+
+        // Log user out
+        Route::post('/logout', 'logout')
+            ->middleware('auth');
+
+        // Show the register form
+        Route::get('/register', 'create')
+            ->middleware('auth');
+
+        // TODO: Invite?
     });
