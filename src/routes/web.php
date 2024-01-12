@@ -19,7 +19,7 @@ Route::get('/', static function () {
     return view('homepage');
 });
 
-// Group of routes using BusinessTripController
+// Business trip management
 Route::controller(BusinessTripController::class)
     // Requests must be authenticated
     ->middleware('auth')
@@ -45,4 +45,5 @@ Route::controller(BusinessTripController::class)
         Route::put('/{trip}', 'update');
 
         // TODO: How to show index?
+        // TODO: Cancel, confirm, close under a single route?
     });
