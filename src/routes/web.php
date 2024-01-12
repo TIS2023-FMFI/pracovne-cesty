@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\BusinessTripController;
+use App\Http\Controllers\SPPController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -66,4 +67,17 @@ Route::controller(UserController::class)
             ->middleware('auth');
 
         // TODO: Invite?
+    });
+
+// SPP management
+Route::controller(SPPController::class)
+    ->middleware('auth')
+    ->prefix('spp')
+    ->group(static function () {
+        // Save a newly created SPP symbol
+        // Intended for the submit button in the SPP form
+        Route::post('/', 'store');
+
+        // Deactivate an SPP symbol
+        Route::post('/{spp}/dactivate', 'deactivate');
     });
