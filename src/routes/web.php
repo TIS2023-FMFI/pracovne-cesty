@@ -78,6 +78,9 @@ Route::controller(SPPController::class)
         // Intended for the submit button in the SPP form
         Route::post('/', 'store');
 
+        // Show the SPP management form
+        Route::get('/{spp}', 'manage');
+
         // Deactivate an SPP symbol
-        Route::post('/{spp}/dactivate', 'deactivate');
+        Route::post('/{spp}/deactivate', 'deactivate');
     });
