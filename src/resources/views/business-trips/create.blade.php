@@ -3,12 +3,17 @@
     use App\Models\Transport;
     use App\Models\TripPurpose;
     use App\Models\Contribution;
-    use App\Models\SppSymbol;;
+    use App\Models\SppSymbol;
+    use App\Enums\UserType;
+
     $countries = Country::all()->pluck('name', 'id')->toArray();
     $transports = Transport::all()->pluck('name', 'id')->toArray();
     $purposes = TripPurpose::all()->pluck('name', 'id')->toArray();;
     $contributions = Contribution::all()->pluck('name', 'id')->toArray();
-    $spp_symbols = SppSymbol::all()->pluck('spp_symbol', 'id')->toArray();;
+    $spp_symbols = SppSymbol::all()->pluck('spp_symbol', 'id')->toArray();
+
+//    $userType = auth()->user()->user_type;
+
 @endphp
 
 <x-layout>
@@ -107,6 +112,7 @@
                     </div>
                 </x-content-section>
 
+{{--            @if($userType == UserType::STUDENT || $userType == UserType::EXTERN)--}}
             <x-content-section title="Prínos pre fakultu">
                 @foreach($contributions as $id => $name)
                     <div class="input-group mb-3">
@@ -119,8 +125,8 @@
                         <input type="text" name="contribution_{{ $id }}_detail" class="form-control">
                     </div>
                 @endforeach
-
             </x-content-section>
+{{--            @endif--}}
 
             <x-content-section title="Financovanie" x-data="{reimbursementShow: false}">
                 <x-slot:description>

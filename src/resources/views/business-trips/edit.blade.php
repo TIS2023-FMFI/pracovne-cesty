@@ -345,7 +345,7 @@
                         <x-textarea name="cancellation_reason" label="Dôvod storna"></x-textarea>
                     </div>
                     <div class="col-3 my-3">
-                        <x-button color="btn-danger">Odoslať žiadosť</x-button>
+                        <x-button color="danger">Odoslať žiadosť</x-button>
                     </div>
                 </div>
             </form>
