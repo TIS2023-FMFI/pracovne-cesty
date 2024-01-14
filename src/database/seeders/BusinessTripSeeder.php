@@ -23,7 +23,7 @@ class BusinessTripSeeder extends Seeder
                 'travelling_expense_id' => 5 * $sequence->index + 2,
                 'other_expense_id' => 5 * $sequence->index + 3,
                 'advance_expense_id' => 5 * $sequence->index + 4,
-                'allowance_id' => 5 * $sequence->index + 5,
+                'allowance_expense_id' => 5 * $sequence->index + 5,
             ])
             ->create();
     }

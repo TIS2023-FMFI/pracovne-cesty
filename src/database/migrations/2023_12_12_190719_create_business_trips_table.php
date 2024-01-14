@@ -23,7 +23,10 @@ return new class extends Migration {
 
             // General details
             $table->foreignIdFor(User::class);
+
+            $table->unsignedSmallInteger('type');
             $table->foreignIdFor(Country::class);
+
             $table->foreignIdFor(Transport::class);
 
             $table->string('place', 200);
@@ -70,7 +73,7 @@ return new class extends Migration {
             $table->foreignIdFor(Expense::class, 'advance_expense_id')
                 ->nullable()
                 ->unique();
-            $table->foreignIdFor(Expense::class, 'allowance_id')
+            $table->foreignIdFor(Expense::class, 'allowance_expense_id')
                 ->nullable()
                 ->unique();
 

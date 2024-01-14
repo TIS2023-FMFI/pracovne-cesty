@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Enums\TripState;
+use App\Enums\TripType;
 use App\Models\BusinessTrip;
 use App\Models\Country;
 use App\Models\SppSymbol;
@@ -40,7 +41,10 @@ class BusinessTripFactory extends Factory
 
         return [
             'user_id' => User::all()->random()->id,
+
+            'type' => fake()->randomElement(TripType::cases()),
             'country_id' => Country::all()->random()->id,
+
             'transport_id' => Transport::all()->random()->id,
 
             'place' => fake()->city(),
@@ -79,7 +83,7 @@ class BusinessTripFactory extends Factory
             'travelling_expense_id' => null,
             'other_expense_id' => null,
             'advance_expense_id' => null,
-            'allowance_id' => null,
+            'allowance_expense_id' => null,
 
             'not_reimbursed_meals' => '',
             'meals_reimbursement' => fake()->boolean(),
