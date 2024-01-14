@@ -18,21 +18,15 @@ class SynchronizationController extends Controller
      */
     public function syncUsers(): void
     {
-        /**
-         * Get all users from the database Pritomnost
-         */
+        //Get all users from the database Pritomnost
         $pritomnostUsers = PritomnostUser::all();
 
         foreach ($pritomnostUsers as $pritomnostUser) {
-            /**
-             * Check if the user exists in the database Cesty
-             */
+            //Check if the user exists in the database Cesty
             $cestyUser = User::where('personal_id', $pritomnostUser->personal_id)->first();
 
             if ($cestyUser) {
-                /**
-                 * Update user details in the Cesty database based on the Pritomnost database
-                 */
+                //Update user details in the Cesty database based on the Pritomnost database
                 $cestyUser->update([
                     'personal_id' => $pritomnostUser->personal_id,
                     'username' => $pritomnostUser->username,
@@ -42,14 +36,10 @@ class SynchronizationController extends Controller
                     'email' => $pritomnostUser->email,
                     'status' => $pritomnostUser->status,
                     'last_login' => $pritomnostUser->last_login,
-                    /**
-                     * Other values are not defined
-                     */
+                    //Other values are not defined
                 ]);
             } else {
-                /**
-                 * User doesn't exist in the Pritomnost database, create them
-                 */
+                //User doesn't exist in the Pritomnost database, create them
                 User::create([
                     'personal_id' => $pritomnostUser->personal_id,
                     'username' => $pritomnostUser->username,
@@ -59,9 +49,7 @@ class SynchronizationController extends Controller
                     'email' => $pritomnostUser->email,
                     'status' => $pritomnostUser->status,
                     'last_login' => $pritomnostUser->last_login,
-                    /**
-                     * Other values are not defined
-                     */
+                    //Other values are not defined
                 ]);
             }
         }
@@ -74,15 +62,11 @@ class SynchronizationController extends Controller
      */
     public function syncBusinessTrips(): void
     {
-        /**
-         * Get all business trips from the database Cesty
-         */
+        //Get all business trips from the database Cesty
         $businessTrips = BusinessTrip::all();
 
         foreach ($businessTrips as $businessTrip) {
-            /**
-             * Check if the absence already exists in the database Pritomnost
-             */
+            //Check if the absence already exists in the database Pritomnost
             $existingAbsence = PritomnostAbsence::where([
                 'user_id' => $businessTrip->user_id,
                 'from_time' => $businessTrip->datetime_start,
@@ -91,16 +75,12 @@ class SynchronizationController extends Controller
             ])->first();
 
             if (!$existingAbsence) {
-                /**
-                 * Create absence record in the database Pritomnost
-                 */
+                //Create absence record in the database Pritomnost
                 PritomnostAbsence::create([
                     'user_id' => $businessTrip->user_id,
                     'from_time' => $businessTrip->datetime_start,
                     'to_time' => $businessTrip->datetime_end,
-                    /**
-                     * Other values are not defined
-                     */
+                    //Other values are not defined
                 ]);
             }
         }
