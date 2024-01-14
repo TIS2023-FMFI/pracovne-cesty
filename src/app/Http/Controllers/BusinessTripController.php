@@ -45,6 +45,43 @@ class BusinessTripController extends Controller
      * Sending mail with mail component to admin
      */
     public function store(Request $request) {
+        $validatedData = $request->validate([
+            //Add more fields and validation rules
+            'place' => 'required|varchar|max:200',
+            'datetime_start' => 'required|datetime',
+        ]);
+
+        //Logic to store the trip based on the validated data
+        //Need to check field names
+        $trip = new BusinessTrip($validatedData);
+
+        //Handle file uploads
+        if ($request->hasFile('file-upload-id')) {
+            $file = $request->file('file-upload-id');
+
+            //Store the file in the storage/app/trips directory
+            $upload_name = $file->storeAs('trips', 'trip_' . $trip->id . '.' . $file->extension());
+
+            //Save the file path in the model
+            $trip->upload_name = $upload_name;
+
+            //Save the model to the DB
+            $trip->save();
+        }
+
+        //Sending mails
+
+        $message = '';
+        $recipient = 'admin@example.com';
+        $viewTemplate = 'emails.new_trip_admin';
+
+        // Create an instance of the SimpleMail class
+        $email = new SimpleMail($message, $recipient, $viewTemplate);
+
+        // Send the email
+        Mail::to($recipient)->send($email);
+
+        //Redirecting to the homepage
         return redirect()->route('components.homepage');
 
     }
@@ -110,7 +147,7 @@ class BusinessTripController extends Controller
     public function close(BusinessTrip $trip) {
         //Close the trip
         $trip->update(['state' => 'closed']);
-        
+
         return redirect()->route('business-trips.show', $trip);
 
     }
