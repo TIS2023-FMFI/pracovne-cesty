@@ -18,37 +18,37 @@ class SynchronizationController extends Controller
      */
     public function syncUsers(): void
     {
-        //Get all users from the database Pritomnost
-        $pritomnostUsers = PritomnostUser::all();
+        // Use LEFT JOIN to check if the user exists in the Cesty database
+        $usersToSync = PritomnostUser::leftJoin('cesty.users', 'cesty.users.personal_id', '=', 'pritomnost.users.personal_id')
+            ->select('pritomnost.users.*', 'cesty.users.id as cesty_user_id')
+            ->get();
 
-        foreach ($pritomnostUsers as $pritomnostUser) {
+        foreach ($usersToSync as $user) {
             //Check if the user exists in the database Cesty
-            $cestyUser = User::where('personal_id', $pritomnostUser->personal_id)->first();
-
-            if ($cestyUser) {
+            if ($user->cesty_user_id) {
                 //Update user details in the Cesty database based on the Pritomnost database
-                $cestyUser->update([
-                    'personal_id' => $pritomnostUser->personal_id,
-                    'username' => $pritomnostUser->username,
-                    'password' => $pritomnostUser->password,
-                    'first_name' => $pritomnostUser->name,
-                    'last_name' => $pritomnostUser->surname,
-                    'email' => $pritomnostUser->email,
-                    'status' => $pritomnostUser->status,
-                    'last_login' => $pritomnostUser->last_login,
+                User::where('id', $user->cesty_user_id)->update([
+                    'personal_id' => $user->personal_id,
+                    'username' => $user->username,
+                    'password' => $user->password,
+                    'first_name' => $user->name,
+                    'last_name' => $user->surname,
+                    'email' => $user->email,
+                    'status' => $user->status,
+                    'last_login' => $user->last_login,
                     //Other values are not defined
                 ]);
             } else {
-                //User doesn't exist in the Pritomnost database, create them
+                //User doesn't exist in the Cesty database, create them
                 User::create([
-                    'personal_id' => $pritomnostUser->personal_id,
-                    'username' => $pritomnostUser->username,
-                    'password' => $pritomnostUser->password,
-                    'first_name' => $pritomnostUser->name,
-                    'last_name' => $pritomnostUser->surname,
-                    'email' => $pritomnostUser->email,
-                    'status' => $pritomnostUser->status,
-                    'last_login' => $pritomnostUser->last_login,
+                    'personal_id' => $user->personal_id,
+                    'username' => $user->username,
+                    'password' => $user->password,
+                    'first_name' => $user->name,
+                    'last_name' => $user->surname,
+                    'email' => $user->email,
+                    'status' => $user->status,
+                    'last_login' => $user->last_login,
                     //Other values are not defined
                 ]);
             }
