@@ -100,6 +100,29 @@ class BusinessTripController extends Controller
      * Sending mail with mail component to admin
      */
     public function update(Request $request, BusinessTrip $trip) {
+        //Validate data
+        $validatedData = $request->validate([
+            //Add check if user is admin/not
+            //Add more fields and validation rules
+            'place' => 'required|varchar|max:200',
+            'datetime_start' => 'required|datetime',
+        ]);
+
+        //Update the trip based on the validated data
+        $trip->update($validatedData);
+
+        //Sending mails
+
+        $message = '';
+        $recipient = 'admin@example.com';
+        $viewTemplate = 'emails.new_trip_admin';
+
+        // Create an instance of the SimpleMail class
+        $email = new SimpleMail($message, $recipient, $viewTemplate);
+
+        // Send the email
+        Mail::to($recipient)->send($email);
+
         return redirect()->route('business-trips.edit', $trip);
 
     }
