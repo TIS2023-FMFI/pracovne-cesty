@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use mikehaertl\pdftk\Pdf;
 use App\Models\BusinessTrip;
 use App\Enums\DocumentType;
+use Illuminate\Support\Facades\Log;
 
 class BusinessTripController extends Controller
 {
@@ -80,7 +81,7 @@ class BusinessTripController extends Controller
     public function close() {
 
     }
-    public function exportPdf(Request $request, $tripId, $documentType)
+    public function exportPdf($tripId, $documentType)
     {
         $trip = BusinessTrip::find($tripId);
         if (!$trip && $tripId != 0) {
@@ -88,28 +89,192 @@ class BusinessTripController extends Controller
         }
 
         $templatePath = storage_path('app/pdf_templates/' . DocumentType::from($documentType)->value);
-
-        $pdf = new Pdf($templatePath);
+        $templatePath = str_replace('\\', '/', $templatePath);
+        if (!file_exists($templatePath)) {
+            Log::error("PDF template file does not exist at path: " . $templatePath);
+            return response()->json(['error' => 'PDF template file not found'], 404);
+        }
 
         $outputPath = storage_path('app/output_pdf/' . 'output_' . time() . '.pdf');
+        $outputPath = str_replace('\\', '/', $outputPath);
+        $outputDir = dirname($outputPath);
+
+        if (!file_exists($outputDir)) {
+            mkdir($outputDir, 0777, true);
+        }
 
         $data = [];
         switch ($documentType) {
-            case DocumentType::FOREIGN_TRIP_AFFIDAVIT:
+            case 'cestne_vyhlasenie_k_zahranicnej_pc.pdf':
                 $data = [
-                    'numberOfCommand' => '123', // Príklad hodnoty, nahraďte reálnymi údajmi
-                    'totalTime' => '48 hodín', // Príklad hodnoty, nahraďte reálnymi údajmi
-                    'placeOfResidence' => $trip->destination, // Predpokladáme, že destinácia cesty je miesto pobytu
-                    'nameOfDeclarator' => $trip->user->name, // Meno používateľa z modelu BusinessTrip
+                    'order_number' => $trip->sofia_id ?? 'N/A',
+                    'trip_duration' => '?', //$trip->'?', // tu potrebujem pomôcť, ktorý stĺpec z databázy to je
+                    'adress' => $trip->place,
+                    'name' => $trip->user->first_name . ' ' . $trip->user->last_name,
                 ];
                 break;
+            case DocumentType::COMPENSATION_AGREEMENT:
+                $data = [
+                    'first_name' => $trip->user->first_name,
+                    'last_name' => $trip->user->last_name,
+                    'academic_degree' => $trip->user->academic_degrees,
+                    'address' => $trip->user->address,
+                    'contribution1' => '?', // v databáze neexistuje prepojenie na tabuľku s prínosmi pre fakultu
+                    'contribution2' => '?', // -||-
+                    'contribution3' => '?', // -||-
+                    'department' => $trip->user->department,
+                    'place' => $trip->country->name . ', ' . $trip->place,
+                    'datetime_start' => $trip->datetime_start->format('Y-m-d'),
+                    'datetime_end' => $trip->datetime_end->format('Y-m-d'),
+                    'transport' => $trip->transport->name,
+                    'trip_purpose' => $trip->tripPurpose->name,
+                    'fund' => $trip->sppSymbol->fund,
+                    'functional_region' => $trip->sppSymbol->functional_region,
+                    'financial_centre' => $trip->sppSymbol->financial_centre,
+                    'spp_symbol' => $trip->sppSymbol->spp_symbol,
+                    'account' => $trip->sppSymbol->account,
+                    'grantee' => $trip->sppSymbol->grantee,
+                    'iban' => $trip->iban,
+                    'bank_name' => '?',
+                    'incumbent_name2' => '?', // sem sa bude dopĺnať meno a priezvisko z tabuľky staff
+                    'incumbent_name1' => '?', // -||-
+                    'position_name1' => '?',  // -||-
+                    'position_name2' => '?',  // -||-
+                    'contribution1_text' => '?', // v databáze neexistuje prepojenie na tabuľku s prínosmi pre fakultu
+                    'contribution2_text' => '?', // -||-
+                    'contribution3_text' => '?', // -||-
+                ];
+                break;
+            case DocumentType::CONTROL_SHEET:
+                $data = [
+                    'spp_symbol' => $trip->sppSymbol->spp_symbol,
+                    'expense_estimation' => $trip->expense_estimation,
+                    'incumbent_name1' => '?', // to isté čo v COMPENSATION_AGREEMENT, dopĺňanie z tabuľky staff
+                    'incumbent_name2' => '?', // -||-
+                    'incumbent_name3' => '?', // -||-
+                    'source1' => $trip->sppSymbol->fund, // niesom si istý, či zdroj je fund
+                    'source2' => $trip->sppSymbol->fund,
+                    'source3' => $trip->sppSymbol->fund,
+                    'functional_region1' => $trip->sppSymbol->functional_region,
+                    'functional_region2' => $trip->sppSymbol->functional_region,
+                    'functional_region3' => $trip->sppSymbol->functional_region,
+                    'spp_symbol1' => $trip->sppSymbol->spp_symbol,
+                    'spp_symbol2' => $trip->sppSymbol->spp_symbol,
+                    'spp_symbol3' => $trip->sppSymbol->spp_symbol,
+                    'financial_centre1' => $trip->sppSymbol->financial_centre,
+                    'financial_centre2' => $trip->sppSymbol->financial_centre,
+                    'financial_centre3' => $trip->sppSymbol->financial_centre,
+                    'incumbent_name4' => '?', // to čo vyššie
+                    'incumbent_name5' => '?',
+                    'purpose_details' => $trip->purpose_details,
+                ];
+                break;
+            case DocumentType::PAYMENT_ORDER:
+                $data = [
+                    'advance_amount_string' => '?', // niesom si istý či máme pre toto vytvorený stĺpec
+                    'advance_amount' => $trip->advanceExpense ? $trip->advanceExpense->amount_eur : null,
+                    'grantee' => $trip->sppSymbol->grantee,
+                    'address' => $trip->user->address,
+                    'incumbent_name' => '?', // to isté čo v COMPENSATION_AGREEMENT, dopĺňanie z tabuľky staff
+                    'source' => $trip->sppSymbol->fund,
+                    'functional_region' => $trip->sppSymbol->functional_region,
+                    'spp_symbol' => $trip->sppSymbol->spp_symbol,
+                    'financial_centre' => $trip->sppSymbol->functional_region,
+                    'iban' => $trip->iban,
+                ];
+                break;
+            case DocumentType::DOMESTIC_REPORT:
+                $data = [
+                    'name' => $trip->user->first_name . ' ' . $trip->user->last_name,
+                    'department' => $trip>user->department,
+                    'date_start' => $trip->datetime_start->format('Y-m-d'),
+                    'date_end' => $trip->datetime_end->format('Y-m-d'),
+                    'spp_symbol' => $trip->spp_symbols->spp_symbol,
+                    'time_start' => $trip->datetime_start->format('H:i'),
+                    'time_end' => $trip->datetime_end->format('H:i'),
+                    'transport' => $trip->transport->name,
+                    'travelling_expense' => $trip->travellingExpense ? $trip->travellingExpense->amount_eur : null,
+                    'accommodation_expense' => $trip->accommodationExpense ? $trip->accommodationExpense->amount_eur : null,
+                    'other_expenses' => $trip->otherExpense ? $trip->otherExpense->amount_eur : null,
+                    'allowance' => $trip->allowanceExpense ? $trip->allowanceExpense->amount_eur : null,
+                    'expenses' => '?', // neviem ktorý stĺpec predstavuje celkové náklady na cestu
+                    'conclusion' => $trip->conclusion,
+                    'iban_foreign' => '?', // tu všade kde je otáznik, potrebujem pomôcť
+                    'bank_address' => '?',
+                    'iban' => $trip->iban,
+                    'address' => $trip->user->address,
+                    'swift' => '?',
+                    'place' => '?',
+                    'meals_reimbursement_DG42' => '?',
+                    'conclusion_MESS' => '?',
+                ];
+                break;
+            case DocumentType::FOREIGN_REPORT:
+                $data = [
+                    'name' => $trip->user->first_name . ' ' . $trip->user->last_name,
+                    'department' => $trip->user->department,
+                    'country' => $trip->country->name,
+                    'datetime_end' => $trip->datetime_end->format('Y-m-d H:i'),
+                    'datetime_start' => $trip->datetime_start->format('Y-m-d H:i'),
+                    'datetime_border_crossing_start' => $trip->datetime_border_crossing_start->format('Y-m-d H:i'),
+                    'datetime_border_crossing_end' => $trip->datetime_border_crossing_end->format('Y-m-d H:i'),
+                    'place' => $trip->place,
+                    'spp_symbol' => $trip->sppSymbol->spp_symbol,
+                    'transport' => $trip->transport->name,
+                    'travelling_expense_foreign' => $trip->travellingExpense ? $trip->travellingExpense->amount_foreign : null,
+                    'travelling_expense' => $trip->travellingExpense ? $trip->travellingExpense->amount_eur : null,
+                    'accommodation_expense_foreign' => $trip->accommodationExpense ? $trip->accommodationExpense->amount_foreign : null,
+                    'accommodation_expense' => $trip->accommodationExpense ? $trip->accommodationExpense->amount_eur : null,
+                    'meals_reimbursement_foreign' => '?', // toto máme uložené v databáze len ako 1 alebo 0
+                    'allowance_foreign' => $trip->allowanceExpense ? $trip->allowanceExpense->amount_foreign : null,
+                    'allowance' => $trip->allowanceExpense ? $trip->allowanceExpense->amount_eur : null,
+                    'meals_reimbursement' => '?', // to isté ako pri meals_reimbursement_foreign
+                    'other_expenses_foreign' => $trip->otherExpense ? $trip->otherExpense->amount_foreign : null,
+                    'other_expenses' => $trip->otherExpense ? $trip->otherExpense->amount_eur : null,
+                    'expenses_foreign' => '?', // opäť neviem nájsť stĺpec ktorý predstavuje celkové náklady
+                    'expenses' => '?', // -||-
+                    'conclusion' => $trip->conclusion,
+                    'bank_code' => '?',
+                    'iban' => $trip->iban,
+                    'advance_expense_foreign' => $trip->advanceExpense ? $trip->advanceExpense->amount_foreign : null,
+                    'invitation_case_charges' => '?',   // neviem ktorý riadok predstavuje odhadnutie preplatených
+                                                        // výdavkov v prípade pozvania druhou stranou
+                ];
+                break;
+            default:
+                return response()->json(['error' => 'Unknown document type'], 400);
         }
 
-        $pdf->fillForm($data)
-            ->flatten()
-            ->saveAs($outputPath);
+        try {
+            Log::info("Creating PDF object with template path: " . $templatePath);
+            $pdf = new Pdf($templatePath);
+        } catch (\Exception $e) {
+            Log::error("Error creating PDF object: " . $e->getMessage());
+            return response()->json(['error' => 'Failed to create PDF object: ' . $e->getMessage()], 500);
+        }
+        try {
+            Log::info("Filling form with data: " . json_encode($data));
+            $pdf->fillForm($data);
 
-        return response()->download($outputPath)->deleteFileAfterSend(true);
+            Log::info("Starting PDF generation for path: " . $outputPath);
+
+            Log::info("Flattening PDF");
+            $pdf->flatten();
+
+            Log::info("Saving PDF to path: " . $outputPath);
+            $pdf->saveAs($outputPath);
+        }
+        catch (\Exception $e) {
+                Log::error("Error during PDF manipulation: " . $e->getMessage());
+                return response()->json(['error' => 'Failed during PDF manipulation: ' . $e->getMessage()], 500);
+            }
+        Log::info("PDF generation completed, checking file existence...");
+        if (file_exists($outputPath)) {
+            Log::info("PDF generation successful, file exists at path: " . $outputPath);
+            return response()->download($outputPath)->deleteFileAfterSend(true);
+        } else {
+            Log::error("PDF file does not exist after generation: " . $outputPath);
+            return response()->json(['error' => 'Failed to generate PDF, file not found'], 500);
+        }
     }
-
 }

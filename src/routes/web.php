@@ -16,7 +16,7 @@ use App\Http\Controllers\BusinessTripController;
 */
 Route::get('/test-export-pdf', function () {
     $controller = new BusinessTripController();
-    return $controller->exportPdf(request(), 0, 'cestne_vyhlasenie_k_zahranicnej_pc.pdf'); // Nahraďte 1 skutočným ID pracovnej cesty
+    return $controller->exportPdf(0, 'cestne_vyhlasenie_k_zahranicnej_pc.pdf');
 });
 
 
