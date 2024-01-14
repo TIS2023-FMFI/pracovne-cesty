@@ -56,6 +56,8 @@
         <footer>
             <p>Projekt tímu z Tvorby informačných systémov pre Katedru aplikovanej informatiky FMFI, 2023</p>
         </footer>
+
+        <x-flash-message />
     </body>
 
 </html>
