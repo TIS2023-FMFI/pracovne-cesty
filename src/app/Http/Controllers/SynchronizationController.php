@@ -62,20 +62,20 @@ class SynchronizationController extends Controller
      */
     public function syncBusinessTrips(): void
     {
-        //Get all business trips from the database Cesty
-        $businessTrips = BusinessTrip::all();
+        // Use LEFT JOIN to check if the absence already exists in the Pritomnost database
+        $businessTripsToSync = BusinessTrip::leftJoin('pritomnost.absences', function ($join) {
+            $join->on('absences.user_id', '=', 'business_trips.user_id')
+                ->where('absences.from_time', '=', 'business_trips.datetime_start')
+                ->where('absences.to_time', '=', 'business_trips.datetime_end')
+                ->where('absences.type', '=', PritomnostAbsenceType::BUSINESS_TRIP);
+        })
+            ->select('business_trips.*', 'absences.id as absence_id')
+            ->get();
 
-        foreach ($businessTrips as $businessTrip) {
-            //Check if the absence already exists in the database Pritomnost
-            $existingAbsence = PritomnostAbsence::where([
-                'user_id' => $businessTrip->user_id,
-                'from_time' => $businessTrip->datetime_start,
-                'to_time' => $businessTrip->datetime_end,
-                'type' => PritomnostAbsenceType::BUSINESS_TRIP,
-            ])->first();
-
-            if (!$existingAbsence) {
-                //Create absence record in the database Pritomnost
+        foreach ($businessTripsToSync as $businessTrip) {
+            //Check if the absence already exists in the Pritomnost database
+            if (!$businessTrip->absence_id) {
+                //Create absence record in the Pritomnost database
                 PritomnostAbsence::create([
                     'user_id' => $businessTrip->user_id,
                     'from_time' => $businessTrip->datetime_start,
