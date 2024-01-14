@@ -107,7 +107,7 @@ class BusinessTripController extends Controller
         switch ($documentType) {
             case 'cestne_vyhlasenie_k_zahranicnej_pc.pdf':
                 $data = [
-                    'order_number' => $trip->sofia_id ?? 'N/A',
+                    'order_number' => $trip->sofia_id,
                     'trip_duration' => '?', //$trip->'?', // tu potrebujem pomôcť, ktorý stĺpec z databázy to je
                     'adress' => $trip->place,
                     'name' => $trip->user->first_name . ' ' . $trip->user->last_name,
