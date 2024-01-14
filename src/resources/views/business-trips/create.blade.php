@@ -5,6 +5,7 @@
     use App\Models\Contribution;
     use App\Models\SppSymbol;
     use App\Enums\UserType;
+    use App\Enums\TripType;
 
     $countries = Country::all()->pluck('name', 'id')->toArray();
     $transports = Transport::all()->pluck('name', 'id')->toArray();
@@ -72,9 +73,12 @@
                         <div class="col">
                             <x-simple-input name="place" label="Miesto"/>
                         </div>
-                        <div class="col">
-                            <x-dropdown-input name="country" label="Štát" :values="$countries"/>
-                        </div>
+                        @if(app('request')->input('type') == TripType::FOREIGN->value)
+                            <div class="col">
+                                <x-dropdown-input name="country" label="Štát" :values="$countries"/>
+                            </div>
+                        @endif
+
                     </div>
                     <div class="form-row">
                         <div class="col">

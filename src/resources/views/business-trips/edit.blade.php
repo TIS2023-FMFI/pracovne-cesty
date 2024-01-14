@@ -3,17 +3,29 @@
     use App\Models\Transport;
     use App\Models\TripPurpose;
     use App\Models\Contribution;
-    use App\Models\SppSymbol;;
+    use App\Models\SppSymbol;
+    use App\Enums\TripType;
+
     $countries = Country::all()->pluck('name', 'id')->toArray();
     $transports = Transport::all()->pluck('name', 'id')->toArray();
     $purposes = TripPurpose::all()->pluck('name', 'id')->toArray();;
     $contributions = Contribution::all()->pluck('name', 'id')->toArray();
-    $spp_symbols = SppSymbol::all()->pluck('spp_symbol', 'id')->toArray();;
+    $spp_symbols = SppSymbol::all()->pluck('spp_symbol', 'id')->toArray();
+
+    $tripType = $trip->type;
 @endphp
 
 <x-layout>
     <x-content-box title="{{ $trip->tripPurpose->name.' '.$trip->place }}">
-        {{--        <div class="container">Stav cesty: {{ $trip->state }}</div>--}}
+        <div class="mb-3">
+            <span class="badge badge-pill badge-danger">
+            {{ $tripType == TripType::DOMESTIC ? "Tuzemská cesta" : "Zahraničná cesta"}}
+            </span>
+            <span class="badge badge-pill badge-danger">
+            Stav: {{ $trip->state}}
+            </span>
+        </div>
+
         <form method="POST" action="/trips/{{ $trip->id }}" enctype="multipart/form-data">
             @csrf
             @method('PUT')
@@ -56,9 +68,11 @@
                             <x-simple-input name="place start" label="Miesto" :value="$trip->place_start"/>
                             <x-simple-input name="datetime_start" type="datetime-local" label="Dátum a čas"
                                             :value="$trip->datetime_start"/>
-                            <x-simple-input name="datetime_border_crossing_start" type="datetime-local"
-                                            label="Dátum a čas prekročenia hraníc"
-                                            :value="$trip->datetime_border_crossing_start ?? ''"/>
+                            @if($tripType == TripType::FOREIGN)
+                                <x-simple-input name="datetime_border_crossing_start" type="datetime-local"
+                                                label="Dátum a čas prekročenia hraníc"
+                                                :value="$trip->datetime_border_crossing_start ?? ''"/>
+                            @endif
                         </x-content-section>
                     </div>
                     <div class="col">
@@ -66,9 +80,11 @@
                             <x-simple-input name="place_end" label="Miesto" :value="$trip->place_end"/>
                             <x-simple-input name="datetime_end" type="datetime-local" label="Dátum a čas"
                                             :value="$trip->datetime_end"/>
-                            <x-simple-input name="datetime_border_crossing_end" type="datetime-local"
-                                            label="Dátum a čas prekročenia hraníc"
-                                            :value="$trip->datetime_border_crossing_end ?? ''"/>
+                            @if($tripType == TripType::FOREIGN)
+                                <x-simple-input name="datetime_border_crossing_end" type="datetime-local"
+                                                label="Dátum a čas prekročenia hraníc"
+                                                :value="$trip->datetime_border_crossing_end ?? ''"/>
+                            @endif
                         </x-content-section>
                     </div>
                 </div>
@@ -79,10 +95,11 @@
                     <div class="col">
                         <x-simple-input name="place" label="Miesto" :value="$trip->place"/>
                     </div>
-                    <div class="col">
-                        <x-dropdown-input name="country" label="Štát" :values="$countries"
-                                          :selected="$trip->country_id"/>
-                    </div>
+                    @if($tripType == TripType::FOREIGN)
+                        <div class="col">
+                            <x-dropdown-input name="country" label="Štát" :values="$countries" :selected="$trip->country_id"/>
+                        </div>
+                    @endif
                 </div>
                 <div class="form-row">
                     <div class="col">
@@ -218,7 +235,9 @@
                     <tr>
                         <th>Druh nákladov</th>
                         <th>Suma v EUR</th>
-                        <th>Suma v cudzej mene</th>
+                        @if ($tripType == TripType::FOREIGN)
+                            <th>Suma v cudzej mene</th>
+                        @endif
                         <th></th>
                     </tr>
                     </thead>
@@ -238,9 +257,12 @@
                                 <x-simple-input name="{{ $expenseName }}_expense_eur"
                                                 :value="$amountEur ?? ''"></x-simple-input>
                             </td>
-                            <td>
-                                <x-simple-input name="{{ $expenseName }}_expense_foreign" :value="$amountForeign ?? ''"></x-simple-input>
-                            </td>
+                            @if ($tripType == TripType::FOREIGN)
+                                <td>
+                                    <x-simple-input name="{{ $expenseName }}_expense_foreign" :value="$amountForeign ?? ''"></x-simple-input>
+                                </td>
+                            @endif
+
                             <td>
                                 <x-checkbox name="{{ $expenseName }}_expense_reimburse" :checked="$reimburse" label="Nenárokujem si"></x-checkbox>
                             </td>
