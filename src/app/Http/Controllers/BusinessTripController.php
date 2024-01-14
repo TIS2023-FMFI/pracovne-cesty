@@ -2,7 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\SimpleMail;
+use App\Models\BusinessTrip;
+use App\Models\Contribution;
+use App\Models\Country;
+use App\Models\SppSymbol;
+use App\Models\Transport;
+use App\Models\TripPurpose;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 
 class BusinessTripController extends Controller
 {
@@ -11,21 +19,23 @@ class BusinessTripController extends Controller
      * Returning view with details from all trips
      */
     public function index() {
-        return view();
+        $trip = BusinessTrip::all();
+        return view('business-trips.show', ['trip' => $trip]);
     }
 
     /**
      * Returning view with the trip details
+     * No need in implementation as by now
      */
-    public function show(BusinessTrip $b) {
-        return view();
+    public function show(BusinessTrip $trip) {
+        return view('business-trips.show', ['trip' => $trip]);
     }
 
     /**
-     * Returning view with the form for addding of the new trip
+     * Returning view with the form for adding of the new trip
      */
     public function create() {
-        return view();
+        return view('business-trips.create');
     }
 
     /**
@@ -35,14 +45,16 @@ class BusinessTripController extends Controller
      * Sending mail with mail component to admin
      */
     public function store(Request $request) {
+        return redirect()->route('components.homepage');
 
     }
 
     /**
      * Returning the view with the trip editing form
      */
-    public function edit(BusinessTrip $b) {
-        return view();
+    public function edit(BusinessTrip $trip) {
+        return view('business-trips.edit', ['trip' => $trip]);
+
     }
 
     /**
@@ -50,31 +62,36 @@ class BusinessTripController extends Controller
      * Redirecting to the trip editing form
      * Sending mail with mail component to admin
      */
-    public function update(Request $request, BusinessTrip $b) {
+    public function update(Request $request, BusinessTrip $trip) {
+        return redirect()->route('business-trips.edit', $trip);
 
     }
 
     /**
-     * Next 3 functions could be combined to changeState(Request $request, BuisenessTrip $b)
+     * Next 3 functions could be combined to changeState(Request $request, BusinessTrip $b)
+     * Check for admin needed?
      *
      * Updating state of the trip to cancelled
      * Adding cancellation reason
      */
-    public function cancel(BusinessTrip $b) {
+    public function cancel(BusinessTrip $trip) {
+        return redirect()->route('business-trips.show', $trip);
 
     }
 
     /**
      * Same as update(), updating state of the trip to confirmed
      */
-    public function confirm() {
+    public function confirm(BusinessTrip $trip) {
+        return redirect()->route('business-trips.show', $trip);
 
     }
 
     /**
      * Same as update, updating state to closed
      */
-    public function close() {
+    public function close(BusinessTrip $trip) {
+        return redirect()->route('business-trips.show', $trip);
 
     }
 }
