@@ -75,6 +75,20 @@ class BusinessTripController extends Controller
      * Adding cancellation reason
      */
     public function cancel(BusinessTrip $trip) {
+        //Cancel the trip and add cancellation reason
+        $trip->update(['state' => 'canceled', 'cancellation_reason' => request('cancellation_reason')]);
+
+        //Send cancellation email to admin
+        $message = '';
+        $recipient = 'admin@example.com';
+        $viewTemplate = 'emails.cancellation_request_admin';
+
+        // Create an instance of the SimpleMail class
+        $email = new SimpleMail($message, $recipient, $viewTemplate);
+
+        // Send the email
+        Mail::to($recipient)->send($email);
+
         return redirect()->route('business-trips.show', $trip);
 
     }
@@ -83,6 +97,9 @@ class BusinessTripController extends Controller
      * Same as update(), updating state of the trip to confirmed
      */
     public function confirm(BusinessTrip $trip) {
+        //Confirm the trip
+        $trip->update(['state' => 'confirmed']);
+
         return redirect()->route('business-trips.show', $trip);
 
     }
@@ -91,6 +108,9 @@ class BusinessTripController extends Controller
      * Same as update, updating state to closed
      */
     public function close(BusinessTrip $trip) {
+        //Close the trip
+        $trip->update(['state' => 'closed']);
+        
         return redirect()->route('business-trips.show', $trip);
 
     }
