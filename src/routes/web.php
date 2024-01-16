@@ -19,7 +19,7 @@ use Illuminate\Support\Facades\Route;
 // General homepage
 Route::get('/', static function () {
     return view('homepage');
-});
+})->middleware('guest');
 
 // Business trip management
 Route::controller(BusinessTripController::class)
@@ -56,7 +56,8 @@ Route::controller(UserController::class)
     ->group(static function () {
         // Log user in
         // Intended for the login button
-        Route::post('/', 'authenticate');
+        Route::post('/', 'authenticate')
+            ->middleware('guest');
 
         // Log user out
         Route::post('/logout', 'logout')
