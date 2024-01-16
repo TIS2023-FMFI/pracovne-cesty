@@ -62,23 +62,30 @@ Route::controller(BusinessTripController::class)
     });
 
 // User management
-// TODO: Decide which middleware to use where
 Route::controller(UserController::class)
+    ->prefix('user')
     ->group(static function () {
         // Log user in
         // Intended for the login button
         Route::post('/', 'authenticate')
-            ->middleware('guest');
+            ->middleware('guest')
+            ->name('login');
 
-        // Log user out
-        Route::post('/logout', 'logout')
-            ->middleware('auth');
+        Route::middleware('auth')
+            ->group(static function () {
+                // Log user out
+                Route::post('/logout', 'logout')
+                    ->name('logout');
 
-        // Show the register form
-        Route::get('/register', 'create')
-            ->middleware('auth');
+                // Show the register form
+                Route::get('/register', 'create')
+                    ->name('register');
 
-        // TODO: Invite?
+                // Invite a new user
+                // Intended for the invitation submit button
+                Route::post('/invite', 'invite')
+                    ->name('invite');
+            });
     });
 
 // SPP management
