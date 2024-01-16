@@ -1,7 +1,6 @@
 @php
     use App\Models\BusinessTrip;
     use App\Models\User;
-    use App\Enums\TripType;
 
     $trips = BusinessTrip::paginate(15);
     $users = User::all();
@@ -9,8 +8,7 @@
 
 <x-layout>
     <div class="mb-4">
-        <x-link-button href="/trips/create?type={{ TripType::DOMESTIC }}">Pridať tuzemskú cestu</x-link-button>
-        <x-link-button href="/trips/create?type={{ TripType::FOREIGN }}">Pridať zahraničnú cestu</x-link-button>
+        <x-link-button href="/trips/create">Pridať pracovnú cestu</x-link-button>
         <x-button color="danger" event="open-add-users">Pridať používateľov</x-button>
         <x-link-button color="danger" href="/spp">ŠPP prvky</x-link-button>
         <x-button event="open-register-form">Registrácia</x-button>
