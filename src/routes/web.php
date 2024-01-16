@@ -19,14 +19,18 @@ use Illuminate\Support\Facades\Route;
 // General homepage
 Route::get('/', static function () {
     return view('homepage');
-})->middleware('guest');
+})
+    ->middleware('guest')
+    ->name('guest-home');
+
+// Show trip index for logged-in user
+Route::get('/dashboard', [BusinessTripController::class, 'index'])
+    ->middleware('auth')
+    ->name('user-home');
 
 // Business trip management
 Route::controller(BusinessTripController::class)
-    // Requests must be authenticated
     ->middleware('auth')
-
-    // All the routes bellow have URIs `/trips/*`
     ->prefix('trips')
     ->group(static function () {
         // Show the create form
@@ -46,7 +50,6 @@ Route::controller(BusinessTripController::class)
         // Intended for the submit button in the edit form
         Route::put('/{trip}', 'update');
 
-        // TODO: How to show index?
         // TODO: Cancel, confirm, close under a single route?
     });
 
