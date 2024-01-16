@@ -50,7 +50,15 @@ Route::controller(BusinessTripController::class)
         // Intended for the submit button in the edit form
         Route::put('/{trip}', 'update');
 
-        // TODO: Cancel, confirm, close under a single route?
+        // Trip modifiers
+        Route::put('/{trip}/cancel', 'cancel')
+            ->name('trip-cancel');
+
+        Route::put('/{trip}/confirm', 'confirm')
+            ->name('trip-confirm');
+
+        Route::put('/{trip}/close', 'close')
+            ->name('trip-close');
     });
 
 // User management
