@@ -34,21 +34,26 @@ Route::controller(BusinessTripController::class)
     ->prefix('trips')
     ->group(static function () {
         // Show the create form
-        Route::get('/create', 'create');
+        Route::get('/create', 'create')
+            ->name('trip-create');
 
         // Show trip details
-        Route::get('/{trip}', 'show');
+        Route::get('/{trip}', 'show')
+            ->name('trip-details');
 
         // Show the edit form
-        Route::get('/{trip}/edit', 'edit');
+        Route::get('/{trip}/edit', 'edit')
+            ->name('trip-edit');
 
         // Save a newly created business trip
         // Intended for the submit button in the create form
-        Route::post('/', 'store');
+        Route::post('/', 'store')
+            ->name('trip-store');
 
         // Update an existing business trip
         // Intended for the submit button in the edit form
-        Route::put('/{trip}', 'update');
+        Route::put('/{trip}', 'update')
+            ->name('trip-update');
 
         // Trip modifiers
         Route::put('/{trip}/cancel', 'cancel')
@@ -59,6 +64,10 @@ Route::controller(BusinessTripController::class)
 
         Route::put('/{trip}/close', 'close')
             ->name('trip-close');
+
+        // Export the trip details as the selected document
+        Route::post('/{trip}/export', 'exportPdf')
+            ->name('export-pdf');
     });
 
 // User management
