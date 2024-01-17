@@ -21,58 +21,60 @@ Route::get('/', static function () {
     return view('homepage');
 })
     ->middleware('guest')
-    ->name('guest-home');
+    ->name('homepage');
 
 // Show trip index for logged-in user
 Route::get('/dashboard', [BusinessTripController::class, 'index'])
     ->middleware('auth')
-    ->name('user-home');
+    ->name('dashboard');
 
 // Business trip management
 Route::controller(BusinessTripController::class)
     ->middleware('auth')
     ->prefix('trips')
+    ->name('trip.')
     ->group(static function () {
         // Show the create form
         Route::get('/create', 'create')
-            ->name('trip-create');
+            ->name('create');
 
         // Show trip details
         Route::get('/{trip}', 'show')
-            ->name('trip-details');
+            ->name('details');
 
         // Show the edit form
         Route::get('/{trip}/edit', 'edit')
-            ->name('trip-edit');
+            ->name('edit');
 
         // Save a newly created business trip
         // Intended for the submit button in the create form
         Route::post('/', 'store')
-            ->name('trip-store');
+            ->name('store');
 
         // Update an existing business trip
         // Intended for the submit button in the edit form
         Route::put('/{trip}', 'update')
-            ->name('trip-update');
+            ->name('update');
 
         // Trip modifiers
         Route::put('/{trip}/cancel', 'cancel')
-            ->name('trip-cancel');
+            ->name('cancel');
 
         Route::put('/{trip}/confirm', 'confirm')
-            ->name('trip-confirm');
+            ->name('confirm');
 
         Route::put('/{trip}/close', 'close')
-            ->name('trip-close');
+            ->name('close');
 
         // Export the trip details as the selected document
         Route::post('/{trip}/export', 'exportPdf')
-            ->name('export-pdf');
+            ->name('export');
     });
 
 // User management
 Route::controller(UserController::class)
     ->prefix('user')
+    ->name('user.')
     ->group(static function () {
         // Log user in
         // Intended for the login button
@@ -101,17 +103,18 @@ Route::controller(UserController::class)
 Route::controller(SPPController::class)
     ->middleware('auth')
     ->prefix('spp')
+    ->name('spp.')
     ->group(static function () {
         // Save a newly created SPP symbol
         // Intended for the submit button in the SPP form
         Route::post('/', 'store')
-            ->name('spp-store');
+            ->name('store');
 
         // Show the SPP management form
         Route::get('/{spp}', 'manage')
-            ->name('spp-manage');
+            ->name('manage');
 
         // Deactivate an SPP symbol
         Route::put('/{spp}/deactivate', 'deactivate')
-            ->name('spp-deactivate');
+            ->name('deactivate');
     });
