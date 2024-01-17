@@ -225,7 +225,7 @@
                 $mealsReimbursement = $trip->meals_reimbursement ?? true;
                 $doesNotWantMeals = !$mealsReimbursement;
             @endphp
-            <x-content-section title="Náklady" x-data="{mealsTableHide: {{ $doesNotWantMeals }} }">
+            <x-content-section title="Náklady" x-data="{mealsTableHide: {{ $doesNotWantMeals ? 'true' : 'false'}} }">
                 <x-slot:description>
                     Pre každý druh nákladov môžete použiť aj oba stĺpce naraz. Ak si preplatenie nejakého druhu nákladov nenárokujete, nezabudnite to, prosím, uviesť.
                 </x-slot:description>
