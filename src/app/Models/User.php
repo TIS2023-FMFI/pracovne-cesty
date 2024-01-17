@@ -23,6 +23,17 @@ class User extends Model
         'last_login' => 'datetime'
     ];
 
+    // Mass assignable attributes
+    protected $fillable = [
+        'first_name',
+        'last_name',
+        'personal_id',
+        'email',
+        'username',
+        'password',
+        'status'
+    ];
+
     /**
      * Get the business trips associated with the user
      *
