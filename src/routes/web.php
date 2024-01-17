@@ -104,11 +104,14 @@ Route::controller(SPPController::class)
     ->group(static function () {
         // Save a newly created SPP symbol
         // Intended for the submit button in the SPP form
-        Route::post('/', 'store');
+        Route::post('/', 'store')
+            ->name('spp-store');
 
         // Show the SPP management form
-        Route::get('/{spp}', 'manage');
+        Route::get('/{spp}', 'manage')
+            ->name('spp-manage');
 
         // Deactivate an SPP symbol
-        Route::post('/{spp}/deactivate', 'deactivate');
+        Route::put('/{spp}/deactivate', 'deactivate')
+            ->name('spp-deactivate');
     });
