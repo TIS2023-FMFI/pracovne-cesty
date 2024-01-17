@@ -2,11 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use mikehaertl\pdftk\Pdf;
-use App\Models\BusinessTrip;
 use App\Enums\DocumentType;
+use App\Models\BusinessTrip;
+use Exception;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
+use mikehaertl\pdftk\Pdf;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class BusinessTripController extends Controller
 {
@@ -81,27 +85,25 @@ class BusinessTripController extends Controller
     public function close() {
 
     }
-    public function exportPdf($tripId, $documentType)
+
+    public function exportPdf(int $tripId, DocumentType $documentType): JsonResponse | BinaryFileResponse
     {
         $trip = BusinessTrip::find($tripId);
-        if (!$trip && $tripId != 0) {
+        if (!$trip && $tripId !== 0) {
             return response()->json(['error' => 'Business trip not found'], 404);
         }
 
-        $templatePath = storage_path('app/pdf_templates/' . DocumentType::from($documentType)->value);
-        $templatePath = str_replace('\\', '/', $templatePath);
-        if (!file_exists($templatePath)) {
+        $templateName = $documentType->value;
+        $templatePath = Storage::disk('pdf-templates')
+            ->path($templateName);
+
+        if (Storage::disk('pdf-templates')->missing($templateName)) {
             Log::error("PDF template file does not exist at path: " . $templatePath);
             return response()->json(['error' => 'PDF template file not found'], 404);
         }
 
-        $outputPath = storage_path('app/output_pdf/' . 'output_' . time() . '.pdf');
-        $outputPath = str_replace('\\', '/', $outputPath);
-        $outputDir = dirname($outputPath);
-
-        if (!file_exists($outputDir)) {
-            mkdir($outputDir, 0777, true);
-        }
+        $outputPath = Storage::disk('pdf-exports')
+            ->path(uniqid('', true) . '.pdf');
 
         $data = [];
         switch ($documentType) {
@@ -113,6 +115,7 @@ class BusinessTripController extends Controller
                     'name' => $trip->user->first_name . ' ' . $trip->user->last_name,
                 ];
                 break;
+
             case DocumentType::COMPENSATION_AGREEMENT:
                 $data = [
                     'first_name' => $trip->user->first_name,
@@ -145,6 +148,7 @@ class BusinessTripController extends Controller
                     'contribution3_text' => '?', // -||-
                 ];
                 break;
+
             case DocumentType::CONTROL_SHEET:
                 $data = [
                     'spp_symbol' => $trip->sppSymbol->spp_symbol,
@@ -186,7 +190,7 @@ class BusinessTripController extends Controller
             case DocumentType::DOMESTIC_REPORT:
                 $data = [
                     'name' => $trip->user->first_name . ' ' . $trip->user->last_name,
-                    'department' => $trip>user->department,
+                    'department' => $trip->user->department,
                     'date_start' => $trip->datetime_start->format('Y-m-d'),
                     'date_end' => $trip->datetime_end->format('Y-m-d'),
                     'spp_symbol' => $trip->spp_symbols->spp_symbol,
@@ -209,6 +213,7 @@ class BusinessTripController extends Controller
                     'conclusion_MESS' => '?',
                 ];
                 break;
+
             case DocumentType::FOREIGN_REPORT:
                 $data = [
                     'name' => $trip->user->first_name . ' ' . $trip->user->last_name,
@@ -238,9 +243,10 @@ class BusinessTripController extends Controller
                     'iban' => $trip->iban,
                     'advance_expense_foreign' => $trip->advanceExpense ? $trip->advanceExpense->amount_foreign : null,
                     'invitation_case_charges' => '?',   // neviem ktorý riadok predstavuje odhadnutie preplatených
-                                                        // výdavkov v prípade pozvania druhou stranou
+                    // výdavkov v prípade pozvania druhou stranou
                 ];
                 break;
+
             default:
                 return response()->json(['error' => 'Unknown document type'], 400);
         }
@@ -248,12 +254,13 @@ class BusinessTripController extends Controller
         try {
             Log::info("Creating PDF object with template path: " . $templatePath);
             $pdf = new Pdf($templatePath);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error("Error creating PDF object: " . $e->getMessage());
             return response()->json(['error' => 'Failed to create PDF object: ' . $e->getMessage()], 500);
         }
+
         try {
-            Log::info("Filling form with data: " . json_encode($data));
+            Log::info("Filling form with data: " . json_encode($data, JSON_THROW_ON_ERROR));
             $pdf->fillForm($data);
 
             Log::info("Starting PDF generation for path: " . $outputPath);
@@ -263,18 +270,18 @@ class BusinessTripController extends Controller
 
             Log::info("Saving PDF to path: " . $outputPath);
             $pdf->saveAs($outputPath);
+        } catch (Exception $e) {
+            Log::error("Error during PDF manipulation: " . $e->getMessage());
+            return response()->json(['error' => 'Failed during PDF manipulation: ' . $e->getMessage()], 500);
         }
-        catch (\Exception $e) {
-                Log::error("Error during PDF manipulation: " . $e->getMessage());
-                return response()->json(['error' => 'Failed during PDF manipulation: ' . $e->getMessage()], 500);
-            }
+
         Log::info("PDF generation completed, checking file existence...");
         if (file_exists($outputPath)) {
             Log::info("PDF generation successful, file exists at path: " . $outputPath);
             return response()->download($outputPath)->deleteFileAfterSend(true);
-        } else {
-            Log::error("PDF file does not exist after generation: " . $outputPath);
-            return response()->json(['error' => 'Failed to generate PDF, file not found'], 500);
         }
+
+        Log::error("PDF file does not exist after generation: " . $outputPath);
+        return response()->json(['error' => 'Failed to generate PDF, file not found'], 500);
     }
 }
