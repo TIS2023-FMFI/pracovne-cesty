@@ -282,43 +282,42 @@
                         </tr>
                     </table>
 
-
                     <x-content-section title="Zrážky zo stravného" x-show="!mealsTableHide">
                         <x-slot:description>
                             Vyberte, prosím, ktoré jedlá si <b>nežiadate</b> preplatiť.
                         </x-slot:description>
 
-                        <div class="container">
-                            <table class="table">
+                        <div>
+                            <table class="table" x-data="{checkBreakfast: false, checkLunch: false, checkDinner: false}">
                                 <thead>
                                 <tr>
                                     <th>Dátum</th>
-                                    <th>Raňajky</th>
-                                    <th>Obed</th>
-                                    <th>Večera</th>
+                                    <th><x-checkbox name="allBreakfast" control="checkBreakfast" label="Raňajky"/></th>
+                                    <th><x-checkbox name="allLunches" control="checkLunch" label="Obed"/></th>
+                                    <th><x-checkbox name="allDinners" control="checkDinner" label="Večera"/></th>
                                 </tr>
                                 </thead>
-                                <tbody x-data="{checkBreakfast: false, checkLunch: false, checkDinner: false}">
-                                <tr>
-                                    <td>Všetky</td>
-                                    <td><input type="checkbox" x-model="checkBreakfast"></td>
-                                    <td><input type="checkbox" x-model="checkLunch"></td>
-                                    <td><input type="checkbox" x-model="checkDinner"></td>
-                                </tr>
 
-                                @for ($i = 0; $i < 5; $i++)
+                                <tbody>
+                                @php
+//                                 $meals = $trip->not_reimbursed_meals;
+                                    $currentDate = clone $trip->datetime_start;
+                                @endphp
+                                @for ($i = 0; $i < $days; $i++)
                                     <tr>
-                                        <td>{{ $i }}</td>
+                                        <td>{{ $currentDate->format('d.m.') }}</td>
                                         <td>
-                                            <input type="checkbox" x-bind:checked="checkBreakfast">
+                                            <input type="checkbox" :name="{{ 'b'.$i }}" x-init="$el.checked = '{{$meals[$i * 3]}}' === '1'" x-bind:checked="checkBreakfast">
                                         </td>
                                         <td>
-                                            <input type="checkbox" x-bind:checked="checkLunch">
+                                            <input type="checkbox" :name="{{ 'l'.$i }}" x-init="$el.checked = '{{$meals[$i * 3 + 1]}}' === '1'" x-bind:checked="checkLunch">
                                         </td>
                                         <td>
-                                            <input type="checkbox" x-bind:checked="checkDinner">
+                                            <input type="checkbox" :name="{{ 'd'.$i }}" x-init="$el.checked = '{{$meals[$i * 3 + 2]}}' === '1'" x-bind:checked="checkDinner" >
                                         </td>
                                     </tr>
+
+                                    @php $currentDate->modify('+1 day'); @endphp
                                 @endfor
 
                                 </tbody>
