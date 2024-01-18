@@ -48,6 +48,12 @@ return [
             'throw' => false,
         ],
 
+        'uploads' => [
+            'driver' => 'local',
+            'root' => storage_path('app/user_uploads'),
+            'throw' => false,
+        ],
+
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),
