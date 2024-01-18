@@ -113,17 +113,29 @@
                 </div>
                 <div class="form-row">
                     <div class="col">
-                        <x-simple-input name="upload_name" type="file"
-                                        label="Vložte pozvánku, plagát alebo iný súbor..."/>
+                        <x-dropdown-input name="transport" label="Dopravný prostriedok" :values="$transports"
+                                          :selected="$trip->transport_id"/>
                     </div>
                     <div class="col">
                         <x-simple-input name="event_url" label="Link na udalosť" :value="$trip->event_url ?? ''"/>
                     </div>
                 </div>
+
+                @php
+                    $hasFile = $trip->upload_name != null;
+                @endphp
                 <div class="form-row">
                     <div class="col-sm-6">
-                        <x-dropdown-input name="transport" label="Dopravný prostriedok" :values="$transports"
-                                          :selected="$trip->transport_id"/>
+
+                        <div class="card">
+                            <div>
+                                <a {{ $hasFile ? 'href=/trips/' . $trip->id . '/attachment' : ''}} class="btn">
+                                    <i class="fa fa-download mr-2"></i>
+                                    {{ $hasFile ? 'Stiahnuť nahratý súbor' : 'Žiadny súbor nebol nahraný' }}
+                                </a>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
             </x-content-section>

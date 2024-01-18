@@ -85,22 +85,10 @@
                             <x-textarea name="purpose_details" label="Špecifikácia účelu"></x-textarea>
                         </div>
                     </div>
-{{--                        <div class="form-group">--}}
-{{--                            <label for="purpose">Účel cesty</label>--}}
-{{--                            <div class="input-group mb-3">--}}
-{{--                                <select class="custom-select col-4" id="purpose">--}}
-{{--                                    <option selected>Select Option</option>--}}
-{{--                                    <option value="1">Option 1</option>--}}
-{{--                                    <option value="2">Option 2</option>--}}
-{{--                                    <option value="3">Option 3</option>--}}
-{{--                                </select>--}}
-{{--                                <input type="text" class="form-control" placeholder="môžete špecifikovať">--}}
-{{--                            </div>--}}
-{{--                        </div>--}}
 
                     <div class="form-row">
                         <div class="col">
-                            <x-simple-input name="upload_name" type="file" label="Vložte pozvánku, plagát alebo iný súbor..."/>
+                            <x-dropdown-input name="transport" label="Dopravný prostriedok" :values="$transports"/>
                         </div>
                         <div class="col">
                             <x-simple-input name="event_url" label="Link na udalosť"/>
@@ -108,7 +96,7 @@
                     </div>
                     <div class="form-row">
                         <div class="col-sm-6">
-                            <x-dropdown-input name="transport" label="Dopravný prostriedok" :values="$transports"/>
+                            <x-simple-input name="upload_name" type="file" label="Vložte pozvánku, plagát alebo iný súbor..."/>
                         </div>
                     </div>
                 </x-content-section>
