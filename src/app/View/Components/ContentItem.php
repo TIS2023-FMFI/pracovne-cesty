@@ -31,6 +31,8 @@ class ContentItem extends Component
             case TripState::NEW:
                 return 'sun';
             case TripState::CONFIRMED:
+                return 'file-circle-question';
+            case TripState::UPDATED:
                 return 'file-circle-plus';
             case TripState::COMPLETED:
                 return 'file-circle-check';
