@@ -111,7 +111,7 @@ Route::controller(SPPController::class)
             ->name('store');
 
         // Show the SPP management form
-        Route::get('/{spp}', 'manage')
+        Route::get('/', 'manage')
             ->name('manage');
 
         // Deactivate an SPP symbol
