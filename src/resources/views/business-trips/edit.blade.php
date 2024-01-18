@@ -5,6 +5,7 @@
     use App\Models\Contribution;
     use App\Models\SppSymbol;
     use App\Enums\TripType;
+    use App\Enums\TripState;
 
     $countries = Country::all()->pluck('name', 'id')->toArray();
     $transports = Transport::all()->pluck('name', 'id')->toArray();
@@ -13,6 +14,7 @@
     $spp_symbols = SppSymbol::all()->pluck('spp_symbol', 'id')->toArray();
 
     $tripType = $trip->type;
+    $tripState = $trip->state;
 @endphp
 
 <x-layout>
@@ -95,11 +97,9 @@
                     <div class="col">
                         <x-simple-input name="place" label="Miesto" :value="$trip->place"/>
                     </div>
-                    @if($tripType == TripType::FOREIGN)
-                        <div class="col">
-                            <x-dropdown-input name="country" label="Štát" :values="$countries" :selected="$trip->country_id"/>
-                        </div>
-                    @endif
+                    <div class="col">
+                        <x-dropdown-input name="country" label="Štát" :values="$countries" :selected="$trip->country_id"/>
+                    </div>
                 </div>
                 <div class="form-row">
                     <div class="col">
@@ -220,116 +220,120 @@
                 </x-hideable-section>
             </x-content-section>
 
-            @php
-                $expenses = ['travelling' => 'Cestovné', 'accommodation' => 'Ubytovanie', 'allowance' => 'Záloha za cestu', 'advance' => 'Vložné', 'other' => 'Iné'];
-                $mealsReimbursement = $trip->meals_reimbursement ?? true;
-                $doesNotWantMeals = !$mealsReimbursement;
-            @endphp
-            <x-content-section title="Náklady" x-data="{mealsTableHide: {{ $doesNotWantMeals ? 'true' : 'false'}} }">
-                <x-slot:description>
-                    Pre každý druh nákladov môžete použiť aj oba stĺpce naraz. Ak si preplatenie nejakého druhu nákladov nenárokujete, nezabudnite to, prosím, uviesť.
-                </x-slot:description>
+            @if(in_array($tripState, [TripState::UPDATED, TripState::COMPLETED, TripState::CLOSED]) )
 
-                <table class="table">
-                    <thead>
-                    <tr>
-                        <th>Druh nákladov</th>
-                        <th>Suma v EUR</th>
-                        @if ($tripType == TripType::FOREIGN)
-                            <th>Suma v cudzej mene</th>
-                        @endif
-                        <th></th>
-                    </tr>
-                    </thead>
-
-                    @foreach($expenses as $expenseName => $label)
-                        @php
-                            $expense = $trip->{$expenseName . 'Expense'};
-                            $amountEur = $expense->amount_eur ?? '';
-                            $amountForeign = $expense->amount_foreign ?? '';
-                            $reimburse = $expense->reimburse ?? false;
-                        @endphp
-                        <tr>
-                            <td>
-                                {{ $label }}
-                            </td>
-                            <td>
-                                <x-simple-input name="{{ $expenseName }}_expense_eur"
-                                                :value="$amountEur ?? ''"></x-simple-input>
-                            </td>
-                            @if ($tripType == TripType::FOREIGN)
-                                <td>
-                                    <x-simple-input name="{{ $expenseName }}_expense_foreign" :value="$amountForeign ?? ''"></x-simple-input>
-                                </td>
-                            @endif
-
-                            <td>
-                                <x-checkbox name="{{ $expenseName }}_expense_reimburse" :checked="$reimburse" label="Nenárokujem si"></x-checkbox>
-                            </td>
-                        </tr>
-                    @endforeach
-
-                    <tr>
-                        <td>
-                            Stravné
-                        </td>
-                        <td>
-                            <x-checkbox name="no_meals_reimbursed" label="Nenárokujem si vôbec" :checked="$doesNotWantMeals" control="mealsTableHide"/>
-                        </td>
-                        <td colspan="2"></td>
-                    </tr>
-                </table>
-
-
-                <x-content-section title="Zrážky zo stravného" x-show="!mealsTableHide">
+                @php
+                    $expenses = ['travelling' => 'Cestovné', 'accommodation' => 'Ubytovanie', 'allowance' => 'Záloha za cestu', 'advance' => 'Vložné', 'other' => 'Iné'];
+                    $mealsReimbursement = $trip->meals_reimbursement ?? true;
+                    $doesNotWantMeals = !$mealsReimbursement;
+                @endphp
+                <x-content-section title="Náklady" x-data="{mealsTableHide: {{ $doesNotWantMeals ? 'true' : 'false'}} }">
                     <x-slot:description>
-                        Vyberte, prosím, ktoré jedlá si <b>nežiadate</b> preplatiť.
+                        Pre každý druh nákladov môžete použiť aj oba stĺpce naraz. Ak si preplatenie nejakého druhu nákladov nenárokujete, nezabudnite to, prosím, uviesť.
                     </x-slot:description>
 
-                    <div class="container">
-                        <table class="table">
-                            <thead>
-                            <tr>
-                                <th>Dátum</th>
-                                <th>Raňajky</th>
-                                <th>Obed</th>
-                                <th>Večera</th>
-                            </tr>
-                            </thead>
-                            <tbody x-data="{checkBreakfast: false, checkLunch: false, checkDinner: false}">
-                            <tr>
-                                <td>Všetky</td>
-                                <td><input type="checkbox" x-model="checkBreakfast"></td>
-                                <td><input type="checkbox" x-model="checkLunch"></td>
-                                <td><input type="checkbox" x-model="checkDinner"></td>
-                            </tr>
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th>Druh nákladov</th>
+                            <th>Suma v EUR</th>
+                            @if ($tripType == TripType::FOREIGN)
+                                <th>Suma v cudzej mene</th>
+                            @endif
+                            <th></th>
+                        </tr>
+                        </thead>
 
-                            @for ($i = 0; $i < 5; $i++)
+                        @foreach($expenses as $expenseName => $label)
+                            @php
+                                $expense = $trip->{$expenseName . 'Expense'};
+                                $amountEur = $expense->amount_eur ?? '';
+                                $amountForeign = $expense->amount_foreign ?? '';
+                                $reimburse = $expense->reimburse ?? false;
+                            @endphp
+                            <tr>
+                                <td>
+                                    {{ $label }}
+                                </td>
+                                <td>
+                                    <x-simple-input name="{{ $expenseName }}_expense_eur"
+                                                    :value="$amountEur ?? ''"></x-simple-input>
+                                </td>
+                                @if ($tripType == TripType::FOREIGN)
+                                    <td>
+                                        <x-simple-input name="{{ $expenseName }}_expense_foreign" :value="$amountForeign ?? ''"></x-simple-input>
+                                    </td>
+                                @endif
+
+                                <td>
+                                    <x-checkbox name="{{ $expenseName }}_expense_reimburse" :checked="$reimburse" label="Nenárokujem si"></x-checkbox>
+                                </td>
+                            </tr>
+                        @endforeach
+
+                        <tr>
+                            <td>
+                                Stravné
+                            </td>
+                            <td>
+                                <x-checkbox name="no_meals_reimbursed" label="Nenárokujem si vôbec" :checked="$doesNotWantMeals" control="mealsTableHide"/>
+                            </td>
+                            <td colspan="2"></td>
+                        </tr>
+                    </table>
+
+
+                    <x-content-section title="Zrážky zo stravného" x-show="!mealsTableHide">
+                        <x-slot:description>
+                            Vyberte, prosím, ktoré jedlá si <b>nežiadate</b> preplatiť.
+                        </x-slot:description>
+
+                        <div class="container">
+                            <table class="table">
+                                <thead>
                                 <tr>
-                                    <td>{{ $i }}</td>
-                                    <td>
-                                        <input type="checkbox" x-bind:checked="checkBreakfast">
-                                    </td>
-                                    <td>
-                                        <input type="checkbox" x-bind:checked="checkLunch">
-                                    </td>
-                                    <td>
-                                        <input type="checkbox" x-bind:checked="checkDinner">
-                                    </td>
+                                    <th>Dátum</th>
+                                    <th>Raňajky</th>
+                                    <th>Obed</th>
+                                    <th>Večera</th>
                                 </tr>
-                            @endfor
+                                </thead>
+                                <tbody x-data="{checkBreakfast: false, checkLunch: false, checkDinner: false}">
+                                <tr>
+                                    <td>Všetky</td>
+                                    <td><input type="checkbox" x-model="checkBreakfast"></td>
+                                    <td><input type="checkbox" x-model="checkLunch"></td>
+                                    <td><input type="checkbox" x-model="checkDinner"></td>
+                                </tr>
 
-                            </tbody>
-                        </table>
-                    </div>
+                                @for ($i = 0; $i < 5; $i++)
+                                    <tr>
+                                        <td>{{ $i }}</td>
+                                        <td>
+                                            <input type="checkbox" x-bind:checked="checkBreakfast">
+                                        </td>
+                                        <td>
+                                            <input type="checkbox" x-bind:checked="checkLunch">
+                                        </td>
+                                        <td>
+                                            <input type="checkbox" x-bind:checked="checkDinner">
+                                        </td>
+                                    </tr>
+                                @endfor
+
+                                </tbody>
+                            </table>
+                        </div>
+                    </x-content-section>
+
                 </x-content-section>
 
-            </x-content-section>
 
+                <x-content-section title="Správa">
+                    <x-textarea name="conclusion" label="Výsledky cesty" :value="$trip->conclusion ?? ''"></x-textarea>
+                </x-content-section>
 
-            <x-content-section title="Správa">
-                <x-textarea name="conclusion" label="Výsledky cesty" :value="$trip->conclusion ?? ''"></x-textarea>
-            </x-content-section>
+            @endif
 
             <div class="d-flex justify-content-end">
                 <x-button>Uložiť úpravy</x-button>
@@ -356,34 +360,38 @@
             </form>
         </x-content-section>
 
-        <x-content-section title="Žiadosť o storno">
-            <x-slot:description>
-                Môžete požiadať o storno pracovnej cesty, musíte však uviesť dôvod storna. Cesta bude stornovaná až po schválení administrátorom.
-            </x-slot:description>
-            <form method="POST" action="/trips/{{ $trip->id }}/">
-                @csrf
-                <div class="form-row align-items-end">
-                    <div class="col-9">
-                        <x-textarea name="cancellation_reason" label="Dôvod storna"></x-textarea>
+        @if(in_array($tripState, [TripState::NEW, TripState::CONFIRMED]))
+            <x-content-section title="Žiadosť o storno">
+                <x-slot:description>
+                    Môžete požiadať o storno pracovnej cesty, musíte však uviesť dôvod storna. Cesta bude stornovaná až po schválení administrátorom.
+                </x-slot:description>
+                <form method="POST" action="/trips/{{ $trip->id }}/">
+                    @csrf
+                    <div class="form-row align-items-end">
+                        <div class="col-9">
+                            <x-textarea name="cancellation_reason" label="Dôvod storna"></x-textarea>
+                        </div>
+                        <div class="col-3 my-3">
+                            <x-button color="danger">Odoslať žiadosť</x-button>
+                        </div>
                     </div>
-                    <div class="col-3 my-3">
-                        <x-button color="danger">Odoslať žiadosť</x-button>
-                    </div>
-                </div>
-            </form>
-        </x-content-section>
+                </form>
+            </x-content-section>
+        @endif
 
-        <x-content-section title="Dokumenty na stiahnutie">
-            <div>
+        @if($tripState != TripState::NEW)
+            <x-content-section title="Dokumenty na stiahnutie">
                 <div>
-                    <a href="/export/{{ $trip->id }}?fileType=" class="text-decoration-none text-dark">
-                        <i class="fa-solid fa-file-pdf fa-2xl"></i>
-                        <div>Správa zo zahraničnej pracovnej cesty</div>
-                    </a>
-                </div>
+                    <div>
+                        <a href="/export/{{ $trip->id }}?fileType=" class="text-decoration-none text-dark">
+                            <i class="fa-solid fa-file-pdf fa-2xl"></i>
+                            <div>Správa zo zahraničnej pracovnej cesty</div>
+                        </a>
+                    </div>
 
-            </div>
-        </x-content-section>
+                </div>
+            </x-content-section>
+        @endif
 
     </x-content-box>
 </x-layout>
