@@ -24,7 +24,7 @@
             {{ $tripType == TripType::DOMESTIC ? "Tuzemská cesta" : "Zahraničná cesta"}}
             </span>
             <span class="badge badge-pill badge-danger">
-            Stav: {{ $trip->state}}
+            Stav: {{ $trip->state->name}}
             </span>
         </div>
 
@@ -394,13 +394,14 @@
         @if($tripState != TripState::NEW)
             <x-content-section title="Dokumenty na stiahnutie">
                 <div>
-                    <div>
-                        <a href="/export/{{ $trip->id }}?fileType=" class="text-decoration-none text-dark">
-                            <i class="fa-solid fa-file-pdf fa-2xl"></i>
-                            <div>Správa zo zahraničnej pracovnej cesty</div>
-                        </a>
-                    </div>
-
+                    @foreach (\App\Enums\DocumentType::cases() as $doc)
+                        <div>
+                            <a href="/export/{{ $trip->id }}?fileType={{ $doc }}" class="text-decoration-none text-dark">
+                                <i class="fa-solid fa-file-pdf fa-2x mb-1"></i>
+                                <p>{{ $doc }}</p>
+                            </a>
+                        </div>
+                    @endforeach
                 </div>
             </x-content-section>
         @endif
