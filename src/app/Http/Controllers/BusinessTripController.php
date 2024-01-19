@@ -102,9 +102,6 @@ class BusinessTripController extends Controller
             return response()->json(['error' => 'PDF template file not found'], 404);
         }
 
-        $outputPath = Storage::disk('pdf-exports')
-            ->path(uniqid('', true) . '.pdf');
-
         $data = [];
         switch ($documentType) {
             case 'cestne_vyhlasenie_k_zahranicnej_pc.pdf':
@@ -173,6 +170,7 @@ class BusinessTripController extends Controller
                     'purpose_details' => $trip->purpose_details,
                 ];
                 break;
+
             case DocumentType::PAYMENT_ORDER:
                 $data = [
                     'advance_amount_string' => '?', // niesom si istý či máme pre toto vytvorený stĺpec
@@ -187,6 +185,7 @@ class BusinessTripController extends Controller
                     'iban' => $trip->iban,
                 ];
                 break;
+
             case DocumentType::DOMESTIC_REPORT:
                 $data = [
                     'name' => $trip->user->first_name . ' ' . $trip->user->last_name,
@@ -259,6 +258,11 @@ class BusinessTripController extends Controller
             return response()->json(['error' => 'Failed to create PDF object: ' . $e->getMessage()], 500);
         }
 
+        $outputName = uniqid('', true) . '.pdf';
+        $outputPath = Storage::disk('pdf-exports')
+            ->path($outputName);
+
+
         try {
             Log::info("Filling form with data: " . json_encode($data, JSON_THROW_ON_ERROR));
             $pdf->fillForm($data);
@@ -276,7 +280,7 @@ class BusinessTripController extends Controller
         }
 
         Log::info("PDF generation completed, checking file existence...");
-        if (file_exists($outputPath)) {
+        if (Storage::disk('pdf-exports')->exists($outputName)) {
             Log::info("PDF generation successful, file exists at path: " . $outputPath);
             return response()->download($outputPath)->deleteFileAfterSend(true);
         }
