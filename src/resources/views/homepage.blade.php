@@ -11,12 +11,9 @@
         <x-link-button href="/trips/create">Pridať pracovnú cestu</x-link-button>
         <x-button color="danger" event="open-add-users">Pridať používateľov</x-button>
         <x-link-button color="danger" href="/spp">ŠPP prvky</x-link-button>
-        <x-button event="open-register-form">Registrácia</x-button>
     </div>
 
     <x-modals.add-user/>
-    <x-modals.register/>
-
 
     <div class="row">
         <div class="col-md-4">

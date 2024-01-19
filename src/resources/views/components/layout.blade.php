@@ -25,7 +25,7 @@
                             <button> <i></i> Odhlásiť sa </button>
                         </form>
                     @else
-                        <form method="POST" action="/users/authenticate">
+                        <form method="POST" action="/user/authenticate">
                             @csrf
                             <label for="username" class="text-white">Prihlasovacie meno: </label>
                             <input name="username" id="username"/>
@@ -39,11 +39,11 @@
                 </div>
             </div>
             <div class="container py-3">
-                <div>
+                <a href="\" class="text-decoration-none">
                     <h1 class="text-white text-uppercase header-h1 d-inline-flex">Pracovné cesty</h1>
                         <span class="badge badge-pill badge-danger">Administrátor</span>
                     <h2 class="text-white text-uppercase">Katedra aplikovanej informatiky</h2>
-                </div>
+                </a>
             </div>
 
         </header>
