@@ -6,6 +6,8 @@
     use App\Models\SppSymbol;
     use App\Enums\TripType;
     use App\Enums\TripState;
+    use App\Enums\DocumentType;
+    use App\Enums\UserType;
 
     $countries = Country::all()->pluck('name', 'id')->toArray();
     $transports = Transport::all()->pluck('name', 'id')->toArray();
@@ -394,14 +396,27 @@
         @if($tripState != TripState::NEW)
             <x-content-section title="Dokumenty na stiahnutie">
                 <div>
-                    @foreach (\App\Enums\DocumentType::cases() as $doc)
-                        <div>
-                            <a href="/export/{{ $trip->id }}?fileType={{ $doc }}" class="text-decoration-none text-dark">
-                                <i class="fa-solid fa-file-pdf fa-2x mb-1"></i>
-                                <p>{{ $doc }}</p>
-                            </a>
-                        </div>
-                    @endforeach
+                    @if(in_array($trip->user->type, [UserType::EXTERN, UserType::STUDENT]))
+                        <x-document-export-icon :id="$trip->id" :docType="DocumentType::COMPENSATION_AGREEMENT"/>
+                    @endif
+
+                    @if($wantsConferenceFee)
+                            <x-document-export-icon :id="$trip->id" :docType="DocumentType::PAYMENT_ORDER"/>
+                            <x-document-export-icon :id="$trip->id" :docType="DocumentType::CONTROL_SHEET"/>
+                    @endif
+
+                    @if($tripType == TripType::FOREIGN)
+                        <x-document-export-icon :id="$trip->id" :docType="DocumentType::FOREIGN_TRIP_AFFIDAVIT"/>
+                    @endif
+
+                    @if(in_array($tripState, [TripState::COMPLETED, TripState::CLOSED]))
+                        @if($tripType == TripType::FOREIGN)
+                                <x-document-export-icon :id="$trip->id" :docType="DocumentType::FOREIGN_REPORT"/>
+                            @else
+                                <x-document-export-icon :id="$trip->id" :docType="DocumentType::DOMESTIC_REPORT"/>
+                        @endif
+                    @endif
+
                 </div>
             </x-content-section>
         @endif
