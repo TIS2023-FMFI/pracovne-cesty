@@ -4,6 +4,7 @@ use App\Mail\SimpleMail;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BusinessTripController;
+use App\Enums\DocumentType;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -16,7 +17,7 @@ use App\Http\Controllers\BusinessTripController;
 */
 Route::get('/test-export-pdf', function () {
     $controller = new BusinessTripController();
-    return $controller->exportPdf(0, 'cestne_vyhlasenie_k_zahranicnej_pc.pdf');
+    return $controller->exportPdf(0, DocumentType::FOREIGN_TRIP_AFFIDAVIT);
 });
 
 

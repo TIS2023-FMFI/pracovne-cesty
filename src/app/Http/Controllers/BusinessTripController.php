@@ -107,12 +107,18 @@ class BusinessTripController extends Controller
 
         $data = [];
         switch ($documentType) {
-            case 'cestne_vyhlasenie_k_zahranicnej_pc.pdf':
+            case DocumentType::FOREIGN_TRIP_AFFIDAVIT:
                 $data = [
+                    'order_number' => '999',
+                    'trip_duration' => '0000-00-00 00:00:00', //$trip->'?', // tu potrebujem pomôcť, ktorý stĺpec z databázy to je
+                    'adress' => 'adresa',
+                    'name' => 'meno',
+                    /*
                     'order_number' => $trip->sofia_id,
                     'trip_duration' => '?', //$trip->'?', // tu potrebujem pomôcť, ktorý stĺpec z databázy to je
                     'adress' => $trip->place,
                     'name' => $trip->user->first_name . ' ' . $trip->user->last_name,
+                    */
                 ];
                 break;
 
