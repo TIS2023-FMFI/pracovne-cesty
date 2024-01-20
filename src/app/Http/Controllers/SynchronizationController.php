@@ -16,7 +16,56 @@ use Exception;
 
 class SynchronizationController extends Controller
 {
-     /**
+    /**
+     * Synchronize a single user between Cesty and Pritomnost databases.
+     *
+     * @param $userId
+     * @return void
+     */
+    public function syncSingleUser($userId): void
+    {
+        // Use LEFT JOIN to check if the user exists in the Cesty database
+        $userToSync = PritomnostUser::leftJoin('cesty.users', 'cesty.users.personal_id', '=', 'pritomnost.users.personal_id')
+            ->where('pritomnost.users.id', $userId)
+            ->select('pritomnost.users.*', 'cesty.users.id as cesty_user_id')
+            ->first();
+
+        // Update user details in the Cesty database based on the Pritomnost database
+        if ($userToSync) {
+            if ($userToSync->cesty_user_id) {
+                User::where('id', $userToSync->cesty_user_id)->update([
+                    'personal_id' => $userToSync->personal_id,
+                    'username' => $userToSync->username,
+                    'password' => $userToSync->password,
+                    'first_name' => $userToSync->name,
+                    'last_name' => $userToSync->surname,
+                    'email' => $userToSync->email,
+                    'status' => $userToSync->status,
+                    'last_login' => $userToSync->last_login,
+                    // Other values are not defined
+                ]);
+            } else {
+                // User doesn't exist in the Cesty database, create them
+                $newUser = User::create([
+                    'personal_id' => $userToSync->personal_id,
+                    'username' => $userToSync->username,
+                    'password' => $userToSync->password,
+                    'first_name' => $userToSync->name,
+                    'last_name' => $userToSync->surname,
+                    'email' => $userToSync->email,
+                    'status' => $userToSync->status,
+                    'last_login' => $userToSync->last_login,
+                    // Other values are not defined
+                ]);
+
+                // Add type of user
+                $newUser->user_type = UserType::EMPLOYEE;
+                $newUser->save();
+            }
+        }
+    }
+    
+    /**
      * Synchronize users between Cesty and Pritomnost databases.
      *
      * @return void
