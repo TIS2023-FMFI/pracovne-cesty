@@ -16,8 +16,8 @@ use App\Enums\DocumentType;
 |
 */
 Route::get('/test-export-pdf', function () {
-    $controller = new BusinessTripController();
-    return $controller->exportPdf(0, DocumentType::FOREIGN_TRIP_AFFIDAVIT);
+    $a = new BusinessTripController();
+    return $a->exportPdf(10, DocumentType::COMPENSATION_AGREEMENT);
 });
 
 

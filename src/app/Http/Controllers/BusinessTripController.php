@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Enums\DocumentType;
 use App\Models\BusinessTrip;
+use App\Models\Staff;
+use App\Enums\PositionTitle;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -89,7 +91,7 @@ class BusinessTripController extends Controller
     public function exportPdf(int $tripId, DocumentType $documentType): JsonResponse | BinaryFileResponse
     {
         $trip = BusinessTrip::find($tripId);
-        if (!$trip && $tripId !== 0) {
+        if (!$trip) {
             return response()->json(['error' => 'Business trip not found'], 404);
         }
 
@@ -105,33 +107,35 @@ class BusinessTripController extends Controller
         $data = [];
         switch ($documentType) {
             case DocumentType::FOREIGN_TRIP_AFFIDAVIT:
+                $tripDuration = $trip->datetime_start->diff($trip->datetime_end);
+                $tripDurationFormatted = $tripDuration->format('%d dni %h hodin %i minut');
+                $name = $trip->user->academic_degrees
+                    ? $trip->user->academic_degrees . ' ' . $trip->user->first_name . ' ' . $trip->user->last_name
+                    : $trip->user->first_name . ' ' . $trip->user->last_name;
                 $data = [
-                    'order_number' => '999',
-                    'trip_duration' => '0000-00-00 00:00:00', //$trip->'?', // tu potrebujem pomôcť, ktorý stĺpec z databázy to je
-                    'adress' => 'adresa',
-                    'name' => 'meno',
-                    /*
                     'order_number' => $trip->sofia_id,
-                    'trip_duration' => '?', //$trip->'?', // tu potrebujem pomôcť, ktorý stĺpec z databázy to je
+                    'trip_duration' => $tripDurationFormatted,
                     'adress' => $trip->place,
-                    'name' => $trip->user->first_name . ' ' . $trip->user->last_name,
-                    */
+                    'name' => $name,
                 ];
                 break;
 
             case DocumentType::COMPENSATION_AGREEMENT:
+                $contributions = $trip->contributions;
+                $dekan = Staff::where('position', PositionTitle::DEAN)->first();
+                $tajomnicka = Staff::where('position', PositionTitle::SECRETARY)->first();
                 $data = [
                     'first_name' => $trip->user->first_name,
                     'last_name' => $trip->user->last_name,
                     'academic_degree' => $trip->user->academic_degrees,
                     'address' => $trip->user->address,
-                    'contribution1' => '?', // v databáze neexistuje prepojenie na tabuľku s prínosmi pre fakultu
-                    'contribution2' => '?', // -||-
-                    'contribution3' => '?', // -||-
+                    'contribution1' => $contributions->get(0) ? 'true' : null,
+                    'contribution2' => $contributions->get(1) ? 'true' : null,
+                    'contribution3' => $contributions->get(2) ? 'true' : null,
                     'department' => $trip->user->department,
                     'place' => $trip->country->name . ', ' . $trip->place,
-                    'datetime_start' => $trip->datetime_start->format('Y-m-d'),
-                    'datetime_end' => $trip->datetime_end->format('Y-m-d'),
+                    'datetime_start' => $trip->datetime_start->format('d-m-Y'),
+                    'datetime_end' => $trip->datetime_end->format('d-m-Y'),
                     'transport' => $trip->transport->name,
                     'trip_purpose' => $trip->tripPurpose->name,
                     'fund' => $trip->sppSymbol->fund,
@@ -141,49 +145,31 @@ class BusinessTripController extends Controller
                     'account' => $trip->sppSymbol->account,
                     'grantee' => $trip->sppSymbol->grantee,
                     'iban' => $trip->iban,
-                    'bank_name' => '?',
-                    'incumbent_name2' => '?', // sem sa bude dopĺnať meno a priezvisko z tabuľky staff
-                    'incumbent_name1' => '?', // -||-
-                    'position_name1' => '?',  // -||-
-                    'position_name2' => '?',  // -||-
-                    'contribution1_text' => '?', // v databáze neexistuje prepojenie na tabuľku s prínosmi pre fakultu
-                    'contribution2_text' => '?', // -||-
-                    'contribution3_text' => '?', // -||-
+                    'incumbent_name1' => $dekan ? $dekan->incumbent_name : 'N/A',
+                    'incumbent_name2' => $tajomnicka ? $tajomnicka->incumbent_name : 'N/A',
+                    'contribution1_text' => $contributions->get(0) ? $contributions->get(0)->name : null,
+                    'contribution2_text' => $contributions->get(1) ? $contributions->get(1)->name : null,
+                    'contribution3_text' => $contributions->get(2) ? $contributions->get(2)->name : null,
                 ];
                 break;
 
             case DocumentType::CONTROL_SHEET:
                 $data = [
                     'spp_symbol' => $trip->sppSymbol->spp_symbol,
-                    'expense_estimation' => $trip->expense_estimation,
-                    'incumbent_name1' => '?', // to isté čo v COMPENSATION_AGREEMENT, dopĺňanie z tabuľky staff
-                    'incumbent_name2' => '?', // -||-
-                    'incumbent_name3' => '?', // -||-
-                    'source1' => $trip->sppSymbol->fund, // niesom si istý, či zdroj je fund
-                    'source2' => $trip->sppSymbol->fund,
-                    'source3' => $trip->sppSymbol->fund,
+                    'expense_estimation' => $trip->conference_fee->amount,
+                    'source1' => $trip->sppSymbol->fund,
                     'functional_region1' => $trip->sppSymbol->functional_region,
-                    'functional_region2' => $trip->sppSymbol->functional_region,
-                    'functional_region3' => $trip->sppSymbol->functional_region,
                     'spp_symbol1' => $trip->sppSymbol->spp_symbol,
-                    'spp_symbol2' => $trip->sppSymbol->spp_symbol,
-                    'spp_symbol3' => $trip->sppSymbol->spp_symbol,
                     'financial_centre1' => $trip->sppSymbol->financial_centre,
-                    'financial_centre2' => $trip->sppSymbol->financial_centre,
-                    'financial_centre3' => $trip->sppSymbol->financial_centre,
-                    'incumbent_name4' => '?', // to čo vyššie
-                    'incumbent_name5' => '?',
-                    'purpose_details' => $trip->purpose_details,
+                    'purpose_details' => 'Úhrada vložného',
                 ];
                 break;
 
             case DocumentType::PAYMENT_ORDER:
                 $data = [
-                    'advance_amount_string' => '?', // niesom si istý či máme pre toto vytvorený stĺpec
-                    'advance_amount' => $trip->advanceExpense ? $trip->advanceExpense->amount_eur : null,
+                    'advance_amount' => $trip->conference_fee->amount,
                     'grantee' => $trip->sppSymbol->grantee,
-                    'address' => $trip->user->address,
-                    'incumbent_name' => '?', // to isté čo v COMPENSATION_AGREEMENT, dopĺňanie z tabuľky staff
+                    'address' => $trip->conference_fee->organiser_address,
                     'source' => $trip->sppSymbol->fund,
                     'functional_region' => $trip->sppSymbol->functional_region,
                     'spp_symbol' => $trip->sppSymbol->spp_symbol,
@@ -193,11 +179,17 @@ class BusinessTripController extends Controller
                 break;
 
             case DocumentType::DOMESTIC_REPORT:
+                $name = $trip->user->academic_degrees
+                    ? $trip->user->academic_degrees . ' ' . $trip->user->first_name . ' ' . $trip->user->last_name
+                    : $trip->user->first_name . ' ' . $trip->user->last_name;
+                $mealsReimbursementText = $trip->meals_reimbursement == 1
+                    ? 'mam zaujem o preplatenie'
+                    : 'nemam zaujem o preplatenie';
                 $data = [
-                    'name' => $trip->user->first_name . ' ' . $trip->user->last_name,
+                    'name' => $name,
                     'department' => $trip->user->department,
-                    'date_start' => $trip->datetime_start->format('Y-m-d'),
-                    'date_end' => $trip->datetime_end->format('Y-m-d'),
+                    'date_start' => $trip->datetime_start->format('d-m-Y'),
+                    'date_end' => $trip->datetime_end->format('d-m-Y'),
                     'spp_symbol' => $trip->spp_symbols->spp_symbol,
                     'time_start' => $trip->datetime_start->format('H:i'),
                     'time_end' => $trip->datetime_end->format('H:i'),
@@ -206,28 +198,25 @@ class BusinessTripController extends Controller
                     'accommodation_expense' => $trip->accommodationExpense ? $trip->accommodationExpense->amount_eur : null,
                     'other_expenses' => $trip->otherExpense ? $trip->otherExpense->amount_eur : null,
                     'allowance' => $trip->allowanceExpense ? $trip->allowanceExpense->amount_eur : null,
-                    'expenses' => '?', // neviem ktorý stĺpec predstavuje celkové náklady na cestu
                     'conclusion' => $trip->conclusion,
-                    'iban_foreign' => '?', // tu všade kde je otáznik, potrebujem pomôcť
-                    'bank_address' => '?',
                     'iban' => $trip->iban,
                     'address' => $trip->user->address,
-                    'swift' => '?',
-                    'place' => '?',
-                    'meals_reimbursement_DG42' => '?',
-                    'conclusion_MESS' => '?',
+                    'meals_reimbursement_DG42' => $mealsReimbursementText,
                 ];
                 break;
 
             case DocumentType::FOREIGN_REPORT:
+                $mealsReimbursementText = $trip->meals_reimbursement == 1
+                    ? 'mam zaujem o preplatenie'
+                    : 'nemam zaujem o preplatenie';
                 $data = [
                     'name' => $trip->user->first_name . ' ' . $trip->user->last_name,
                     'department' => $trip->user->department,
                     'country' => $trip->country->name,
-                    'datetime_end' => $trip->datetime_end->format('Y-m-d H:i'),
-                    'datetime_start' => $trip->datetime_start->format('Y-m-d H:i'),
-                    'datetime_border_crossing_start' => $trip->datetime_border_crossing_start->format('Y-m-d H:i'),
-                    'datetime_border_crossing_end' => $trip->datetime_border_crossing_end->format('Y-m-d H:i'),
+                    'datetime_end' => $trip->datetime_end->format('d-m-Y H:i'),
+                    'datetime_start' => $trip->datetime_start->format('d-m-Y H:i'),
+                    'datetime_border_crossing_start' => $trip->datetime_border_crossing_start->format('d-m-Y H:i'),
+                    'datetime_border_crossing_end' => $trip->datetime_border_crossing_end->format('d-m-Y H:i'),
                     'place' => $trip->place,
                     'spp_symbol' => $trip->sppSymbol->spp_symbol,
                     'transport' => $trip->transport->name,
@@ -235,20 +224,15 @@ class BusinessTripController extends Controller
                     'travelling_expense' => $trip->travellingExpense ? $trip->travellingExpense->amount_eur : null,
                     'accommodation_expense_foreign' => $trip->accommodationExpense ? $trip->accommodationExpense->amount_foreign : null,
                     'accommodation_expense' => $trip->accommodationExpense ? $trip->accommodationExpense->amount_eur : null,
-                    'meals_reimbursement_foreign' => '?', // toto máme uložené v databáze len ako 1 alebo 0
                     'allowance_foreign' => $trip->allowanceExpense ? $trip->allowanceExpense->amount_foreign : null,
                     'allowance' => $trip->allowanceExpense ? $trip->allowanceExpense->amount_eur : null,
-                    'meals_reimbursement' => '?', // to isté ako pri meals_reimbursement_foreign
+                    'meals_reimbursement' => $mealsReimbursementText,
                     'other_expenses_foreign' => $trip->otherExpense ? $trip->otherExpense->amount_foreign : null,
                     'other_expenses' => $trip->otherExpense ? $trip->otherExpense->amount_eur : null,
-                    'expenses_foreign' => '?', // opäť neviem nájsť stĺpec ktorý predstavuje celkové náklady
-                    'expenses' => '?', // -||-
                     'conclusion' => $trip->conclusion,
-                    'bank_code' => '?',
                     'iban' => $trip->iban,
                     'advance_expense_foreign' => $trip->advanceExpense ? $trip->advanceExpense->amount_foreign : null,
-                    'invitation_case_charges' => '?',   // neviem ktorý riadok predstavuje odhadnutie preplatených
-                    // výdavkov v prípade pozvania druhou stranou
+                    'invitation_case_charges' => $trip->expense_estimation,
                 ];
                 break;
 
