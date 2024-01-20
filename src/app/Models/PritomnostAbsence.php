@@ -21,6 +21,16 @@ class PritomnostAbsence extends Model
         'confirmation' => 'boolean'
     ];
 
+    // Mass assignable attributes
+    protected $fillable = [
+        'user_id',
+        'date_time',
+        'from_time',
+        'to_time',
+        'description',
+        'type'
+    ];
+
     /**
      * Get the user associated with the absence
      *
