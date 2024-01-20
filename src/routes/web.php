@@ -15,11 +15,6 @@ use App\Enums\DocumentType;
 | be assigned to the "web" middleware group. Make something great!
 |
 */
-Route::get('/test-export-pdf', function () {
-    $a = new BusinessTripController();
-    return $a->exportPdf(10, DocumentType::COMPENSATION_AGREEMENT);
-});
-
 
 Route::get('/', function () {
     return view('welcome');
