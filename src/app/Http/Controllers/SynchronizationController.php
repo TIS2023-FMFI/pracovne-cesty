@@ -4,14 +4,19 @@ namespace App\Http\Controllers;
 
 
 use App\Enums\PritomnostAbsenceType;
+use App\Enums\UserType;
 use App\Models\BusinessTrip;
 use App\Models\PritomnostAbsence;
 use App\Models\PritomnostUser;
 use App\Models\User;
+use DateInterval;
+use DateTime;
+use DatePeriod;
+use Exception;
 
 class SynchronizationController extends Controller
 {
-    /**
+     /**
      * Synchronize users between Cesty and Pritomnost databases.
      *
      * @return void
@@ -40,7 +45,7 @@ class SynchronizationController extends Controller
                 ]);
             } else {
                 //User doesn't exist in the Cesty database, create them
-                User::create([
+                $newUser = User::create([
                     'personal_id' => $user->personal_id,
                     'username' => $user->username,
                     'password' => $user->password,
@@ -51,6 +56,10 @@ class SynchronizationController extends Controller
                     'last_login' => $user->last_login,
                     //Other values are not defined
                 ]);
+
+                //Add type of user
+                $newUser->user_type = UserType::EMPLOYEE; // Set the appropriate user type
+                $newUser->save();
             }
         }
     }
@@ -59,6 +68,7 @@ class SynchronizationController extends Controller
      * Synchronize business trips between Cesty and Pritomnost databases.
      *
      * @return void
+     * @throws Exception If there is an issue with DateTime
      */
     public function syncBusinessTrips(): void
     {
@@ -73,15 +83,37 @@ class SynchronizationController extends Controller
             ->get();
 
         foreach ($businessTripsToSync as $businessTrip) {
-            //Check if the absence already exists in the Pritomnost database
-            if (!$businessTrip->absence_id) {
-                //Create absence record in the Pritomnost database
-                PritomnostAbsence::create([
+            // Calculate the number of days in the business trip
+            $startDate = new DateTime($businessTrip->datetime_start);
+            $endDate = new DateTime($businessTrip->datetime_end);
+            $interval = new DateInterval('P1D');
+            $dateRange = new DatePeriod($startDate, $interval, $endDate);
+
+            foreach ($dateRange as $date) {
+                // Calculate from_time and to_time for the current day in the loop
+                $fromTime = ($date == $startDate) ? $businessTrip->datetime_start : $date->format('Y-m-d') . ' 00:00:00';
+                $toTime = ($date == $endDate) ? $businessTrip->datetime_end : $date->format('Y-m-d') . ' 23:59:59';
+
+                // Check if the absence already exists in the Pritomnost database for this day
+                $existingAbsence = PritomnostAbsence::where([
                     'user_id' => $businessTrip->user_id,
-                    'from_time' => $businessTrip->datetime_start,
-                    'to_time' => $businessTrip->datetime_end,
-                    //Other values are not defined
-                ]);
+                    'from_time' => $fromTime,
+                    'to_time' => $toTime,
+                    'type' => PritomnostAbsenceType::BUSINESS_TRIP,
+                    'description' => 'Pracovna cesta z Cesty DB',
+                ])->first();
+
+                if (!$existingAbsence) {
+                    //Create absence record in the Pritomnost database
+                    PritomnostAbsence::create([
+                        'user_id' => $businessTrip->user_id,
+                        'from_time' => $fromTime,
+                        'to_time' => $toTime,
+                        'type' => PritomnostAbsenceType::BUSINESS_TRIP,
+                        'description' => 'Pracovna cesta z Cesty DB',
+                        //Other values are not defined
+                    ]);
+                }
             }
         }
     }
