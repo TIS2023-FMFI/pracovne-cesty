@@ -147,14 +147,15 @@
                 <x-content-section title="Prínos pre fakultu">
                     @foreach($contributions as $id => $name)
                         @php
-                            $checked = $tripContributions->has($id);
-                            $detail = $tripContributions[$id]->detail ?? '';
+                            $contribution = $trip->contributions->where('id', $id)->first();
+                            $detail = $contribution->pivot->detail ?? '';
+                            $checked = $contribution != null;
                         @endphp
 
                         <div class="input-group mb-3">
                             <div class="input-group-prepend">
                                 <div class="input-group-text">
-                                    <input type="checkbox" name="contribution_{{ $id }}" {{$checked ? 'checked' : ''}}>
+                                    <input type="checkbox" name="contribution_{{ $id }}" {{ $checked ? 'checked' : '' }}>
                                 </div>
                                 <span class="input-group-text">{{ $name }}</span>
                             </div>
