@@ -95,6 +95,27 @@ class BusinessTripController extends Controller
     }
 
     /**
+     * Get the attachment from a business trip.
+     */
+    public function getAttachment(BusinessTrip $trip) {
+        // Check if the trip has an attachment
+        if (!$trip->upload_name) {
+            abort(404, 'File not found'); // Or other error handling
+        }
+
+        // Build the file path
+        $filePath = storage_path('app/' . $trip->upload_name);
+
+        // Check if the file exists
+        if (!file_exists($filePath)) {
+            abort(404, 'File not found'); // Or other error handling
+        }
+
+        // Download the file
+        return response()->download($filePath, $trip->upload_name);
+    }
+
+    /**
      * Returning the view with the trip editing form
      * @throws \Exception
      */
