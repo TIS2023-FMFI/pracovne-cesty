@@ -51,10 +51,38 @@ class BusinessTripController extends Controller
      * Sending mail with mail component to admin
      */
     public function store(Request $request) {
+        //Validate data
         $validatedData = $request->validate([
-            //Add more fields and validation rules
-            'place' => 'required|varchar|max:200',
-            'datetime_start' => 'required|datetime',
+            'user_id' => 'required|integer|min:0',
+            'country_id' => 'required|exists:countries,id',
+            'transport_id' => 'required|exists:transports,id',
+            'place' => 'required|string|max:200',
+            'event_url' => 'nullable|string|max:200',
+            'upload_name' => 'nullable|string|max:200',
+            'sofia_id' => 'nullable|string|max:40',
+            'state' => 'required|integer',
+            'datetime_start' => 'required|date',
+            'datetime_end' => 'required|date|after:datetime_start',
+            'place_start' => 'nullable|string|max:200',
+            'place_end' => 'nullable|string|max:200',
+            'datetime_border_crossing_start' => 'nullable|date',
+            'datetime_border_crossing_end' => 'nullable|date',
+            'trip_purpose_id' => 'required|integer|min:0', //possibly |exists:trip_purposes,id
+            'purpose_details' => 'nullable|string|max:50',
+            'iban' => 'required|string|max:34',
+            'conference_fee_id' => 'nullable|integer|min:0',
+            'reimbursement_id' => 'nullable|integer|min:0',
+            'spp_symbol_id' => 'nullable|exists:spp_symbols,id',
+            'accommodation_expense_id' => 'nullable|integer|min:0',
+            'travelling_expense_id' => 'nullable|integer|min:0',
+            'other_expense_id' => 'nullable|integer|min:0',
+            'advance_expense_id' => 'nullable|integer|min:0',
+            'not_reimbursed_meals' => 'nullable|string|max:255',
+            'meals_reimbursement' => 'boolean',
+            'expense_estimation' => 'nullable|string|max:20',
+            'cancellation_reason' => 'nullable|string|max:1000',
+            'note' => 'nullable|string|max:5000',
+            'conclusion' => 'nullable|string|max:5000',
         ]);
 
         // Set the type of trip based on the selected country
@@ -139,16 +167,42 @@ class BusinessTripController extends Controller
     }
 
     /**
-     * Validation as in create(), should check if user is admin/not
      * Redirecting to the trip editing form
      * Sending mail with mail component to admin
      */
     public function update(Request $request, BusinessTrip $trip) {
         //Validate data
         $validatedData = $request->validate([
-            //Add more fields and validation rules
-            'place' => 'required|varchar|max:200',
-            'datetime_start' => 'required|datetime',
+            'user_id' => 'required|integer|min:0',
+            'country_id' => 'required|exists:countries,id',
+            'transport_id' => 'required|exists:transports,id',
+            'place' => 'required|string|max:200',
+            'event_url' => 'nullable|string|max:200',
+            'upload_name' => 'nullable|string|max:200',
+            'sofia_id' => 'nullable|string|max:40',
+            'state' => 'required|integer',
+            'datetime_start' => 'required|date',
+            'datetime_end' => 'required|date|after:datetime_start',
+            'place_start' => 'nullable|string|max:200',
+            'place_end' => 'nullable|string|max:200',
+            'datetime_border_crossing_start' => 'nullable|date',
+            'datetime_border_crossing_end' => 'nullable|date',
+            'trip_purpose_id' => 'required|integer|min:0', //possibly |exists:trip_purposes,id
+            'purpose_details' => 'nullable|string|max:50',
+            'iban' => 'required|string|max:34',
+            'conference_fee_id' => 'nullable|integer|min:0',
+            'reimbursement_id' => 'nullable|integer|min:0',
+            'spp_symbol_id' => 'nullable|exists:spp_symbols,id',
+            'accommodation_expense_id' => 'nullable|integer|min:0',
+            'travelling_expense_id' => 'nullable|integer|min:0',
+            'other_expense_id' => 'nullable|integer|min:0',
+            'advance_expense_id' => 'nullable|integer|min:0',
+            'not_reimbursed_meals' => 'nullable|string|max:255',
+            'meals_reimbursement' => 'boolean',
+            'expense_estimation' => 'nullable|string|max:20',
+            'cancellation_reason' => 'nullable|string|max:1000',
+            'note' => 'nullable|string|max:5000',
+            'conclusion' => 'nullable|string|max:5000',
         ]);
 
         //Update the trip based on the validated data
@@ -170,9 +224,6 @@ class BusinessTripController extends Controller
     }
 
     /**
-     * Next 3 functions could be combined to changeState(Request $request, BusinessTrip $b)
-     * Check for admin needed?
-     *
      * Updating state of the trip to cancelled
      * Adding cancellation reason
      * @throws ValidationException
@@ -201,7 +252,7 @@ class BusinessTripController extends Controller
     }
 
     /**
-     * Same as update(), updating state of the trip to confirmed
+     * Updating state of the trip to confirmed
      * @throws ValidationException
      */
     public function confirm(BusinessTrip $trip) {
@@ -217,7 +268,7 @@ class BusinessTripController extends Controller
     }
 
     /**
-     * Same as update, updating state to closed
+     * Updating state to closed
      * @throws ValidationException
      */
     public function close(BusinessTrip $trip) {
