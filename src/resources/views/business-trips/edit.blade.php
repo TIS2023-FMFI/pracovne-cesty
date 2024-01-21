@@ -30,6 +30,9 @@
             <span class="badge badge-pill badge-danger">
             Stav: {{ $trip->state->name}}
             </span>
+            <span class="badge badge-pill badge-danger">
+            Identifikátor: {{ $trip->sofia_id ?? '0000'}}
+            </span>
         </div>
 
         <form method="POST" action="/trips/{{ $trip->id }}" enctype="multipart/form-data">
@@ -373,6 +376,7 @@
             </x-slot:description>
             <form method="POST" action="/trips/{{ $trip->id }}/">
                 @csrf
+                @method('PUT')
                 <div class="form-row align-items-end">
                     <div class="col-9">
                         <x-textarea name="note" label="Poznámka"></x-textarea>
@@ -384,8 +388,64 @@
             </form>
         </x-content-section>
 
+        @if($tripState == TripState::NEW)
+            <x-content-section title="Potvrdenie cesty">
+                <x-slot:description>
+                    Po zaevidovaní v systéme SOFIA sem vložte identifikátor cesty a potvrdťe ju. Zmeníte tak jej stav.
+                </x-slot:description>
+                <form method="POST" action="/trips/{{ $trip->id }}/confirm">
+                    @csrf
+                    @method('PUT')
+                    <div class="form-row align-items-end">
+                        <div class="col-9">
+                            <x-simple-input name="sofia_id" label="Identifikátor"></x-simple-input>
+                        </div>
+                        <div class="col-3 my-3 ">
+                            <x-button>Potvrdiť cestu</x-button>
+                        </div>
+                    </div>
+                </form>
+            </x-content-section>
+        @endif
+
+        @if($tripState == TripState::COMPLETED)
+            <x-content-section title="Vyúčtovanie cesty">
+                <x-slot:description>
+                    Tu si môžete označiť, že ste zaevidovali správu a náklady v systéme SOFIA. Zmeníte tak stav cesty na uzavretú.
+                </x-slot:description>
+                <form method="POST" action="/trips/{{ $trip->id }}/close">
+                    @csrf
+                    @method('PUT')
+                    <div class="form-row align-items-end">
+                        <div class="col my-3 ">
+                            <x-button>Vyúčtovanie vytvorené</x-button>
+                        </div>
+                    </div>
+                </form>
+            </x-content-section>
+        @endif
+
         @if(in_array($tripState, [TripState::NEW, TripState::CONFIRMED]))
             <x-content-section title="Žiadosť o storno">
+                <x-slot:description>
+                    Môžete požiadať o storno pracovnej cesty, musíte však uviesť dôvod storna. Cesta bude stornovaná až po schválení administrátorom.
+                </x-slot:description>
+                <form method="POST" action="/trips/{{ $trip->id }}/">
+                    @csrf
+                    <div class="form-row align-items-end">
+                        <div class="col-9">
+                            <x-textarea name="cancellation_reason" label="Dôvod storna"></x-textarea>
+                        </div>
+                        <div class="col-3 my-3">
+                            <x-button color="danger">Odoslať žiadosť</x-button>
+                        </div>
+                    </div>
+                </form>
+            </x-content-section>
+        @endif
+
+        @if(!in_array($tripState, [TripState::NEW, TripState::CONFIRMED]))
+            <x-content-section title="Stornovanie">
                 <x-slot:description>
                     Môžete požiadať o storno pracovnej cesty, musíte však uviesť dôvod storna. Cesta bude stornovaná až po schválení administrátorom.
                 </x-slot:description>
