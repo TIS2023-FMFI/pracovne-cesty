@@ -13,6 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\ValidationException;
 use App\Enums\TripState;
+use App\Enums\TripType;
 
 class BusinessTripController extends Controller
 {
@@ -52,6 +53,10 @@ class BusinessTripController extends Controller
             'place' => 'required|varchar|max:200',
             'datetime_start' => 'required|datetime',
         ]);
+
+        // Set the type of trip based on the selected country
+        $selectedCountry = $request->input('country');
+        $validatedData['type'] = $selectedCountry === 'Slovensko' ? TripType::DOMESTIC : TripType::FOREIGN;
 
         //Logic to store the trip based on the validated data
         //Need to check field names
