@@ -17,6 +17,7 @@
 
     $tripType = $trip->type;
     $tripState = $trip->state;
+    $tripUserType = $trip->user->user_type;
 @endphp
 
 <x-layout>
@@ -142,20 +143,27 @@
                 </div>
             </x-content-section>
 
-            <x-content-section title="Prínos pre fakultu">
-                @foreach($contributions as $id => $name)
-                    <div class="input-group mb-3">
-                        <div class="input-group-prepend">
-                            <div class="input-group-text">
-                                <input type="checkbox">
-                            </div>
-                            <span class="input-group-text">{{ $name }}</span>
-                        </div>
-                        <input type="text" name="contribution_{{ $id }}_detail" class="form-control">
-                    </div>
-                @endforeach
+            @if(in_array($tripUserType, [UserType::STUDENT, UserType::EXTERN]))
+                <x-content-section title="Prínos pre fakultu">
+                    @foreach($contributions as $id => $name)
+                        @php
+                            $checked = $tripContributions->has($id);
+                            $detail = $tripContributions[$id]->detail ?? '';
+                        @endphp
 
-            </x-content-section>
+                        <div class="input-group mb-3">
+                            <div class="input-group-prepend">
+                                <div class="input-group-text">
+                                    <input type="checkbox" name="contribution_{{ $id }}" {{$checked ? 'checked' : ''}}>
+                                </div>
+                                <span class="input-group-text">{{ $name }}</span>
+                            </div>
+                            <input type="text" name="contribution_{{ $id }}_detail" class="form-control" value="{{ $detail }}">
+                        </div>
+                    @endforeach
+
+                </x-content-section>
+            @endif
 
             @php
                 $isReimbursed = $trip->reimbursement != null;
@@ -396,7 +404,7 @@
         @if($tripState != TripState::NEW)
             <x-content-section title="Dokumenty na stiahnutie">
                 <div>
-                    @if(in_array($trip->user->type, [UserType::EXTERN, UserType::STUDENT]))
+                    @if(in_array($tripUserType, [UserType::EXTERN, UserType::STUDENT]))
                         <x-document-export-icon :id="$trip->id" :docType="DocumentType::COMPENSATION_AGREEMENT"/>
                     @endif
 

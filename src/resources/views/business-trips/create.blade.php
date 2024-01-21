@@ -101,20 +101,20 @@
                     </div>
                 </x-content-section>
 
-{{--            @if($userType == UserType::STUDENT || $userType == UserType::EXTERN)--}}
-            <x-content-section title="Prínos pre fakultu">
-                @foreach($contributions as $id => $name)
-                    <div class="input-group mb-3">
-                        <div class="input-group-prepend">
-                            <div class="input-group-text">
-                                <input type="checkbox">
+{{--            @if(in_array($userType, [UserType::STUDENT, UserType::EXTERN]))--}}
+                <x-content-section title="Prínos pre fakultu">
+                    @foreach($contributions as $id => $name)
+                        <div class="input-group mb-3">
+                            <div class="input-group-prepend">
+                                <div class="input-group-text">
+                                    <input type="checkbox" name="contribution_{{ $id }}">
+                                </div>
+                                <span class="input-group-text">{{ $name }}</span>
                             </div>
-                            <span class="input-group-text">{{ $name }}</span>
+                            <input type="text" name="contribution_{{ $id }}_detail" class="form-control">
                         </div>
-                        <input type="text" name="contribution_{{ $id }}_detail" class="form-control">
-                    </div>
-                @endforeach
-            </x-content-section>
+                    @endforeach
+                </x-content-section>
 {{--            @endif--}}
 
             <x-content-section title="Financovanie" x-data="{reimbursementShow: false}">
