@@ -9,6 +9,9 @@ use App\Models\Country;
 use App\Models\SppSymbol;
 use App\Models\Transport;
 use App\Models\TripPurpose;
+use DateTime;
+use DateInterval;
+use DatePeriod;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\ValidationException;
@@ -59,7 +62,6 @@ class BusinessTripController extends Controller
         $validatedData['type'] = $selectedCountry === 'Slovensko' ? TripType::DOMESTIC : TripType::FOREIGN;
 
         //Logic to store the trip based on the validated data
-        //Need to check field names
         $trip = new BusinessTrip($validatedData);
 
         //Handle file uploads
@@ -77,7 +79,6 @@ class BusinessTripController extends Controller
         }
 
         //Sending mails
-
         $message = '';
         $recipient = 'admin@example.com';
         $viewTemplate = 'emails.new_trip_admin';
@@ -95,9 +96,24 @@ class BusinessTripController extends Controller
 
     /**
      * Returning the view with the trip editing form
+     * @throws \Exception
      */
     public function edit(BusinessTrip $trip) {
-        return view('business-trips.edit', ['trip' => $trip]);
+        $startDate = new DateTime($trip->datetime_start);
+        $endDate = new DateTime($trip->datetime_end);
+        $interval = new DateInterval('P1D');
+        $dateRange = new DatePeriod($startDate, $interval, $endDate);
+
+        $days = iterator_count($dateRange);
+
+        // Get the collection of contributions associated with the trip
+        $tripContributions = $trip->contributions()->pluck('contributions.id');
+
+        return view('business-trips.edit',  [
+            'trip' => $trip,
+            'days' => $days,
+            'tripContributions' => $tripContributions,
+        ]);
 
     }
 
@@ -109,7 +125,6 @@ class BusinessTripController extends Controller
     public function update(Request $request, BusinessTrip $trip) {
         //Validate data
         $validatedData = $request->validate([
-            //Add check if user is admin/not
             //Add more fields and validation rules
             'place' => 'required|varchar|max:200',
             'datetime_start' => 'required|datetime',
@@ -119,7 +134,6 @@ class BusinessTripController extends Controller
         $trip->update($validatedData);
 
         //Sending mails
-
         $message = '';
         $recipient = 'admin@example.com';
         $viewTemplate = 'emails.new_trip_admin';
