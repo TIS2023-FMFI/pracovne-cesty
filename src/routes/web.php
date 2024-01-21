@@ -69,6 +69,10 @@ Route::controller(BusinessTripController::class)
         // Export the trip details as the selected document
         Route::post('/{trip}/export', 'exportPdf')
             ->name('export');
+
+        // Download attachment in the trip
+        Route::post('/{trip}/attachment', 'getAttachment')
+            ->name('attachment');
     });
 
 // User management
