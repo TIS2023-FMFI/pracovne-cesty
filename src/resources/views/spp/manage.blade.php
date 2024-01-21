@@ -1,6 +1,8 @@
 @php
     use App\Models\SppSymbol;
-    $spp_symbols = SppSymbol::all()->pluck('spp_symbol', 'id')->toArray();
+    use App\Enums\SppStatus;
+
+    $spp_symbols = SppSymbol::where('status', SppStatus::ACTIVE)->pluck('spp_symbol', 'id');
 @endphp
 
 <x-layout>

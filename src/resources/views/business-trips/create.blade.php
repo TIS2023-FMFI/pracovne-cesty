@@ -4,13 +4,14 @@
     use App\Models\TripPurpose;
     use App\Models\Contribution;
     use App\Models\SppSymbol;
+    use App\Enums\SppStatus;
     use App\Enums\UserType;
 
-    $countries = Country::all()->pluck('name', 'id')->toArray();
-    $transports = Transport::all()->pluck('name', 'id')->toArray();
-    $purposes = TripPurpose::all()->pluck('name', 'id')->toArray();;
-    $contributions = Contribution::all()->pluck('name', 'id')->toArray();
-    $spp_symbols = SppSymbol::all()->pluck('spp_symbol', 'id')->toArray();
+    $countries = Country::all()->pluck('name', 'id');
+    $transports = Transport::all()->pluck('name', 'id');
+    $purposes = TripPurpose::all()->pluck('name', 'id');
+    $contributions = Contribution::all()->pluck('name', 'id');
+    $spp_symbols = SppSymbol::where('status', SppStatus::ACTIVE)->pluck('spp_symbol', 'id');
 
 //    $userType = auth()->user()->user_type;
 

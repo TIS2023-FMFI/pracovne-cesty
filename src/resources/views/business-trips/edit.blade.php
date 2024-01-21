@@ -8,12 +8,13 @@
     use App\Enums\TripState;
     use App\Enums\DocumentType;
     use App\Enums\UserType;
+    use App\Enums\SppStatus;
 
-    $countries = Country::all()->pluck('name', 'id')->toArray();
-    $transports = Transport::all()->pluck('name', 'id')->toArray();
-    $purposes = TripPurpose::all()->pluck('name', 'id')->toArray();;
-    $contributions = Contribution::all()->pluck('name', 'id')->toArray();
-    $spp_symbols = SppSymbol::all()->pluck('spp_symbol', 'id')->toArray();
+    $countries = Country::all()->pluck('name', 'id');
+    $transports = Transport::all()->pluck('name', 'id');
+    $purposes = TripPurpose::all()->pluck('name', 'id');
+    $contributions = Contribution::all()->pluck('name', 'id');
+    $spp_symbols = SppSymbol::where('status', SppStatus::ACTIVE)->pluck('spp_symbol', 'id');
 
     $tripType = $trip->type;
     $tripState = $trip->state;

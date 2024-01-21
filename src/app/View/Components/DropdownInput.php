@@ -4,6 +4,7 @@ namespace App\View\Components;
 
 use Closure;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Collection;
 use Illuminate\View\Component;
 
 class DropdownInput extends Component
@@ -13,7 +14,7 @@ class DropdownInput extends Component
      */
     public function __construct(
         public string $name,
-        public array $values,
+        public Collection $values,
         public string $label ='',
         public string $selected = '',
         public bool $disabled = false
