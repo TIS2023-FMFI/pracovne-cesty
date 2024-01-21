@@ -11,6 +11,8 @@ use App\Models\Transport;
 use App\Models\TripPurpose;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Validation\ValidationException;
+use App\Enums\TripState;
 
 class BusinessTripController extends Controller
 {
@@ -133,10 +135,15 @@ class BusinessTripController extends Controller
      *
      * Updating state of the trip to cancelled
      * Adding cancellation reason
+     * @throws ValidationException
      */
     public function cancel(BusinessTrip $trip) {
+        // Check if the trip is in a valid state for cancellation
+        if (!in_array($trip->state, [TripState::NEW, TripState::CONFIRMED])) {
+            throw ValidationException::withMessages(['state' => 'Invalid state for cancellation.']);
+        }
         //Cancel the trip and add cancellation reason
-        $trip->update(['state' => 'canceled', 'cancellation_reason' => request('cancellation_reason')]);
+        $trip->update(['state' => TripState::CANCELLATION_REQUEST, 'cancellation_reason' => request('cancellation_reason')]);
 
         //Send cancellation email to admin
         $message = '';
@@ -155,10 +162,15 @@ class BusinessTripController extends Controller
 
     /**
      * Same as update(), updating state of the trip to confirmed
+     * @throws ValidationException
      */
     public function confirm(BusinessTrip $trip) {
+        // Check if the trip is in a valid state for confirmation
+        if ($trip->state !== TripState::NEW) {
+            throw ValidationException::withMessages(['state' => 'Invalid state for confirmation.']);
+        }
         //Confirm the trip
-        $trip->update(['state' => 'confirmed']);
+        $trip->update(['state' => TripState::CONFIRMED]);
 
         return redirect()->route('business-trips.show', $trip);
 
@@ -166,10 +178,16 @@ class BusinessTripController extends Controller
 
     /**
      * Same as update, updating state to closed
+     * @throws ValidationException
      */
     public function close(BusinessTrip $trip) {
+        // Check if the trip is in a valid state for closing
+        if ($trip->state !== TripState::CONFIRMED) {
+            throw ValidationException::withMessages(['state' => 'Invalid state for closing.']);
+        }
+
         //Close the trip
-        $trip->update(['state' => 'closed']);
+        $trip->update(['state' => TripState::CLOSED]);
 
         return redirect()->route('business-trips.show', $trip);
 
