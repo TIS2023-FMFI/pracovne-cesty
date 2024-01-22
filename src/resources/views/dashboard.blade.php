@@ -1,10 +1,10 @@
-@php
-    use App\Models\BusinessTrip;
-    use App\Models\User;
+{{--@php--}}
+{{--    use App\Models\BusinessTrip;--}}
+{{--    use App\Models\User;--}}
 
-    $trips = BusinessTrip::paginate(15);
-    $users = User::all();
-@endphp
+{{--    $trips = BusinessTrip::paginate(15);--}}
+{{--    $users = User::all();--}}
+{{--@endphp--}}
 
 <x-layout>
     <div class="mb-4">
