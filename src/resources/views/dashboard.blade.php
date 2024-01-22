@@ -23,7 +23,7 @@
                 <x-overview-item content="Nevyúčtované" ref="/?filter=unaccounted"/>
 
                 @foreach($users as $user)
-                    <x-overview-item :content="$user->first_name.' '.$user->last_name" :ref="'users/'.$user->id"/>
+                    <x-overview-item :content="$user->first_name.' '.$user->last_name" :ref="'/?user='.$user->id"/>
                 @endforeach
             </x-content-box>
         </div>
@@ -46,13 +46,6 @@
                 </div>
             </x-content-box>
         </div>
-
     </div>
 
-
-
-
-    @guest
-        <p>Pre zobrazenie pracovných ciest a ich pridávanie či úpravu sa, prosím, prihláste.</p>
-    @endguest
 </x-layout>

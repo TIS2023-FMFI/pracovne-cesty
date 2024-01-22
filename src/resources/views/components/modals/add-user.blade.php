@@ -1,5 +1,5 @@
 <x-modal title="Pridať použivateľov" event="open-add-users" control="usersOpen">
-    <form action="users/add">
+    <form action="users/invite">
         @csrf
         <x-content-section>
             <x-slot:description>

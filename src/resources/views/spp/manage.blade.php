@@ -7,21 +7,23 @@
 
 <x-layout>
     <x-content-box title="ŠPP prvky">
-        <form action="spp/deactivate">
-            @csrf
-            <x-content-section title="Deaktivácia">
-                <div class="form-row">
-                    <div class="col">
-                        <x-dropdown-input name="spp_symbol" :values="$spp_symbols" label="ŠPP prvok:"></x-dropdown-input>
+        <div x-data="{ sppId: '' }">
+            <form x-bind:action="'spp/' + sppId + '/deactivate'" method="POST">
+                @csrf
+                <x-content-section title="Deaktivácia">
+                    <div class="form-row">
+                        <div class="col">
+                            <x-dropdown-input control="sppId" name="spp_symbol" :values="$spp_symbols" label="ŠPP prvok:"></x-dropdown-input>
+                        </div>
+                        <div class="col">
+                            <x-button color="danger">Deaktivovať</x-button>
+                        </div>
                     </div>
-                    <div class="col">
-                        <x-button color="danger">Deaktivovať</x-button>
-                    </div>
-                </div>
-            </x-content-section>
+                </x-content-section>
+            </form>
+        </div>
 
-        </form>
-        <form action="spp/store">
+        <form action="spp/">
             @csrf
             <x-content-section title="Nový ŠPP prvok">
                 <div class="form-row">
@@ -49,10 +51,12 @@
                         <x-simple-input name="grantee" label="Zodpovedný riešiteľ"></x-simple-input>
                     </div>
                 </div>
+
+                <div class="d-flex justify-content-end">
+                    <x-button>Pridať ŠPP prvok</x-button>
+                </div>
             </x-content-section>
-            <div class="d-flex justify-content-end">
-                <x-button>Pridať</x-button>
-            </div>
+
 
         </form>
     </x-content-box>

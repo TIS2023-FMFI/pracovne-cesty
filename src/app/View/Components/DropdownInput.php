@@ -17,7 +17,8 @@ class DropdownInput extends Component
         public Collection $values,
         public string $label ='',
         public string $selected = '',
-        public bool $disabled = false
+        public bool $disabled = false,
+        public string $control = ''
     )
     {
         //

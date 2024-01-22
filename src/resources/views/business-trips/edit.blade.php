@@ -374,7 +374,7 @@
             <x-slot:description>
                 Tu môžete k pracovnej ceste pridať poznámku pre administrátora, ktorý bude upozornený mailom, poznámka zostane viditeľná aj pre Vás.
             </x-slot:description>
-            <form method="POST" action="/trips/{{ $trip->id }}/">
+            <form method="POST" action="/trips/{{ $trip->id }}/note">
                 @csrf
                 @method('PUT')
                 <div class="form-row align-items-end">
@@ -430,8 +430,9 @@
                 <x-slot:description>
                     Môžete požiadať o storno pracovnej cesty, musíte však uviesť dôvod storna. Cesta bude stornovaná až po schválení administrátorom.
                 </x-slot:description>
-                <form method="POST" action="/trips/{{ $trip->id }}/">
+                <form method="POST" action="/trips/{{ $trip->id }}/request_cancellation">
                     @csrf
+                    @method('PUT')
                     <div class="form-row align-items-end">
                         <div class="col-9">
                             <x-textarea name="cancellation_reason" label="Dôvod storna"></x-textarea>
@@ -449,8 +450,9 @@
                 <x-slot:description>
                     Ako administrátor môžete stornovať pracovnú cestu.
                 </x-slot:description>
-                <form method="POST" action="/trips/{{ $trip->id }}/">
+                <form method="POST" action="/trips/{{ $trip->id }}/cancel">
                     @csrf
+                    @method('PUT')
                     <div class="form-row align-items-end">
                         <div class="col-9">
                             <x-textarea name="cancellation_reason" label="Dôvod storna"></x-textarea>

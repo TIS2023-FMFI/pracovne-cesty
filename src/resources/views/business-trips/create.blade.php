@@ -163,12 +163,11 @@
                             <x-simple-input name="amount" type="text" label="Suma"/>
                         </div>
                     </div>
-
                 </x-hideable-section>
             </x-content-section>
 
-            <div class="container">
-            <x-button>Vytvoriť</x-button>
+            <div>
+                <x-button>Vytvoriť cestu</x-button>
             </div>
 
         </form>
