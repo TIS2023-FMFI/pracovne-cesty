@@ -357,7 +357,7 @@
 
 
                 <x-content-section title="Správa">
-                    <x-textarea name="conclusion" label="Výsledky cesty" :value="$trip->conclusion ?? ''"></x-textarea>
+                    <x-textarea name="conclusion" label="Výsledky cesty" :value="$trip->conclusion ?? ''" rows="10"></x-textarea>
                 </x-content-section>
 
             @endif

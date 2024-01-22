@@ -15,7 +15,8 @@ class Textarea extends Component
         public string $name,
         public string $label = "",
         public bool $disabled = false,
-        public string $value = ""
+        public string $value = "",
+        public int $rows = 3
     )
     {
         //
