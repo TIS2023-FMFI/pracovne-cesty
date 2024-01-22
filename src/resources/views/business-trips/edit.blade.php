@@ -444,10 +444,10 @@
             </x-content-section>
         @endif
 
-        @if(!in_array($tripState, [TripState::NEW, TripState::CONFIRMED]))
+        @if(in_array($tripState, [TripState::NEW, TripState::CONFIRMED, TripState::CANCELLATION_REQUEST]))
             <x-content-section title="Stornovanie">
                 <x-slot:description>
-                    Môžete požiadať o storno pracovnej cesty, musíte však uviesť dôvod storna. Cesta bude stornovaná až po schválení administrátorom.
+                    Ako administrátor môžete stornovať pracovnú cestu.
                 </x-slot:description>
                 <form method="POST" action="/trips/{{ $trip->id }}/">
                     @csrf
