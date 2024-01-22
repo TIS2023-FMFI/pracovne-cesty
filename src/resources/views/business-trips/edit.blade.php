@@ -454,11 +454,8 @@
                     @csrf
                     @method('PUT')
                     <div class="form-row align-items-end">
-                        <div class="col-9">
-                            <x-textarea name="cancellation_reason" label="Dôvod storna"></x-textarea>
-                        </div>
-                        <div class="col-3 my-3">
-                            <x-button color="danger">Odoslať žiadosť</x-button>
+                        <div class="col">
+                            <x-button color="danger">Stornovať</x-button>
                         </div>
                     </div>
                 </form>
