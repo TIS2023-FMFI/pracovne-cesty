@@ -64,7 +64,7 @@ class SynchronizationController extends Controller
             }
         }
     }
-    
+
     /**
      * Synchronize users between Cesty and Pritomnost databases.
      *
@@ -122,13 +122,12 @@ class SynchronizationController extends Controller
     public function syncBusinessTrips(): void
     {
         // Use LEFT JOIN to check if the absence already exists in the Pritomnost database
-        $businessTripsToSync = BusinessTrip::leftJoin('pritomnost.absences', function ($join) {
-            $join->on('absences.user_id', '=', 'business_trips.user_id')
-                ->where('absences.from_time', '=', 'business_trips.datetime_start')
-                ->where('absences.to_time', '=', 'business_trips.datetime_end')
-                ->where('absences.type', '=', PritomnostAbsenceType::BUSINESS_TRIP);
+        $businessTripsToSync = BusinessTrip::leftJoin('pritomnost.absence', function ($join) {
+            $join->on('absence.user_id', '=', 'business_trips.user_id')
+                ->whereRaw('absence.date_time BETWEEN DATE(business_trips.datetime_start) AND DATE(business_trips.datetime_end)')
+                ->where('absence.type', '=', PritomnostAbsenceType::BUSINESS_TRIP);
         })
-            ->select('business_trips.*', 'absences.id as absence_id')
+            ->select('business_trips.*', 'absence.id as absence_id')
             ->get();
 
         foreach ($businessTripsToSync as $businessTrip) {
@@ -139,23 +138,24 @@ class SynchronizationController extends Controller
             $dateRange = new DatePeriod($startDate, $interval, $endDate);
 
             foreach ($dateRange as $date) {
+                $formattedDate = $date->format('Y-m-d');
+
                 // Calculate from_time and to_time for the current day in the loop
-                $fromTime = ($date == $startDate) ? $businessTrip->datetime_start : $date->format('Y-m-d') . ' 00:00:00';
-                $toTime = ($date == $endDate) ? $businessTrip->datetime_end : $date->format('Y-m-d') . ' 23:59:59';
+                $fromTime = ($date == $startDate) ? $startDate->format('H:i:s') : '00:00:00';
+                $toTime = ($date == $endDate) ? $endDate->format('H:i:s') : '23:59:59';
 
                 // Check if the absence already exists in the Pritomnost database for this day
                 $existingAbsence = PritomnostAbsence::where([
                     'user_id' => $businessTrip->user_id,
-                    'from_time' => $fromTime,
-                    'to_time' => $toTime,
+                    'date_time' => $formattedDate,
                     'type' => PritomnostAbsenceType::BUSINESS_TRIP,
-                    'description' => 'Pracovna cesta z Cesty DB',
                 ])->first();
 
                 if (!$existingAbsence) {
                     //Create absence record in the Pritomnost database
                     PritomnostAbsence::create([
                         'user_id' => $businessTrip->user_id,
+                        'date_time' => $formattedDate,
                         'from_time' => $fromTime,
                         'to_time' => $toTime,
                         'type' => PritomnostAbsenceType::BUSINESS_TRIP,
