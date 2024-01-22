@@ -87,23 +87,34 @@ class BusinessTripController extends Controller
     public function close() {
 
     }
-
+    /**
+     * Exports a PDF document based on a specific business trip and document type.
+     *
+     * Generates various types of PDF documents for business trips. The method
+     * verifies the trip's existence and the PDF template, prepares data based on
+     * the document type, and creates the PDF, which is returned as a binary file.
+     *
+     * @param int $tripId The ID of the business trip.
+     * @param DocumentType $documentType The type of document to be exported.
+     * @return JsonResponse|BinaryFileResponse Returns a JsonResponse in case of
+     *         errors or a BinaryFileResponse with the generated PDF.
+     * @throws Exception If there is an error during PDF creation or manipulation.
+     * @example
+     *   $response = $object->exportPdf(123, DocumentType::FOREIGN_TRIP_AFFIDAVIT);
+     */
     public function exportPdf(int $tripId, DocumentType $documentType): JsonResponse | BinaryFileResponse
     {
         $trip = BusinessTrip::find($tripId);
         if (!$trip) {
             return response()->json(['error' => 'Business trip not found'], 404);
         }
-
         $templateName = $documentType->value;
         $templatePath = Storage::disk('pdf-templates')
             ->path($templateName);
-
         if (Storage::disk('pdf-templates')->missing($templateName)) {
             Log::error("PDF template file does not exist at path: " . $templatePath);
             return response()->json(['error' => 'PDF template file not found'], 404);
         }
-
         $data = [];
         switch ($documentType) {
             case DocumentType::FOREIGN_TRIP_AFFIDAVIT:
@@ -122,8 +133,8 @@ class BusinessTripController extends Controller
 
             case DocumentType::COMPENSATION_AGREEMENT:
                 $contributions = $trip->contributions;
-                $dekan = Staff::where('position', PositionTitle::DEAN)->first();
-                $tajomnicka = Staff::where('position', PositionTitle::SECRETARY)->first();
+                $dean = Staff::where('position', PositionTitle::DEAN)->first();
+                $secretary = Staff::where('position', PositionTitle::SECRETARY)->first();
                 $data = [
                     'first_name' => $trip->user->first_name,
                     'last_name' => $trip->user->last_name,
@@ -145,8 +156,8 @@ class BusinessTripController extends Controller
                     'account' => $trip->sppSymbol->account,
                     'grantee' => $trip->sppSymbol->grantee,
                     'iban' => $trip->iban,
-                    'incumbent_name1' => $dekan ? $dekan->incumbent_name : 'N/A',
-                    'incumbent_name2' => $tajomnicka ? $tajomnicka->incumbent_name : 'N/A',
+                    'incumbent_name1' => $dean ? $dean->incumbent_name : 'N/A',
+                    'incumbent_name2' => $secretary ? $secretary->incumbent_name : 'N/A',
                     'contribution1_text' => $contributions->get(0) ? $contributions->get(0)->name : null,
                     'contribution2_text' => $contributions->get(1) ? $contributions->get(1)->name : null,
                     'contribution3_text' => $contributions->get(2) ? $contributions->get(2)->name : null,
@@ -183,8 +194,8 @@ class BusinessTripController extends Controller
                     ? $trip->user->academic_degrees . ' ' . $trip->user->first_name . ' ' . $trip->user->last_name
                     : $trip->user->first_name . ' ' . $trip->user->last_name;
                 $mealsReimbursementText = $trip->meals_reimbursement == 1
-                    ? 'mam zaujem o preplatenie'
-                    : 'nemam zaujem o preplatenie';
+                    ? 'mám záujem o preplatenie'
+                    : 'nemám záujem o preplatenie';
                 $data = [
                     'name' => $name,
                     'department' => $trip->user->department,
@@ -239,7 +250,6 @@ class BusinessTripController extends Controller
             default:
                 return response()->json(['error' => 'Unknown document type'], 400);
         }
-
         try {
             Log::info("Creating PDF object with template path: " . $templatePath);
             $pdf = new Pdf($templatePath);
@@ -247,34 +257,20 @@ class BusinessTripController extends Controller
             Log::error("Error creating PDF object: " . $e->getMessage());
             return response()->json(['error' => 'Failed to create PDF object: ' . $e->getMessage()], 500);
         }
-
         $outputName = uniqid('', true) . '.pdf';
         $outputPath = Storage::disk('pdf-exports')
             ->path($outputName);
-
-
         try {
-            Log::info("Filling form with data: " . json_encode($data, JSON_THROW_ON_ERROR));
             $pdf->fillForm($data);
-
-            Log::info("Starting PDF generation for path: " . $outputPath);
-
-            Log::info("Flattening PDF");
             $pdf->flatten();
-
-            Log::info("Saving PDF to path: " . $outputPath);
             $pdf->saveAs($outputPath);
         } catch (Exception $e) {
             Log::error("Error during PDF manipulation: " . $e->getMessage());
             return response()->json(['error' => 'Failed during PDF manipulation: ' . $e->getMessage()], 500);
         }
-
-        Log::info("PDF generation completed, checking file existence...");
         if (Storage::disk('pdf-exports')->exists($outputName)) {
-            Log::info("PDF generation successful, file exists at path: " . $outputPath);
             return response()->download($outputPath)->deleteFileAfterSend(true);
         }
-
         Log::error("PDF file does not exist after generation: " . $outputPath);
         return response()->json(['error' => 'Failed to generate PDF, file not found'], 500);
     }
