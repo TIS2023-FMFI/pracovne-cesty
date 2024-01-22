@@ -5,7 +5,7 @@
             id="{{ $name }}"
             name="{{ $name }}"
             rows="3"
-            {{ $isReadOnly() ? 'readonly' : '' }}
+            {{ $isDisabled() ? 'disabled' : '' }}
         >{{ $value == '' ? old($name) : $value }}</textarea>
 </div>
 

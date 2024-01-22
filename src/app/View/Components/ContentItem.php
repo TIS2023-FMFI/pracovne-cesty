@@ -26,6 +26,9 @@ class ContentItem extends Component
         //
     }
 
+    /**
+     * Chooses icon according to trip state.
+     */
     public function getIcon(): string {
         switch ($this->state) {
             case TripState::NEW:

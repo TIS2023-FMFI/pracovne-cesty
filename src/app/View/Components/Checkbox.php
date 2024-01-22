@@ -21,6 +21,9 @@ class Checkbox extends Component
         //
     }
 
+    /**
+     * Decides if checkbox should be checked.
+     */
     public function isChecked(): bool
     {
         return $this->checked;

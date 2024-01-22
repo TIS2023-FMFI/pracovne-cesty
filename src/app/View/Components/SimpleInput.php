@@ -15,22 +15,19 @@ class SimpleInput extends Component
         public string $name,
         public string $label = '',
         public string $type = 'text',
-        public bool $readOnly = false,
+        public bool $disabled = false,
         public string $value = '',
-        public string $size = 'short'
     )
     {
         //
     }
 
-    public function isReadOnly(): bool
+    /**
+     * Decides if input should be disabled.
+     */
+    public function isDisabled(): bool
     {
-        return $this->readOnly;
-    }
-
-    public function getSize(): string
-    {
-        return $this->size == 'short' ? 'col-md-6' : ($this->size == 'long' ? 'col-md-12' : '');
+        return $this->disabled;
     }
 
     /**

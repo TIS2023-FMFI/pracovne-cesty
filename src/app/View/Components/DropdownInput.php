@@ -23,11 +23,17 @@ class DropdownInput extends Component
         //
     }
 
+    /**
+     * Decides if option should be selected.
+     */
     public function isSelected(string $option): bool
     {
         return $option === $this->selected;
     }
 
+    /**
+     * Decides if input should be disabled.
+     */
     public function isDisabled(): bool
     {
         return $this->disabled;
