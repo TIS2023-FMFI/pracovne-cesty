@@ -148,7 +148,7 @@ class BusinessTripController extends Controller
                     'datetime_start' => $trip->datetime_start->format('d-m-Y'),
                     'datetime_end' => $trip->datetime_end->format('d-m-Y'),
                     'transport' => $trip->transport->name,
-                    'trip_purpose' => $trip->tripPurpose->name,
+                    'trip_purpose' => $trip->tripPurpose->name . ' - ' . $trip->purpose_details,
                     'fund' => $trip->sppSymbol->fund,
                     'functional_region' => $trip->sppSymbol->functional_region,
                     'financial_centre' => $trip->sppSymbol->financial_centre,
@@ -158,9 +158,9 @@ class BusinessTripController extends Controller
                     'iban' => $trip->iban,
                     'incumbent_name1' => $dean ? $dean->incumbent_name : 'N/A',
                     'incumbent_name2' => $secretary ? $secretary->incumbent_name : 'N/A',
-                    'contribution1_text' => $contributions->get(0) ? $contributions->get(0)->name : null,
-                    'contribution2_text' => $contributions->get(1) ? $contributions->get(1)->name : null,
-                    'contribution3_text' => $contributions->get(2) ? $contributions->get(2)->name : null,
+                    'contribution1_text' => $contributions->get(0) ? $contributions->get(0)->pivot->detail : null,
+                    'contribution2_text' => $contributions->get(1) ? $contributions->get(1)->pivot->detail : null,
+                    'contribution3_text' => $contributions->get(2) ? $contributions->get(2)->pivot->detail : null,
                 ];
                 break;
 
@@ -218,8 +218,8 @@ class BusinessTripController extends Controller
 
             case DocumentType::FOREIGN_REPORT:
                 $mealsReimbursementText = $trip->meals_reimbursement == 1
-                    ? 'mam zaujem o preplatenie'
-                    : 'nemam zaujem o preplatenie';
+                    ? 'mám záujem o preplatenie'
+                    : 'nemám záujem o preplatenie';
                 $data = [
                     'name' => $trip->user->first_name . ' ' . $trip->user->last_name,
                     'department' => $trip->user->department,
@@ -231,7 +231,7 @@ class BusinessTripController extends Controller
                     'place' => $trip->place,
                     'spp_symbol' => $trip->sppSymbol->spp_symbol,
                     'transport' => $trip->transport->name,
-                    'travelling_expense_foreign' => $trip->travellingExpense ? $trip->travellingExpense->amount_foreign : null,
+                    'travelling_expense_foreign' => $trip->travellingExpense && isset($trip->travellingExpense->amount_foreign) ? $trip->travellingExpense->amount_foreign : null,
                     'travelling_expense' => $trip->travellingExpense ? $trip->travellingExpense->amount_eur : null,
                     'accommodation_expense_foreign' => $trip->accommodationExpense ? $trip->accommodationExpense->amount_foreign : null,
                     'accommodation_expense' => $trip->accommodationExpense ? $trip->accommodationExpense->amount_eur : null,
