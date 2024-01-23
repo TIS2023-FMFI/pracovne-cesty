@@ -148,7 +148,7 @@ class BusinessTripController extends Controller
                     'datetime_start' => $trip->datetime_start->format('d-m-Y'),
                     'datetime_end' => $trip->datetime_end->format('d-m-Y'),
                     'transport' => $trip->transport->name,
-                    'trip_purpose' => $trip->tripPurpose->name . ' - ' . $trip->purpose_details,
+                    'trip_purpose' => $trip->tripPurpose->name . (isset($trip->purpose_details) ? ' - ' . $trip->purpose_details : ''),
                     'fund' => $trip->sppSymbol->fund,
                     'functional_region' => $trip->sppSymbol->functional_region,
                     'financial_centre' => $trip->sppSymbol->financial_centre,
