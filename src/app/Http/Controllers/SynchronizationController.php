@@ -144,9 +144,16 @@ class SynchronizationController extends Controller
                 $fromTime = ($date == $startDate) ? $startDate->format('H:i:s') : '00:00:00';
                 $toTime = ($date == $endDate) ? $endDate->format('H:i:s') : '23:59:59';
 
+                // Get the Pritomnost user_id
+                $pritomnostUserId = $businessTrip->user()
+                    ->first()
+                    ->pritomnostUser()
+                    ->first()
+                    ->id;
+
                 // Check if the absence already exists in the Pritomnost database for this day
                 $existingAbsence = PritomnostAbsence::where([
-                    'user_id' => $businessTrip->user_id,
+                    'user_id' => $pritomnostUserId,
                     'date_time' => $formattedDate,
                     'type' => PritomnostAbsenceType::BUSINESS_TRIP,
                 ])->first();
@@ -154,7 +161,7 @@ class SynchronizationController extends Controller
                 if (!$existingAbsence) {
                     //Create absence record in the Pritomnost database
                     PritomnostAbsence::create([
-                        'user_id' => $businessTrip->user_id,
+                        'user_id' => $pritomnostUserId,
                         'date_time' => $formattedDate,
                         'from_time' => $fromTime,
                         'to_time' => $toTime,
