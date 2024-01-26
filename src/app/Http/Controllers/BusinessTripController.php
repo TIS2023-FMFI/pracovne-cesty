@@ -135,7 +135,7 @@ class BusinessTripController extends Controller
         $filePath = Storage::disk('uploads')->path($trip->upload_name);
 
         // Check if the file exists
-        if (!file_exists($filePath)) {
+        if (Storage::disk('uploads')->missing($trip->upload_name)) {
             abort(404, 'File not found'); // Or other error handling
         }
 
