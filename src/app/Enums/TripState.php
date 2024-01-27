@@ -33,4 +33,17 @@ enum TripState: int
 
     // Trip cancellation is approved by a secretariat
     case CANCELLED = 6;
+
+    public function inSlovak(): string
+    {
+        return match ($this) {
+            self::NEW => 'Nová',
+            self::CONFIRMED => 'Potvrdená',
+            self::UPDATED => 'Doplnená',
+            self::COMPLETED => 'Ukončená',
+            self::CLOSED => 'Spracovaná',
+            self::CANCELLATION_REQUEST => 'Žiadosť o stornovanie',
+            self::CANCELLED => 'Stornovaná',
+        };
+    }
 }
