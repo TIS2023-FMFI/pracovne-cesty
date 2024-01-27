@@ -10,8 +10,8 @@ use App\Models\PritomnostAbsence;
 use App\Models\PritomnostUser;
 use App\Models\User;
 use DateInterval;
-use DateTime;
 use DatePeriod;
+use DateTime;
 use Exception;
 
 class SynchronizationController extends Controller
@@ -22,10 +22,13 @@ class SynchronizationController extends Controller
      * @param $userId
      * @return void
      */
-    public function syncSingleUser($userId): void
+    public static function syncSingleUser($userId): void
     {
         // Use LEFT JOIN to check if the user exists in the Cesty database
-        $userToSync = PritomnostUser::leftJoin('cesty.users', 'cesty.users.personal_id', '=', 'pritomnost.users.personal_id')
+        $userToSync = PritomnostUser::leftJoin(
+            'cesty.users',
+            'cesty.users.personal_id', '=', 'pritomnost.users.personal_id'
+        )
             ->where('pritomnost.users.id', $userId)
             ->select('pritomnost.users.*', 'cesty.users.id as cesty_user_id')
             ->first();
@@ -73,7 +76,7 @@ class SynchronizationController extends Controller
      * @return void
      * @throws Exception If there is an issue with DateTime
      */
-    public function syncSingleBusinessTrip($businessTripId): void
+    public static function syncSingleBusinessTrip($businessTripId): void
     {
         // Fetch the specific business trip
         $businessTrip = BusinessTrip::findOrFail($businessTripId);
@@ -106,15 +109,15 @@ class SynchronizationController extends Controller
             ])->first();
 
             if (!$existingAbsence) {
-                //Create absence record in the Pritomnost database
+                // Create absence record in the Pritomnost database
                 PritomnostAbsence::create([
                     'user_id' => $pritomnostUserId,
                     'date_time' => $formattedDate,
                     'from_time' => $fromTime,
                     'to_time' => $toTime,
                     'type' => PritomnostAbsenceType::BUSINESS_TRIP,
-                    'description' => 'Pracovna cesta z Cesty DB',
-                    //Other values are not defined
+                    'description' => 'Pracovná cesta zo systému Cesty',
+                    // Other values are not defined
                 ]);
             }
         }
