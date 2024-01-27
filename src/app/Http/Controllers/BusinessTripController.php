@@ -87,6 +87,7 @@ class BusinessTripController extends Controller
     public function close() {
 
     }
+
     /**
      * Exports a PDF document based on a specific business trip and document type.
      *
@@ -95,28 +96,33 @@ class BusinessTripController extends Controller
      * the document type, and creates the PDF, which is returned as a binary file.
      *
      * @param int $tripId The ID of the business trip.
-     * @param DocumentType $documentType The type of document to be exported.
+     * @param int $documentType ID of the document type to be exported.
      * @return JsonResponse|BinaryFileResponse Returns a JsonResponse in case of
      *         errors or a BinaryFileResponse with the generated PDF.
      * @throws Exception If there is an error during PDF creation or manipulation.
      * @example
-     *   $response = $object->exportPdf(123, DocumentType::FOREIGN_TRIP_AFFIDAVIT);
+     * $response = $object->exportPdf(123, 0);
      */
-    public function exportPdf(int $tripId, DocumentType $documentType): JsonResponse | BinaryFileResponse
+    public function exportPdf(int $tripId, int $documentType): JsonResponse | BinaryFileResponse
     {
         $trip = BusinessTrip::find($tripId);
         if (!$trip) {
             return response()->json(['error' => 'Business trip not found'], 404);
         }
-        $templateName = $documentType->value;
+
+        $docType = DocumentType::from($documentType);
+
+        $templateName = $docType->fileName();
         $templatePath = Storage::disk('pdf-templates')
             ->path($templateName);
+
         if (Storage::disk('pdf-templates')->missing($templateName)) {
             Log::error("PDF template file does not exist at path: " . $templatePath);
             return response()->json(['error' => 'PDF template file not found'], 404);
         }
+
         $data = [];
-        switch ($documentType) {
+        switch ($docType) {
             case DocumentType::FOREIGN_TRIP_AFFIDAVIT:
                 $tripDuration = $trip->datetime_start->diff($trip->datetime_end);
                 $tripDurationFormatted = $tripDuration->format('%d dni %h hodin %i minut');
@@ -250,6 +256,7 @@ class BusinessTripController extends Controller
             default:
                 return response()->json(['error' => 'Unknown document type'], 400);
         }
+
         try {
             Log::info("Creating PDF object with template path: " . $templatePath);
             $pdf = new Pdf($templatePath);
@@ -257,9 +264,11 @@ class BusinessTripController extends Controller
             Log::error("Error creating PDF object: " . $e->getMessage());
             return response()->json(['error' => 'Failed to create PDF object: ' . $e->getMessage()], 500);
         }
+
         $outputName = uniqid('', true) . '.pdf';
         $outputPath = Storage::disk('pdf-exports')
             ->path($outputName);
+
         try {
             $pdf->fillForm($data);
             $pdf->flatten();
@@ -268,9 +277,11 @@ class BusinessTripController extends Controller
             Log::error("Error during PDF manipulation: " . $e->getMessage());
             return response()->json(['error' => 'Failed during PDF manipulation: ' . $e->getMessage()], 500);
         }
+
         if (Storage::disk('pdf-exports')->exists($outputName)) {
             return response()->download($outputPath)->deleteFileAfterSend(true);
         }
+
         Log::error("PDF file does not exist after generation: " . $outputPath);
         return response()->json(['error' => 'Failed to generate PDF, file not found'], 500);
     }
