@@ -119,6 +119,6 @@ Route::controller(SPPController::class)
             ->name('manage');
 
         // Deactivate an SPP symbol
-        Route::put('/{spp}/deactivate', 'deactivate')
+        Route::put('/deactivate', 'deactivate')
             ->name('deactivate');
     });
