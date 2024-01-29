@@ -56,7 +56,14 @@ Route::controller(BusinessTripController::class)
         Route::put('/{trip}', 'update')
             ->name('update');
 
+        // Add report for the trip
+        Route::put('/{trip}/add-report', 'addReport')
+            ->name('add-report');
+
         // Trip modifiers
+        Route::put('/{trip}/request-cancel', 'requestCancellation')
+            ->name('request-cancel');
+
         Route::put('/{trip}/cancel', 'cancel')
             ->name('cancel');
 
@@ -119,6 +126,6 @@ Route::controller(SPPController::class)
             ->name('manage');
 
         // Deactivate an SPP symbol
-        Route::put('/{spp}/deactivate', 'deactivate')
+        Route::put('/deactivate', 'deactivate')
             ->name('deactivate');
     });
