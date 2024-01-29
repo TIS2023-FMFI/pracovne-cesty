@@ -15,6 +15,11 @@ class SppSymbol extends Model
         'status' => SppStatus::class
     ];
 
+    protected $fillable = [
+        'spp_symbol', 'fund', 'functional_region',
+        'financial_centre', 'account', 'grantee', 'status'
+    ];
+
     /**
      * Get the business trips associated with the SPP symbol
      *
