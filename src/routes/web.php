@@ -57,8 +57,8 @@ Route::controller(BusinessTripController::class)
             ->name('update');
 
         // Add report for the trip
-        Route::put('/{trip}/add-report', 'addReport')
-            ->name('add-report');
+        Route::put('/{trip}/add-comment', 'addComment')
+            ->name('add-comment');
 
         // Trip modifiers
         Route::put('/{trip}/request-cancel', 'requestCancellation')
