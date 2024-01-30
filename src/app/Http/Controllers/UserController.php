@@ -58,23 +58,35 @@ class UserController extends Controller
      * @return \Illuminate\View\View
      */
     public function login() {
-        return view('users.login');
+        return view('dashboard');
     }
-    
+
     /**
      * Authenticate the user.
      *
-    * @return \Illuminate\Http\Response
-    */
-    public function authenticate() {
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function authenticate(Request $request) {
+        $credentials = $request->validate([
+            'username' => 'required|string',
+            'password' => 'required|string',
+        ]);
 
+        if (Auth::attempt($credentials)) {
+            $request->session()->regenerate();
+            return redirect()->intended('dashboard');
+        }
+
+        return back();
     }
+
 
     /**
      * Invitation for external employee
      * @return \Illuminate\View\View
      */
-    public function invite(Request $request) {
+    public function invite() {
         return view('components.modals.add-user');
     }
 }
