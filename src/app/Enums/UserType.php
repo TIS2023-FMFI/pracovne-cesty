@@ -9,4 +9,17 @@ enum UserType: int
     case STUDENT = 2;
     case EXTERN = 3;
     case ADMIN = 4;
+
+    /**
+     * Returns internal access role associated with the user type
+     *
+     * @return string
+     */
+    public function role(): string
+    {
+        return match ($this) {
+            self::EMPLOYEE, self::PHD_STUDENT, self::STUDENT, self::EXTERN => 'traveller',
+            self::ADMIN => 'admin',
+        };
+    }
 }
