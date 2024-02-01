@@ -63,6 +63,8 @@ class SynchronizationController extends Controller
 
                 // Add type of user
                 $newUser->user_type = UserType::EMPLOYEE;
+                $newUser->assignRole('traveller');
+
                 $newUser->save();
             }
         }
