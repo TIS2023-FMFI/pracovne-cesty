@@ -30,6 +30,7 @@ return new class extends Migration {
             $table->unsignedSmallInteger('status');
             $table->dateTime('last_login')->nullable();
 
+            $table->rememberToken();
             $table->timestamps();
         });
     }
