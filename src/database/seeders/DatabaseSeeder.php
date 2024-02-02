@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
             ContributionSeeder::class,
             TripPurposeSeeder::class,
             StaffSeeder::class,
+            RoleAndPermissionSeeder::class,
 
             // With factories
             // Without foreign references

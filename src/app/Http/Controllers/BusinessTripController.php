@@ -2,25 +2,29 @@
 
 namespace App\Http\Controllers;
 
-use App\Mail\SimpleMail;
-use App\Models\BusinessTrip;
-use App\Models\Contribution;
-use App\Models\Country;
-use App\Models\SppSymbol;
-use App\Models\Transport;
-use App\Models\TripPurpose;
-use DateTime;
-use DateInterval;
-use DatePeriod;
-use Exception;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Validation\ValidationException;
+use App\Enums\DocumentType;
+use App\Enums\PositionTitle;
 use App\Enums\TripState;
 use App\Enums\TripType;
-use App\Enums\UserType;
+use App\Mail\SimpleMail;
+use App\Models\BusinessTrip;
+use App\Models\BusinessTrip;
+use App\Models\Staff;
 use App\Models\User;
+use DateInterval;
+use DatePeriod;
+use DateTime;
+use Exception;
+use Exception;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\ValidationException;
+use mikehaertl\pdftk\Pdf;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class BusinessTripController extends Controller
 {
@@ -420,5 +424,203 @@ class BusinessTripController extends Controller
 
         // Redirect or respond with a success message
         return redirect()->route('add-report', $trip->id)->with('success', 'Comment added successfully.');
+    }
+
+    /**
+     * Exports a PDF document based on a specific business trip and document type.
+     *
+     * Generates various types of PDF documents for business trips. The method
+     * verifies the trip's existence and the PDF template, prepares data based on
+     * the document type, and creates the PDF, which is returned as a binary file.
+     *
+     * @param int $tripId The ID of the business trip.
+     * @param int $documentType ID of the document type to be exported.
+     * @return JsonResponse|BinaryFileResponse Returns a JsonResponse in case of
+     *         errors or a BinaryFileResponse with the generated PDF.
+     * @throws Exception If there is an error during PDF creation or manipulation.
+     * @example
+     * $response = $object->exportPdf(123, 0);
+     */
+    public function exportPdf(int $tripId, int $documentType): JsonResponse | BinaryFileResponse
+    {
+        $trip = BusinessTrip::find($tripId);
+        if (!$trip) {
+            return response()->json(['error' => 'Business trip not found'], 404);
+        }
+
+        $docType = DocumentType::from($documentType);
+
+        $templateName = $docType->fileName();
+        $templatePath = Storage::disk('pdf-templates')
+            ->path($templateName);
+
+        if (Storage::disk('pdf-templates')->missing($templateName)) {
+            Log::error("PDF template file does not exist at path: " . $templatePath);
+            return response()->json(['error' => 'PDF template file not found'], 404);
+        }
+
+        $data = [];
+        switch ($docType) {
+            case DocumentType::FOREIGN_TRIP_AFFIDAVIT:
+                $tripDuration = $trip->datetime_start->diff($trip->datetime_end);
+                $tripDurationFormatted = $tripDuration->format('%d dni %h hodin %i minut');
+                $name = $trip->user->academic_degrees
+                    ? $trip->user->academic_degrees . ' ' . $trip->user->first_name . ' ' . $trip->user->last_name
+                    : $trip->user->first_name . ' ' . $trip->user->last_name;
+                $data = [
+                    'order_number' => $trip->sofia_id,
+                    'trip_duration' => $tripDurationFormatted,
+                    'adress' => $trip->place,
+                    'name' => $name,
+                ];
+                break;
+
+            case DocumentType::COMPENSATION_AGREEMENT:
+                $contributions = $trip->contributions;
+                $dean = Staff::where('position', PositionTitle::DEAN)->first();
+                $secretary = Staff::where('position', PositionTitle::SECRETARY)->first();
+                $data = [
+                    'first_name' => $trip->user->first_name,
+                    'last_name' => $trip->user->last_name,
+                    'academic_degree' => $trip->user->academic_degrees,
+                    'address' => $trip->user->address,
+                    'contribution1' => $contributions->get(0) ? 'true' : null,
+                    'contribution2' => $contributions->get(1) ? 'true' : null,
+                    'contribution3' => $contributions->get(2) ? 'true' : null,
+                    'department' => $trip->user->department,
+                    'place' => $trip->country->name . ', ' . $trip->place,
+                    'datetime_start' => $trip->datetime_start->format('d-m-Y'),
+                    'datetime_end' => $trip->datetime_end->format('d-m-Y'),
+                    'transport' => $trip->transport->name,
+                    'trip_purpose' => $trip->tripPurpose->name . (isset($trip->purpose_details) ? ' - ' . $trip->purpose_details : ''),
+                    'fund' => $trip->sppSymbol->fund,
+                    'functional_region' => $trip->sppSymbol->functional_region,
+                    'financial_centre' => $trip->sppSymbol->financial_centre,
+                    'spp_symbol' => $trip->sppSymbol->spp_symbol,
+                    'account' => $trip->sppSymbol->account,
+                    'grantee' => $trip->sppSymbol->grantee,
+                    'iban' => $trip->iban,
+                    'incumbent_name1' => $dean ? $dean->incumbent_name : 'N/A',
+                    'incumbent_name2' => $secretary ? $secretary->incumbent_name : 'N/A',
+                    'contribution1_text' => $contributions->get(0) ? $contributions->get(0)->pivot->detail : null,
+                    'contribution2_text' => $contributions->get(1) ? $contributions->get(1)->pivot->detail : null,
+                    'contribution3_text' => $contributions->get(2) ? $contributions->get(2)->pivot->detail : null,
+                ];
+                break;
+
+            case DocumentType::CONTROL_SHEET:
+                $data = [
+                    'spp_symbol' => $trip->sppSymbol->spp_symbol,
+                    'expense_estimation' => $trip->conference_fee->amount,
+                    'source1' => $trip->sppSymbol->fund,
+                    'functional_region1' => $trip->sppSymbol->functional_region,
+                    'spp_symbol1' => $trip->sppSymbol->spp_symbol,
+                    'financial_centre1' => $trip->sppSymbol->financial_centre,
+                    'purpose_details' => 'Úhrada vložného',
+                ];
+                break;
+
+            case DocumentType::PAYMENT_ORDER:
+                $data = [
+                    'advance_amount' => $trip->conference_fee->amount,
+                    'grantee' => $trip->sppSymbol->grantee,
+                    'address' => $trip->conference_fee->organiser_address,
+                    'source' => $trip->sppSymbol->fund,
+                    'functional_region' => $trip->sppSymbol->functional_region,
+                    'spp_symbol' => $trip->sppSymbol->spp_symbol,
+                    'financial_centre' => $trip->sppSymbol->functional_region,
+                    'iban' => $trip->iban,
+                ];
+                break;
+
+            case DocumentType::DOMESTIC_REPORT:
+                $name = $trip->user->academic_degrees
+                    ? $trip->user->academic_degrees . ' ' . $trip->user->first_name . ' ' . $trip->user->last_name
+                    : $trip->user->first_name . ' ' . $trip->user->last_name;
+                $mealsReimbursementText = $trip->meals_reimbursement == 1
+                    ? 'mám záujem o preplatenie'
+                    : 'nemám záujem o preplatenie';
+                $data = [
+                    'name' => $name,
+                    'department' => $trip->user->department,
+                    'date_start' => $trip->datetime_start->format('d-m-Y'),
+                    'date_end' => $trip->datetime_end->format('d-m-Y'),
+                    'spp_symbol' => $trip->spp_symbols->spp_symbol,
+                    'time_start' => $trip->datetime_start->format('H:i'),
+                    'time_end' => $trip->datetime_end->format('H:i'),
+                    'transport' => $trip->transport->name,
+                    'travelling_expense' => $trip->travellingExpense ? $trip->travellingExpense->amount_eur : null,
+                    'accommodation_expense' => $trip->accommodationExpense ? $trip->accommodationExpense->amount_eur : null,
+                    'other_expenses' => $trip->otherExpense ? $trip->otherExpense->amount_eur : null,
+                    'allowance' => $trip->allowanceExpense ? $trip->allowanceExpense->amount_eur : null,
+                    'conclusion' => $trip->conclusion,
+                    'iban' => $trip->iban,
+                    'address' => $trip->user->address,
+                    'meals_reimbursement_DG42' => $mealsReimbursementText,
+                ];
+                break;
+
+            case DocumentType::FOREIGN_REPORT:
+                $mealsReimbursementText = $trip->meals_reimbursement == 1
+                    ? 'mám záujem o preplatenie'
+                    : 'nemám záujem o preplatenie';
+                $data = [
+                    'name' => $trip->user->first_name . ' ' . $trip->user->last_name,
+                    'department' => $trip->user->department,
+                    'country' => $trip->country->name,
+                    'datetime_end' => $trip->datetime_end->format('d-m-Y H:i'),
+                    'datetime_start' => $trip->datetime_start->format('d-m-Y H:i'),
+                    'datetime_border_crossing_start' => $trip->datetime_border_crossing_start->format('d-m-Y H:i'),
+                    'datetime_border_crossing_end' => $trip->datetime_border_crossing_end->format('d-m-Y H:i'),
+                    'place' => $trip->place,
+                    'spp_symbol' => $trip->sppSymbol->spp_symbol,
+                    'transport' => $trip->transport->name,
+                    'travelling_expense_foreign' => $trip->travellingExpense && isset($trip->travellingExpense->amount_foreign) ? $trip->travellingExpense->amount_foreign : null,
+                    'travelling_expense' => $trip->travellingExpense ? $trip->travellingExpense->amount_eur : null,
+                    'accommodation_expense_foreign' => $trip->accommodationExpense ? $trip->accommodationExpense->amount_foreign : null,
+                    'accommodation_expense' => $trip->accommodationExpense ? $trip->accommodationExpense->amount_eur : null,
+                    'allowance_foreign' => $trip->allowanceExpense ? $trip->allowanceExpense->amount_foreign : null,
+                    'allowance' => $trip->allowanceExpense ? $trip->allowanceExpense->amount_eur : null,
+                    'meals_reimbursement' => $mealsReimbursementText,
+                    'other_expenses_foreign' => $trip->otherExpense ? $trip->otherExpense->amount_foreign : null,
+                    'other_expenses' => $trip->otherExpense ? $trip->otherExpense->amount_eur : null,
+                    'conclusion' => $trip->conclusion,
+                    'iban' => $trip->iban,
+                    'advance_expense_foreign' => $trip->advanceExpense ? $trip->advanceExpense->amount_foreign : null,
+                    'invitation_case_charges' => $trip->expense_estimation,
+                ];
+                break;
+
+            default:
+                return response()->json(['error' => 'Unknown document type'], 400);
+        }
+
+        try {
+            Log::info("Creating PDF object with template path: " . $templatePath);
+            $pdf = new Pdf($templatePath);
+        } catch (Exception $e) {
+            Log::error("Error creating PDF object: " . $e->getMessage());
+            return response()->json(['error' => 'Failed to create PDF object: ' . $e->getMessage()], 500);
+        }
+
+        $outputName = uniqid('', true) . '.pdf';
+        $outputPath = Storage::disk('pdf-exports')
+            ->path($outputName);
+
+        try {
+            $pdf->fillForm($data);
+            $pdf->flatten();
+            $pdf->saveAs($outputPath);
+        } catch (Exception $e) {
+            Log::error("Error during PDF manipulation: " . $e->getMessage());
+            return response()->json(['error' => 'Failed during PDF manipulation: ' . $e->getMessage()], 500);
+        }
+
+        if (Storage::disk('pdf-exports')->exists($outputName)) {
+            return response()->download($outputPath)->deleteFileAfterSend(true);
+        }
+
+        Log::error("PDF file does not exist after generation: " . $outputPath);
+        return response()->json(['error' => 'Failed to generate PDF, file not found'], 500);
     }
 }

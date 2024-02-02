@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\UserType;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -18,15 +19,18 @@ return new class extends Migration {
             $table->string('personal_id', 10)->nullable();
             $table->string('department', 10)->default('KAI');
             $table->string('email', 127)->unique();
-            $table->string('address', 200);
+            $table->string('address', 200)->nullable();
 
-            $table->unsignedSmallInteger('user_type');
+            $table->unsignedSmallInteger('user_type')
+                ->default(UserType::EMPLOYEE->value);
+
             $table->string('username', 255)->unique();
             $table->string('password', 255);
 
             $table->unsignedSmallInteger('status');
             $table->dateTime('last_login')->nullable();
 
+            $table->rememberToken();
             $table->timestamps();
         });
     }
