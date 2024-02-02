@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\SppSymbol;
 use App\Enums\SppStatus;
 use Illuminate\Http\Request;
+use \Illuminate\Http\RedirectResponse;
 
 class SPPController extends Controller
 {
@@ -14,7 +15,9 @@ class SPPController extends Controller
      * Sending all active spp symbols
      */
     public function manage() {
-        return view('spp.manage', ['spp_symbols' => SppSymbol::where('status', SppStatus::ACTIVE)->pluck('spp_symbol', 'id')]);
+        return view('spp.manage', ['spp_symbols' =>
+            SppSymbol::where('status', SppStatus::ACTIVE)
+                ->pluck('spp_symbol', 'id')]);
     }
 
     /**
@@ -22,7 +25,8 @@ class SPPController extends Controller
      * Validating data
      * Saving new spp symbol in DB
      */
-    public function store(Request $request) {
+    public function store(Request $request): RedirectResponse
+    {
         $validatedData = $request->validate([
             'fund' => 'required|string',
             'spp_symbol' => 'required|string|unique:spp_symbols,spp_symbol',
@@ -42,9 +46,9 @@ class SPPController extends Controller
      * Input parameter of type Request and the spp symbol
      * Updating the spp symbols state to deactivated
      */
-//    public function deactivate(Request $request, SppSymbol $spp) {
-    public function deactivate(Request $request) {
-        $validatedData = $request->validate(['spp' => 'exists:spp_symbols,id']);
+    public function deactivate(Request $request): RedirectResponse
+    {
+        $validatedData = $request->validate(['spp' => 'required|exists:spp_symbols,id']);
         SppSymbol::find($validatedData['spp'])->update(['status' => SppStatus::DEACTIVATED]);
 
         return redirect()->route('spp.manage')->with('message', 'ŠPP prvok bol deaktivovaný.');
