@@ -103,19 +103,23 @@
                 </x-content-section>
 
 {{--            @if(in_array($userType, [UserType::STUDENT, UserType::EXTERN]))--}}
-                <x-content-section title="Prínos pre fakultu">
-                    @foreach($contributions as $id => $name)
-                        <div class="input-group mb-3">
-                            <div class="input-group-prepend">
-                                <div class="input-group-text">
-                                    <input type="checkbox" name="contribution_{{ $id }}">
-                                </div>
-                                <span class="input-group-text">{{ $name }}</span>
+            <x-content-section title="Prínos pre fakultu">
+                <x-slot:description>
+                    Označte prínosy pre fakultu, ktoré sa týkajú Vašej pracovnej cesty. Môžete ich aj špecifikovať.
+                </x-slot:description>
+
+                @foreach($contributions as $id => $name)
+                    <div x-data="{ contributionDetail: { checked: false, value: '' } }" class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <div class="input-group-text">
+                                <input type="checkbox" x-model="contributionDetail.checked" x-on:change="if (!contributionDetail.checked) { contributionDetail.value = '' }">
                             </div>
-                            <input type="text" name="contribution_{{ $id }}_detail" class="form-control">
+                            <span class="input-group-text">{{ $name }}</span>
                         </div>
-                    @endforeach
-                </x-content-section>
+                        <input type="text" name="contribution_{{ $id }}_detail" x-model="contributionDetail.value" class="form-control">
+                    </div>
+                @endforeach
+            </x-content-section>
 {{--            @endif--}}
 
             <x-content-section title="Financovanie" x-data="{reimbursementShow: false}">
