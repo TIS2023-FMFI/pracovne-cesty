@@ -2,7 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Enums\UserType;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
+use App\Models\User;
+use Illuminate\Validation\Rule;
 
 class UserController extends Controller
 {
@@ -22,23 +28,38 @@ class UserController extends Controller
      * @return \Illuminate\Http\RedirectResponse
      */
     public function store(Request $request) {
-        $validatedData = $request->validate([
+        $validator = Validator::make($request->all(), [
             'first_name' => 'required|string|max:50',
             'last_name' => 'required|string|max:50',
             'email' => 'required|string|email|max:127|unique:users',
             'username' => 'required|string|max:255|unique:users',
             'password' => 'required|string|max:255',
-            'user_types' => 'required|string',
+            'user_types' => ['required', 'string', Rule::in(['externist', 'student'])],
         ]);
 
+        if ($validator->fails()) {
+            return redirect('register')
+                ->withErrors($validator)
+                ->withInput();
+        }
+
+        $userType = match($request->user_types) {
+            'externist' => UserType::EXTERN,
+            'student' => UserType::STUDENT,
+            default => throw new \Exception("Invalid user type"),
+        };
+
         $user = User::create([
-            'first_name' => $validatedData['first_name'],
-            'last_name' => $validatedData['last_name'],
-            'email' => $validatedData['email'],
-            'username' => $validatedData['username'],
-            'password' => Hash::make($validatedData['password']),
-            'user_type' => $validatedData['user_types'],
+            'first_name' => $request->first_name,
+            'last_name' => $request->last_name,
+            'email' => $request->email,
+            'username' => $request->username,
+            'password' => Hash::make($request->password),
         ]);
+
+        $user->user_type = $userType->value;
+        $user->save(); 
+
         return redirect()->route('login');
     }
 
