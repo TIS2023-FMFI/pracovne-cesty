@@ -152,18 +152,18 @@
                     @foreach($contributions as $id => $name)
                         @php
                             $contribution = $trip->contributions->where('id', $id)->first();
-                            $detail = $contribution->pivot->detail ?? '';
+                            $detail = addslashes($contribution->pivot->detail ?? '');
                             $checked = $contribution != null;
                         @endphp
 
-                        <div class="input-group mb-3">
+                        <div x-data="{ tripContribution: { checked: {{ $checked ? 'true' : 'false' }}, value: '{{ $detail }}' } }" class="input-group mb-3">
                             <div class="input-group-prepend">
                                 <div class="input-group-text">
-                                    <input type="checkbox" name="contribution_{{ $id }}" {{ $checked ? 'checked' : '' }}>
+                                    <input type="checkbox" x-model="tripContribution.checked" x-on:change="if (!tripContribution.checked) { tripContribution.value = '' }">
                                 </div>
                                 <span class="input-group-text">{{ $name }}</span>
                             </div>
-                            <input type="text" name="contribution_{{ $id }}_detail" class="form-control" value="{{ $detail }}">
+                            <input type="text" name="contribution_{{ $id }}_detail" x-model="tripContribution.value" class="form-control">
                         </div>
                     @endforeach
 
@@ -173,10 +173,10 @@
             @php
                 $isReimbursed = $trip->reimbursement != null;
                 $spp2 = $isReimbursed ? $trip->reimbursement->spp_symbol_id : '';
-                $reimbursementDate = $isReimbursed ? $trip->reimbursement->reimbursement_date : '';
+                $reimbursementDate = $isReimbursed ? $trip->reimbursement->reimbursement_date->format('Y-m-d') : '';
             @endphp
 
-            <x-content-section title="Financovanie" x-data="{reimbursementShow: {{ $isReimbursed }} }">
+            <x-content-section title="Financovanie" x-data="{reimbursementShow: {{ $isReimbursed ? 'true' : 'false' }} }">
                 <x-slot:description>
                     V prípade refundácie, prosím, vyberte ako ŠPP prvok 2 ten prvok, z ktorého budú peniaze neskôr
                     vrátené do ŠPP prvku 1. Ako dátum vrátenia peňazí uveďte iba orientačný, predpokladaný dátum.
@@ -200,7 +200,7 @@
                         </div>
                         <div class="col">
                             <x-simple-input name="reimbursement_date" type="date" label="Dátum vrátenia peňazí"
-                                            :value="$reimbursementDate->format('Y-m-d')"/>
+                                            :value="$reimbursementDate"/>
                         </div>
                     </div>
                 </x-hideable-section>
@@ -216,7 +216,7 @@
             @endphp
 
             <x-content-section title="Úhrada konferenčného poplatku"
-                               x-data="{conferenceFeeShow: {{ $wantsConferenceFee }} }">
+                               x-data="{conferenceFeeShow: {{ $wantsConferenceFee ? 'true' : 'false' }} }">
                 <x-checkbox name="conference_fee"
                             label="Mám záujem o úhradu konferenčného poplatku pred cestou priamo z pracoviska"
                             control="conferenceFeeShow" :checked="$wantsConferenceFee"></x-checkbox>
