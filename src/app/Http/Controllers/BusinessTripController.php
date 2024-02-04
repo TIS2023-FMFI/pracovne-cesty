@@ -31,37 +31,23 @@ class BusinessTripController extends Controller
      * Returning view with details from all trips
      */
     public function index() {
-        // Check if the user is logged in
-        if (Auth::check()) {
-            // Check if the user is an admin
-            if (Auth::user()->hasRole('admin')) {
-                // Retrieve all trips and users for admin
-                $trips = BusinessTrip::paginate(15);
-                $users = User::all();
-            } else {
-                // Retrieve only user's trips for regular users
-                $trips = Auth::user()->businessTrips()->paginate(15);
-                // No need for a list of users
-                $users = null;
-            }
-
-            // Return the dashboard view with trips and users
-            return view('dashboard', [
-                'trips' => $trips,
-                'users' => $users,
-            ]);
+        // Check if the user is an admin
+        if (Auth::user()->hasRole('admin')) {
+            // Retrieve all trips and users for admin
+            $trips = BusinessTrip::paginate(15);
+            $users = User::all();
         } else {
-            // User is not logged in, redirect to login page
-            return redirect()->route('login');
+            // Retrieve only user's trips for regular users
+            $trips = Auth::user()->businessTrips()->paginate(15);
+            // No need for a list of users
+            $users = null;
         }
-    }
 
-    /**
-     * Returning view with the trip details
-     * No need in implementation as by now
-     */
-    public function show(BusinessTrip $trip) {
-        return view('business-trips.show', ['trip' => $trip]);
+        // Return the dashboard view with trips and users
+        return view('dashboard', [
+            'trips' => $trips,
+            'users' => $users,
+        ]);
     }
 
     /**
@@ -178,10 +164,10 @@ class BusinessTripController extends Controller
      */
     public function update(Request $request, BusinessTrip $trip) {
         // Validation rules for expense-related fields
-        $expenses = ['travelling' => 'Cestovné', 'accommodation' => 'Ubytovanie', 'allowance' => 'Záloha za cestu', 'advance' => 'Vložné', 'other' => 'Iné'];
+        $expenses = ['travelling', 'accommodation', 'allowance', 'advance', 'other'];
         $expenseRules = [];
 
-        foreach ($expenses as $expenseName => $label) {
+        foreach ($expenses as $expenseName) {
             $eurKey = $expenseName . '_expense_eur';
             $foreignKey = $expenseName . '_expense_foreign';
             $reimburseKey = $expenseName . '_reimburse';
@@ -249,20 +235,7 @@ class BusinessTripController extends Controller
         $validatedData['not_reimbursed_meals'] = $notReimbursedMeals;
 
         // Check if the authenticated user is an admin
-        $isAdmin = Auth::check() && Auth::user()->hasRole('admin');
-
-        // Check if the trip is in a valid state for updating by non-admin user
-        if (!$isAdmin && !in_array($trip->state, [TripState::NEW, TripState::CONFIRMED])) {
-            throw ValidationException::withMessages(['state' => 'Invalid state for updating.']);
-        }
-
-        // Update the trip with the calculated 'not_reimbursed_meals' value
-        $trip->update($validatedData);
-
-        // Change the state to 'UPDATED' if not admin
-        if (!$isAdmin) {
-            $trip->update(['state' => TripState::UPDATED]);
-        }
+        $isAdmin = Auth::user()->hasRole('admin');
 
         // Check if the trip is in a valid state for updating by non-admin user
         if (!$isAdmin && !in_array($trip->state, [TripState::NEW, TripState::CONFIRMED])) {
@@ -323,7 +296,7 @@ class BusinessTripController extends Controller
         // Send the email
         Mail::to($recipient)->send($email);
 
-        return redirect()->route('business-trips.show', $trip);
+        return redirect()->route('business-trips.edit', $trip);
 
     }
 
@@ -345,7 +318,7 @@ class BusinessTripController extends Controller
         // Confirm the trip and record sofia_id
         $trip->update(['state' => TripState::CONFIRMED, 'sofia_id' => $validatedData['sofia_id']]);
 
-        return redirect()->route('business-trips.show', $trip);
+        return redirect()->route('business-trips.edit', $trip);
 
     }
 
@@ -362,7 +335,7 @@ class BusinessTripController extends Controller
         //Close the trip
         $trip->update(['state' => TripState::CLOSED]);
 
-        return redirect()->route('business-trips.show', $trip);
+        return redirect()->route('business-trips.edit', $trip);
 
     }
 
@@ -373,9 +346,8 @@ class BusinessTripController extends Controller
     public function requestCancellation(BusinessTrip $trip): \Illuminate\Http\RedirectResponse
     {
         // Check if the current state of the trip allows cancellation request
-        if ($trip->state === TripState::NEW
-            || $trip->state === TripState::CONFIRMED
-            || $trip->state === TripState::UPDATED) {
+        if (in_array($trip->state,
+            [TripState::NEW, TripState::CONFIRMED, TripState::UPDATED])) {
             // Change the state to CANCELLATION_REQUEST
             $trip->update(['state' => TripState::CANCELLATION_REQUEST]);
 
