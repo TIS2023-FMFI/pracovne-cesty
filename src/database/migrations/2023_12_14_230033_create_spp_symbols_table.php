@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\SppStatus;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -19,7 +20,7 @@ return new class extends Migration {
             $table->string('financial_centre', 10)->default('107240');
             $table->string('account', 50);
             $table->string('grantee', 100);
-            $table->unsignedSmallInteger('status');
+            $table->unsignedSmallInteger('status')->default(SppStatus::ACTIVE->value);
 
             $table->timestamps();
         });
