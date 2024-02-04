@@ -9,6 +9,14 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use App\Models\User;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\SynchronizationController;
+use App\Models\InvitationLink;
+use Illuminate\Support\Str;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\SimpleMail;
+
 
 class UserController extends Controller
 {
@@ -58,7 +66,7 @@ class UserController extends Controller
         ]);
 
         $user->user_type = $userType->value;
-        $user->save(); 
+        $user->save();
 
         return redirect()->route('login');
     }
@@ -74,40 +82,55 @@ class UserController extends Controller
     }
 
     /**
-     * Show the login form.
-     *
-     * @return \Illuminate\View\View
-     */
-    public function login() {
-        return view('dashboard');
-    }
-
-    /**
      * Authenticate the user.
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\RedirectResponse
      */
+
+
     public function authenticate(Request $request) {
-        $credentials = $request->validate([
-            'username' => 'required|string',
-            'password' => 'required|string',
-        ]);
+        $credentials = $request->only('username', 'password');
+        $user = User::where('username', $credentials['username'])->first();
 
-        if (Auth::attempt($credentials)) {
-            $request->session()->regenerate();
-            return redirect()->intended('dashboard');
+        if ($user) {
+            if (in_array($user->user_type, [UserType::EMPLOYEE->value, UserType::PHD_STUDENT->value])) {
+                SynchronizationController::syncSingleUser($user->id);
+            }
+            if (Auth::attempt($credentials)) {
+                $request->session()->regenerate();
+                return redirect()->intended('dashboard');
+            }
         }
-
-        return back();
+        return back()->withErrors([
+            'username' => 'The provided credentials do not match our records.',
+        ]);
     }
 
 
+
     /**
-     * Invitation for external employee
-     * @return \Illuminate\View\View
+     * Generate and send an invitation link to an external employee.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\RedirectResponse
      */
-    public function invite() {
-        return view('components.modals.add-user');
+    public function invite(Request $request) {
+        $email = $request->input('email');
+        $token = Str::random(40);
+        $expiresAt = Carbon::now()->addDays(7);
+
+        $link = InvitationLink::create([
+            'email' => $email,
+            'token' => $token,
+            'expires_at' => $expiresAt,
+        ]);
+
+        $url = url('/register?token=' . $token);
+        $messageText = "Pre registráciu kliknite na tento odkaz: " . $url;
+
+        Mail::to($email)->send(new SimpleMail($messageText, $email, 'emails.registration_externist'));
+
+        return back()->with('success', 'Pozvánka bola úspešne odoslaná.');
     }
 }
