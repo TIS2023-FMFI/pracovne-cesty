@@ -2,20 +2,21 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Enums\UserType;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Validator;
-use App\Models\User;
-use Illuminate\Validation\Rule;
-use Illuminate\Support\Facades\Auth;
-use App\Http\Controllers\SynchronizationController;
-use App\Models\InvitationLink;
-use Illuminate\Support\Str;
-use Carbon\Carbon;
-use Illuminate\Support\Facades\Mail;
 use App\Mail\SimpleMail;
+use App\Models\InvitationLink;
+use App\Models\User;
+use Carbon\Carbon;
+use Exception;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
+use Illuminate\View\View;
 
 
 class UserController extends Controller
@@ -23,7 +24,7 @@ class UserController extends Controller
     /**
      * Display the user registration form.
      *
-     * @return \Illuminate\View\View
+     * @return View
      */
     public function create() {
         return view('users.register');
@@ -32,8 +33,9 @@ class UserController extends Controller
     /**
      * Process the data submitted from the registration form and create a new user.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\RedirectResponse
+     * @param Request $request
+     * @return RedirectResponse
+     * @throws Exception
      */
     public function store(Request $request) {
         $validator = Validator::make($request->all(), [
@@ -54,7 +56,7 @@ class UserController extends Controller
         $userType = match($request->user_types) {
             'externist' => UserType::EXTERN,
             'student' => UserType::STUDENT,
-            default => throw new \Exception("Invalid user type"),
+            default => throw new Exception("Invalid user type"),
         };
 
         $user = User::create([
@@ -74,7 +76,7 @@ class UserController extends Controller
     /**
      * Log the user out of the application.
      *
-     * @return \Illuminate\View\View
+     * @return View
      */
     public function logout() {
         Auth::logout();
@@ -84,11 +86,9 @@ class UserController extends Controller
     /**
      * Authenticate the user.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\RedirectResponse
+     * @param Request $request
+     * @return RedirectResponse
      */
-
-
     public function authenticate(Request $request) {
         $credentials = $request->only('username', 'password');
         $user = User::where('username', $credentials['username'])->first();
@@ -112,8 +112,8 @@ class UserController extends Controller
     /**
      * Generate and send an invitation link to an external employee.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\RedirectResponse
+     * @param Request $request
+     * @return RedirectResponse
      */
     public function invite(Request $request) {
         $email = $request->input('email');
