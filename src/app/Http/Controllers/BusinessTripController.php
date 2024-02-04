@@ -134,7 +134,7 @@ class BusinessTripController extends Controller
         }
 
         // Download the file
-        return response()->download($filePath, $trip->upload_name);
+        return Storage::disk('uploads')->download($trip->upload_name);
     }
 
     /**
