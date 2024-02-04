@@ -126,7 +126,7 @@ class BusinessTripController extends Controller
         }
 
         // Build the file path
-        $filePath = storage_path('app/' . $trip->upload_name);
+        $filePath = Storage::disk('uploads')->path($trip->upload_name);
 
         // Check if the file exists
         if (!file_exists($filePath)) {
