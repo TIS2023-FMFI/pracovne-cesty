@@ -11,6 +11,12 @@ use App\Models\User;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\SynchronizationController;
+use App\Models\InvitationLink;
+use Illuminate\Support\Str;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\SimpleMail;
+
 
 class UserController extends Controller
 {
@@ -104,10 +110,27 @@ class UserController extends Controller
 
 
     /**
-     * Invitation for external employee
-     * @return \Illuminate\View\View
+     * Generate and send an invitation link to an external employee.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\RedirectResponse
      */
-    public function invite() {
-        return view('components.modals.add-user');
+    public function invite(Request $request) {
+        $email = $request->input('email');
+        $token = Str::random(40);
+        $expiresAt = Carbon::now()->addDays(7);
+
+        $link = InvitationLink::create([
+            'email' => $email,
+            'token' => $token,
+            'expires_at' => $expiresAt,
+        ]);
+
+        $url = url('/register?token=' . $token);
+        $messageText = "Pre registráciu kliknite na tento odkaz: " . $url;
+
+        Mail::to($email)->send(new SimpleMail($messageText, $email, 'emails.registration_externist'));
+
+        return back()->with('success', 'Pozvánka bola úspešne odoslaná.');
     }
 }
