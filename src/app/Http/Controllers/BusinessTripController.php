@@ -90,7 +90,8 @@ class BusinessTripController extends Controller
             $file = $request->file('file-upload-id');
 
             //Store the file in the storage/app/trips directory
-            $upload_name = $file->storeAs('trips', 'trip_' . $trip->id . '.' . $file->extension());
+            $upload_name = uniqid('', true) . '.' . $file->extension();
+            Storage::disk('uploads')->put($upload_name, $file);
 
             //Save the file path in the model
             $trip->upload_name = $upload_name;
