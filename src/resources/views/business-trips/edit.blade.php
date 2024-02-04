@@ -14,7 +14,10 @@
     $transports = Transport::all()->pluck('name', 'id');
     $purposes = TripPurpose::all()->pluck('name', 'id');
     $contributions = Contribution::all()->pluck('name', 'id');
-    $spp_symbols = SppSymbol::where('status', SppStatus::ACTIVE)->pluck('spp_symbol', 'id');
+    $spp_symbols = SppSymbol::where('status', SppStatus::ACTIVE)
+        ->orWhere('id', $trip->sppSymbol->id)
+        ->orWhere('id', $trip->reimbursement->sppSymbol->id)
+        ->pluck('spp_symbol', 'id');
 
     $tripType = $trip->type;
     $tripState = $trip->state;
