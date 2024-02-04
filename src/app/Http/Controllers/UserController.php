@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use App\Models\User;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\SynchronizationController;
 
 class UserController extends Controller
 {
@@ -58,7 +60,7 @@ class UserController extends Controller
         ]);
 
         $user->user_type = $userType->value;
-        $user->save(); 
+        $user->save();
 
         return redirect()->route('login');
     }
@@ -74,33 +76,31 @@ class UserController extends Controller
     }
 
     /**
-     * Show the login form.
-     *
-     * @return \Illuminate\View\View
-     */
-    public function login() {
-        return view('dashboard');
-    }
-
-    /**
      * Authenticate the user.
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\RedirectResponse
      */
+
+
     public function authenticate(Request $request) {
-        $credentials = $request->validate([
-            'username' => 'required|string',
-            'password' => 'required|string',
-        ]);
+        $credentials = $request->only('username', 'password');
+        $user = User::where('username', $credentials['username'])->first();
 
-        if (Auth::attempt($credentials)) {
-            $request->session()->regenerate();
-            return redirect()->intended('dashboard');
+        if ($user) {
+            if (in_array($user->user_type, [UserType::EMPLOYEE->value, UserType::PHD_STUDENT->value])) {
+                SynchronizationController::syncSingleUser($user->id);
+            }
+            if (Auth::attempt($credentials)) {
+                $request->session()->regenerate();
+                return redirect()->intended('dashboard');
+            }
         }
-
-        return back();
+        return back()->withErrors([
+            'username' => 'The provided credentials do not match our records.',
+        ]);
     }
+
 
 
     /**
