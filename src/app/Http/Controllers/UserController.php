@@ -109,27 +109,31 @@ class UserController extends Controller
 
 
     /**
-     * Generate and send an invitation link to an external employee.
+     * Generate and send an invitation link to multiple external employees.
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\RedirectResponse
      */
     public function invite(Request $request) {
-        $email = $request->input('email');
-        $token = bin2hex(random_bytes(20));
-        $expiresAt = Carbon::now()->addDays(7);
+        $emails = explode(';', $request->input('email'));
 
-        $link = InvitationLink::create([
-            'email' => $email,
-            'token' => $token,
-            'expires_at' => $expiresAt,
-        ]);
+        foreach ($emails as $email) {
+            $email = trim($email);
+            $token = bin2hex(random_bytes(20));
+            $expiresAt = Carbon::now()->addDays(7);
 
-        $url = url('/register?token=' . $token);
-        $messageText = "Pre registráciu kliknite na tento odkaz: " . $url;
+            InvitationLink::create([
+                'email' => $email,
+                'token' => $token,
+                'expires_at' => $expiresAt,
+            ]);
 
-        Mail::to($email)->send(new SimpleMail($messageText, $email, 'emails.registration_externist'));
+            $url = url('/register?token=' . $token);
+            $messageText = "Pre registráciu kliknite na tento odkaz: " . $url;
 
-        return back()->with('success', 'Pozvánka bola úspešne odoslaná.');
+            Mail::to($email)->send(new SimpleMail($messageText, $email, 'emails.registration_externist'));
+        }
+        return back()->with('success', 'Pozvánky boli úspešne odoslané.');
     }
+
 }
