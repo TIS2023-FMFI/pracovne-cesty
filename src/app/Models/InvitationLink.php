@@ -2,16 +2,11 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
 class InvitationLink extends Model
 {
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
         'email',
         'token',
@@ -19,13 +14,20 @@ class InvitationLink extends Model
         'used',
     ];
 
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
     protected $casts = [
         'expires_at' => 'datetime',
         'used' => 'boolean',
     ];
+
+    /**
+     * Check whether a given token is valid
+     *
+     * @param string $token
+     * @return bool
+     */
+    public static function isValid(string $token): bool
+    {
+        $link = self::where('token', $token)->first();
+        return $link && !$link->used && Carbon::now() < $link->expires_at;
+    }
 }
