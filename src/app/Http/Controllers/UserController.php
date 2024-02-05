@@ -14,9 +14,9 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
+use Random\RandomException;
 
 
 class UserController extends Controller
@@ -26,7 +26,8 @@ class UserController extends Controller
      *
      * @return View
      */
-    public function create() {
+    public function create(): View
+    {
         return view('users.register');
     }
 
@@ -37,7 +38,8 @@ class UserController extends Controller
      * @return RedirectResponse
      * @throws Exception
      */
-    public function store(Request $request) {
+    public function store(Request $request): RedirectResponse
+    {
         $validUserTypes = array_column(UserType::cases(), 'value');
 
         $validator = Validator::make($request->all(), [
@@ -54,7 +56,6 @@ class UserController extends Controller
                 ->withErrors($validator)
                 ->withInput();
         }
-
 
         $user = User::create([
             'first_name' => $request->first_name,
@@ -73,7 +74,8 @@ class UserController extends Controller
      *
      * @return View
      */
-    public function logout() {
+    public function logout(): View
+    {
         Auth::logout();
         return view('homepage');
     }
@@ -84,7 +86,8 @@ class UserController extends Controller
      * @param Request $request
      * @return RedirectResponse
      */
-    public function authenticate(Request $request) {
+    public function authenticate(Request $request): RedirectResponse
+    {
         $credentials = $request->only('username', 'password');
         $user = User::where('username', $credentials['username'])->first();
 
@@ -97,20 +100,21 @@ class UserController extends Controller
                 return redirect()->intended('dashboard');
             }
         }
+
         return back()->withErrors([
             'username' => 'The provided credentials do not match our records.',
         ]);
     }
-
-
 
     /**
      * Generate and send an invitation link to multiple external employees.
      *
      * @param Request $request
      * @return RedirectResponse
+     * @throws RandomException
      */
-    public function invite(Request $request) {
+    public function invite(Request $request): RedirectResponse
+    {
         $inputEmails = explode(';', $request->input('email'));
         $cleanedEmails = array_map('trim', $inputEmails);
         $existingEmails = User::whereIn('email', $cleanedEmails)->pluck('email')->toArray();
@@ -146,7 +150,4 @@ class UserController extends Controller
 
         return back()->with('success', $successMessage)->with('rejected', $rejectedEmails)->with('invited', $invitedEmails);
     }
-
-
-
 }
