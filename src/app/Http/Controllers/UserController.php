@@ -38,13 +38,15 @@ class UserController extends Controller
      * @throws Exception
      */
     public function store(Request $request) {
+        $validUserTypes = array_column(UserType::cases(), 'value');
+
         $validator = Validator::make($request->all(), [
             'first_name' => 'required|string|max:50',
             'last_name' => 'required|string|max:50',
             'email' => 'required|string|email|max:127|unique:users',
             'username' => 'required|string|max:255|unique:users',
             'password' => 'required|string|max:255',
-            'user_types' => ['required', 'string', Rule::in(['externist', 'student'])],
+            'user_types' => ['required', 'integer', Rule::in($validUserTypes)],
         ]);
 
         if ($validator->fails()) {
@@ -53,10 +55,6 @@ class UserController extends Controller
                 ->withInput();
         }
 
-        $userType = match($request->user_types) {
-            'externist' => UserType::EXTERN,
-            'student' => UserType::STUDENT,
-        };
 
         $user = User::create([
             'first_name' => $request->first_name,
@@ -64,10 +62,8 @@ class UserController extends Controller
             'email' => $request->email,
             'username' => $request->username,
             'password' => Hash::make($request->password),
+            'user_type' => $request->user_types,
         ]);
-
-        $user->user_type = $userType;
-        $user->save();
 
         return redirect()->route('login');
     }
