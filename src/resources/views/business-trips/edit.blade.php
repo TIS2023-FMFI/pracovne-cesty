@@ -108,12 +108,12 @@
                         <x-simple-input name="place" label="Miesto" :value="$trip->place"/>
                     </div>
                     <div class="col">
-                        <x-dropdown-input name="country" label="Štát" :values="$countries" :selected="$trip->country_id"/>
+                        <x-dropdown-input name="country_id" label="Štát" :values="$countries" :selected="$trip->country_id"/>
                     </div>
                 </div>
                 <div class="form-row">
                     <div class="col">
-                        <x-dropdown-input name="trip_purpose" label="Účel cesty" :values="$purposes"
+                        <x-dropdown-input name="trip_purpose_id" label="Účel cesty" :values="$purposes"
                                           :selected="$trip->trip_purpose_id"/>
                     </div>
                     <div class="col">
@@ -123,7 +123,7 @@
                 </div>
                 <div class="form-row">
                     <div class="col">
-                        <x-dropdown-input name="transport" label="Dopravný prostriedok" :values="$transports"
+                        <x-dropdown-input name="transport_id" label="Dopravný prostriedok" :values="$transports"
                                           :selected="$trip->transport_id"/>
                     </div>
                     <div class="col">
@@ -186,7 +186,7 @@
                 </x-slot:description>
                 <div class="form-row align-items-center">
                     <div class="col">
-                        <x-dropdown-input name="spp_symbol" label="ŠPP prvok 1:" :values="$spp_symbols"
+                        <x-dropdown-input name="spp_symbol_id" label="ŠPP prvok 1:" :values="$spp_symbols"
                                           :selected="$trip->spp_symbol_id"/>
                     </div>
                     <div class="col">
@@ -198,7 +198,7 @@
                 <x-hideable-section control="reimbursementShow">
                     <div class="form-row">
                         <div class="col">
-                            <x-dropdown-input name="reimbursement_spp" label="ŠPP prvok 2" :values="$spp_symbols"
+                            <x-dropdown-input name="reimbursement_spp_symbol_id" label="ŠPP prvok 2" :values="$spp_symbols"
                                               :selected="$spp2"/>
                         </div>
                         <div class="col">
