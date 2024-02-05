@@ -115,10 +115,17 @@ class UserController extends Controller
      * @return RedirectResponse
      */
     public function invite(Request $request) {
-        $emails = explode(';', $request->input('email'));
+        $inputEmails = explode(';', $request->input('email'));
+        $cleanedEmails = array_map('trim', $inputEmails);
+        $existingEmails = User::whereIn('email', $cleanedEmails)->pluck('email')->toArray();
+        $rejectedEmails = [];
+        $invitedEmails = [];
 
-        foreach ($emails as $email) {
-            $email = trim($email);
+        foreach ($cleanedEmails as $email) {
+            if (in_array($email, $existingEmails)) {
+                $rejectedEmails[] = $email;
+                continue;
+            }
             $token = bin2hex(random_bytes(20));
             $expiresAt = Carbon::now()->addDays(7);
 
@@ -132,8 +139,18 @@ class UserController extends Controller
             $messageText = "Pre registráciu kliknite na tento odkaz: " . $url;
 
             Mail::to($email)->send(new SimpleMail($messageText, $email, 'emails.registration_externist'));
+            $invitedEmails[] = $email;
         }
-        return back()->with('success', 'Pozvánky boli úspešne odoslané.');
+
+        $successMessage = 'Pozvánky boli úspešne odoslané.';
+        if (!empty($rejectedEmails)) {
+            $rejectedEmailsList = implode(', ', $rejectedEmails);
+            $successMessage .= " Pozvánka nebola odoslaná na tieto e-maily, pretože už sú v systéme: $rejectedEmailsList.";
+        }
+
+        return back()->with('success', $successMessage)->with('rejected', $rejectedEmails)->with('invited', $invitedEmails);
     }
+
+
 
 }
