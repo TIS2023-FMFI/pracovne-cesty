@@ -56,7 +56,7 @@
             <div class="form-row">
                 <div class="col">
                     <x-content-section title="Začiatok cesty">
-                        <x-simple-input name="place start" label="Miesto"/>
+                        <x-simple-input name="place_start" label="Miesto"/>
                         <x-simple-input name="datetime_start" type="datetime-local" label="Dátum a čas"/>
                     </x-content-section>
                 </div>
