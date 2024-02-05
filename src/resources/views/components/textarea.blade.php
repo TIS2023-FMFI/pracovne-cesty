@@ -5,10 +5,7 @@
         class="form-control"
         id="{{ $name }}"
         name="{{ $name }}"
-        value="{{ old($name, $value) }}"
         rows="{{ $rows }}"
         {{ $isDisabled() ? 'disabled' : '' }}
-    >
-
-    </textarea>
+    >{{ old($name, $value) }}</textarea>
 </div>
