@@ -74,13 +74,13 @@
                             <x-simple-input name="place" label="Miesto"/>
                         </div>
                         <div class="col">
-                            <x-dropdown-input name="country" label="Štát" :values="$countries"/>
+                            <x-dropdown-input name="country_id" label="Štát" :values="$countries"/>
                         </div>
 
                     </div>
                     <div class="form-row">
                         <div class="col">
-                            <x-dropdown-input name="trip_purpose" label="Účel cesty" :values="$purposes"/>
+                            <x-dropdown-input name="trip_purpose_id" label="Účel cesty" :values="$purposes"/>
                         </div>
                         <div class="col">
                             <x-textarea name="purpose_details" label="Špecifikácia účelu"></x-textarea>
@@ -89,7 +89,7 @@
 
                     <div class="form-row">
                         <div class="col">
-                            <x-dropdown-input name="transport" label="Dopravný prostriedok" :values="$transports"/>
+                            <x-dropdown-input name="transport_id" label="Dopravný prostriedok" :values="$transports"/>
                         </div>
                         <div class="col">
                             <x-simple-input name="event_url" label="Link na udalosť"/>
@@ -103,19 +103,23 @@
                 </x-content-section>
 
 {{--            @if(in_array($userType, [UserType::STUDENT, UserType::EXTERN]))--}}
-                <x-content-section title="Prínos pre fakultu">
-                    @foreach($contributions as $id => $name)
-                        <div class="input-group mb-3">
-                            <div class="input-group-prepend">
-                                <div class="input-group-text">
-                                    <input type="checkbox" name="contribution_{{ $id }}">
-                                </div>
-                                <span class="input-group-text">{{ $name }}</span>
+            <x-content-section title="Prínos pre fakultu">
+                <x-slot:description>
+                    Označte prínosy pre fakultu, ktoré sa týkajú Vašej pracovnej cesty. Môžete ich aj špecifikovať.
+                </x-slot:description>
+
+                @foreach($contributions as $id => $name)
+                    <div x-data="{ contributionDetail: { checked: false, value: '' } }" class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <div class="input-group-text">
+                                <input type="checkbox" name="contribution_{{ $id }}" x-model="contributionDetail.checked" x-on:change="if (!contributionDetail.checked) { contributionDetail.value = '' }">
                             </div>
-                            <input type="text" name="contribution_{{ $id }}_detail" class="form-control">
+                            <span class="input-group-text">{{ $name }}</span>
                         </div>
-                    @endforeach
-                </x-content-section>
+                        <input type="text" name="contribution_{{ $id }}_detail" x-model="contributionDetail.value" class="form-control">
+                    </div>
+                @endforeach
+            </x-content-section>
 {{--            @endif--}}
 
             <x-content-section title="Financovanie" x-data="{reimbursementShow: false}">
@@ -124,7 +128,7 @@
                 </x-slot:description>
                 <div class="form-row align-items-center">
                     <div class="col">
-                        <x-dropdown-input name="spp_symbol" label="ŠPP prvok 1" :values="$spp_symbols"/>
+                        <x-dropdown-input name="spp_symbol_id" label="ŠPP prvok 1" :values="$spp_symbols"/>
                     </div>
                     <div class="col">
                         <x-checkbox name="reimbursement" label="Refundovať" control="reimbursementShow"></x-checkbox>
@@ -133,7 +137,7 @@
                 <x-hideable-section control="reimbursementShow">
                     <div class="form-row">
                         <div class="col">
-                            <x-dropdown-input name="reimbursement_spp" label="ŠPP prvok 2" :values="$spp_symbols"/>
+                            <x-dropdown-input name="reimbursement_spp_symbol_id" label="ŠPP prvok 2" :values="$spp_symbols"/>
                         </div>
                         <div class="col">
                             <x-simple-input name="reimbursement_date" type="date" label="Dátum vrátenia peňazí"/>

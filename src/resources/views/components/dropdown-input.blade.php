@@ -2,6 +2,7 @@
     @if ($label != '')
         <label for="{{ $name }}">{{ $label }}</label>
     @endif
+
     <select
         class="custom-select"
         name="{{ $name }}"
@@ -11,7 +12,10 @@
     >
 
         @foreach ($values as $id => $name)
-            <option value="{{ $id }}" {{ $isSelected($id) ? 'selected' : '' }}>
+            <option
+                value="{{ $id }}"
+                @selected(old($name, $selected) == $id)
+            >
                 {{ $name }}
             </option>
         @endforeach

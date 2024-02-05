@@ -3,9 +3,17 @@
                 <label for="{{ $name }}">{{ $label }}</label>
             @endif
 
-            <input class="form-control" type="{{ $type }}" id="{{ $name }}" name="{{ $name }}" value="{{ $value == '' ? old($name) : $value }}" {{ $isDisabled() ? 'disabled' : '' }} />
+            <input
+                class="form-control"
+                type="{{ $type }}"
+                id="{{ $name }}"
+                name="{{ $name }}"
+                value="{{ old($name, $value) }}"
+                {{ $isDisabled() ? 'disabled' : '' }}
+            />
+
             @error($name)
-            <p>{{$message}}</p>
+            <p>{{ $message }}</p>
             @enderror
 
 
