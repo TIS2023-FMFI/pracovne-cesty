@@ -15,6 +15,8 @@ class Reimbursement extends Model
         'reimbursement_date' => 'date'
     ];
 
+    protected $fillable = ['spp_symbol_id', 'reimbursement_date'];
+
     /**
      * Get the business trip associated with the reimbursement
      *

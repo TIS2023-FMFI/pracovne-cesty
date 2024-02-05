@@ -15,6 +15,8 @@ class Expense extends Model
         'reimburse' => 'boolean'
     ];
 
+    protected $fillable = ['amount_eur', 'amount_foreign', 'reimburse'];
+
     /**
      * Get the business trips where the expense acts as an accommodation expense
      *
