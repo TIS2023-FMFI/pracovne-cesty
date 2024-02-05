@@ -54,7 +54,6 @@ class UserController extends Controller
         $userType = match($request->user_types) {
             'externist' => UserType::EXTERN,
             'student' => UserType::STUDENT,
-            default => throw new \Exception("Invalid user type"),
         };
 
         $user = User::create([
@@ -65,7 +64,7 @@ class UserController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
-        $user->user_type = $userType->value;
+        $user->user_type = $userType;
         $user->save();
 
         return redirect()->route('login');
@@ -94,7 +93,7 @@ class UserController extends Controller
         $user = User::where('username', $credentials['username'])->first();
 
         if ($user) {
-            if (in_array($user->user_type, [UserType::EMPLOYEE->value, UserType::PHD_STUDENT->value])) {
+            if (in_array($user->user_type, [UserType::EMPLOYEE, UserType::PHD_STUDENT])) {
                 SynchronizationController::syncSingleUser($user->id);
             }
             if (Auth::attempt($credentials)) {
@@ -117,7 +116,7 @@ class UserController extends Controller
      */
     public function invite(Request $request) {
         $email = $request->input('email');
-        $token = Str::random(40);
+        $token = bin2hex(random_bytes(20));
         $expiresAt = Carbon::now()->addDays(7);
 
         $link = InvitationLink::create([
