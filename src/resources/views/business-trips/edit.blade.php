@@ -14,7 +14,10 @@
     $transports = Transport::all()->pluck('name', 'id');
     $purposes = TripPurpose::all()->pluck('name', 'id');
     $contributions = Contribution::all()->pluck('name', 'id');
-    $spp_symbols = SppSymbol::where('status', SppStatus::ACTIVE)->pluck('spp_symbol', 'id');
+    $spp_symbols = SppSymbol::where('status', SppStatus::ACTIVE)
+        ->orWhere('id', $trip->sppSymbol->id)
+        ->orWhere('id', $trip->reimbursement->sppSymbol->id)
+        ->pluck('spp_symbol', 'id');
 
     $tripType = $trip->type;
     $tripState = $trip->state;
@@ -28,7 +31,7 @@
             {{ $tripType == TripType::DOMESTIC ? "Tuzemská cesta" : "Zahraničná cesta"}}
             </span>
             <span class="badge badge-pill badge-danger">
-            Stav: {{ $trip->state->name}}
+            Stav: {{ $trip->state->inSlovak()}}
             </span>
             <span class="badge badge-pill badge-danger">
             Identifikátor: {{ $trip->sofia_id ?? '0000'}}
@@ -105,12 +108,12 @@
                         <x-simple-input name="place" label="Miesto" :value="$trip->place"/>
                     </div>
                     <div class="col">
-                        <x-dropdown-input name="country" label="Štát" :values="$countries" :selected="$trip->country_id"/>
+                        <x-dropdown-input name="country_id" label="Štát" :values="$countries" :selected="$trip->country_id"/>
                     </div>
                 </div>
                 <div class="form-row">
                     <div class="col">
-                        <x-dropdown-input name="trip_purpose" label="Účel cesty" :values="$purposes"
+                        <x-dropdown-input name="trip_purpose_id" label="Účel cesty" :values="$purposes"
                                           :selected="$trip->trip_purpose_id"/>
                     </div>
                     <div class="col">
@@ -120,7 +123,7 @@
                 </div>
                 <div class="form-row">
                     <div class="col">
-                        <x-dropdown-input name="transport" label="Dopravný prostriedok" :values="$transports"
+                        <x-dropdown-input name="transport_id" label="Dopravný prostriedok" :values="$transports"
                                           :selected="$trip->transport_id"/>
                     </div>
                     <div class="col">
@@ -152,18 +155,18 @@
                     @foreach($contributions as $id => $name)
                         @php
                             $contribution = $trip->contributions->where('id', $id)->first();
-                            $detail = $contribution->pivot->detail ?? '';
+                            $detail = addslashes($contribution->pivot->detail ?? '');
                             $checked = $contribution != null;
                         @endphp
 
-                        <div class="input-group mb-3">
+                        <div x-data="{ tripContribution: { checked: {{ $checked ? 'true' : 'false' }}, value: '{{ $detail }}' } }" class="input-group mb-3">
                             <div class="input-group-prepend">
                                 <div class="input-group-text">
-                                    <input type="checkbox" name="contribution_{{ $id }}" {{ $checked ? 'checked' : '' }}>
+                                    <input type="checkbox" x-model="tripContribution.checked" x-on:change="if (!tripContribution.checked) { tripContribution.value = '' }">
                                 </div>
                                 <span class="input-group-text">{{ $name }}</span>
                             </div>
-                            <input type="text" name="contribution_{{ $id }}_detail" class="form-control" value="{{ $detail }}">
+                            <input type="text" name="contribution_{{ $id }}_detail" x-model="tripContribution.value" class="form-control">
                         </div>
                     @endforeach
 
@@ -173,17 +176,17 @@
             @php
                 $isReimbursed = $trip->reimbursement != null;
                 $spp2 = $isReimbursed ? $trip->reimbursement->spp_symbol_id : '';
-                $reimbursementDate = $isReimbursed ? $trip->reimbursement->reimbursement_date : '';
+                $reimbursementDate = $isReimbursed ? $trip->reimbursement->reimbursement_date->format('Y-m-d') : '';
             @endphp
 
-            <x-content-section title="Financovanie" x-data="{reimbursementShow: {{ $isReimbursed }} }">
+            <x-content-section title="Financovanie" x-data="{reimbursementShow: {{ $isReimbursed ? 'true' : 'false' }} }">
                 <x-slot:description>
                     V prípade refundácie, prosím, vyberte ako ŠPP prvok 2 ten prvok, z ktorého budú peniaze neskôr
                     vrátené do ŠPP prvku 1. Ako dátum vrátenia peňazí uveďte iba orientačný, predpokladaný dátum.
                 </x-slot:description>
                 <div class="form-row align-items-center">
                     <div class="col">
-                        <x-dropdown-input name="spp_symbol" label="ŠPP prvok 1:" :values="$spp_symbols"
+                        <x-dropdown-input name="spp_symbol_id" label="ŠPP prvok 1:" :values="$spp_symbols"
                                           :selected="$trip->spp_symbol_id"/>
                     </div>
                     <div class="col">
@@ -195,12 +198,12 @@
                 <x-hideable-section control="reimbursementShow">
                     <div class="form-row">
                         <div class="col">
-                            <x-dropdown-input name="reimbursement_spp" label="ŠPP prvok 2" :values="$spp_symbols"
+                            <x-dropdown-input name="reimbursement_spp_symbol_id" label="ŠPP prvok 2" :values="$spp_symbols"
                                               :selected="$spp2"/>
                         </div>
                         <div class="col">
                             <x-simple-input name="reimbursement_date" type="date" label="Dátum vrátenia peňazí"
-                                            :value="$reimbursementDate->format('Y-m-d')"/>
+                                            :value="$reimbursementDate"/>
                         </div>
                     </div>
                 </x-hideable-section>
@@ -216,7 +219,7 @@
             @endphp
 
             <x-content-section title="Úhrada konferenčného poplatku"
-                               x-data="{conferenceFeeShow: {{ $wantsConferenceFee }} }">
+                               x-data="{conferenceFeeShow: {{ $wantsConferenceFee ? 'true' : 'false' }} }">
                 <x-checkbox name="conference_fee"
                             label="Mám záujem o úhradu konferenčného poplatku pred cestou priamo z pracoviska"
                             control="conferenceFeeShow" :checked="$wantsConferenceFee"></x-checkbox>

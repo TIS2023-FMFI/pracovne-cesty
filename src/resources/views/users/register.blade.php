@@ -1,3 +1,9 @@
+@php
+use App\Enums\UserType;
+@endphp
+
+
+
 <x-layout>
     <x-content-box title="Registrácia">
         <form action="users/store">
@@ -21,11 +27,11 @@
                     </div>
                 </div>
                 <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="radio" name="user_types" id="type1" value="externist">
+                    <input class="form-check-input" type="radio" name="user_types" id="type1" :value="{{UserType::EXTERN->value}}">
                     <label class="form-check-label" for="type1">Externista</label>
                 </div>
                 <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="radio" name="user_types" id="type2" value="student">
+                    <input class="form-check-input" type="radio" name="user_types" id="type2" value=""{{UserType::STUDENT->value}}"">
                     <label class="form-check-label" for="type2">Študent</label>
                 </div>
             </x-content-section>
