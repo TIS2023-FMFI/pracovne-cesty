@@ -40,7 +40,7 @@ class UserController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
-        $validUserTypes = array_column(UserType::cases(), 'value');
+        $validUserTypes = [UserType::EXTERN->value, UserType::STUDENT->value];
 
         $validator = Validator::make($request->all(), [
             'first_name' => 'required|string|max:50',
