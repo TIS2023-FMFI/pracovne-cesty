@@ -164,106 +164,102 @@ class BusinessTripController extends Controller
      * @throws Exception
      */
     public function update(Request $request, BusinessTrip $trip) {
-        // Validation rules for expense-related fields
-        $expenses = ['travelling', 'accommodation', 'allowance', 'advance', 'other'];
-        $expenseRules = [];
-
-        foreach ($expenses as $expenseName) {
-            $eurKey = $expenseName . '_expense_eur';
-            $foreignKey = $expenseName . '_expense_foreign';
-            $reimburseKey = $expenseName . '_reimburse';
-
-            // Rules for each expense-related field
-            $expenseRules[$eurKey] = ['nullable', 'numeric'];
-            $expenseRules[$foreignKey] = ['nullable', 'numeric'];
-            $expenseRules[$reimburseKey] = ['nullable', 'boolean'];
-        }
-
-        //Validate data
-        $validatedData = $request->validate([
-            'user_id' => 'required|integer|min:0',
-            'country_id' => 'required|exists:countries,id',
-            'transport_id' => 'required|exists:transports,id',
-            'place' => 'required|string|max:200',
-            'event_url' => 'nullable|string|max:200',
-            'upload_name' => 'nullable|string|max:200',
-            'sofia_id' => 'nullable|string|max:40',
-            'state' => 'required|integer',
-            'datetime_start' => 'required|date',
-            'datetime_end' => 'required|date|after:datetime_start',
-            'place_start' => 'nullable|string|max:200',
-            'place_end' => 'nullable|string|max:200',
-            'datetime_border_crossing_start' => 'nullable|date',
-            'datetime_border_crossing_end' => 'nullable|date',
-            'trip_purpose_id' => 'required|integer|min:0', //possibly |exists:trip_purposes,id
-            'purpose_details' => 'nullable|string|max:50',
-            'iban' => 'required|string|max:34',
-            'conference_fee_id' => 'nullable|integer|min:0',
-            'reimbursement_id' => 'nullable|integer|min:0',
-            'spp_symbol_id' => 'nullable|exists:spp_symbols,id',
-            'accommodation_expense_id' => 'nullable|integer|min:0',
-            'travelling_expense_id' => 'nullable|integer|min:0',
-            'other_expense_id' => 'nullable|integer|min:0',
-            'advance_expense_id' => 'nullable|integer|min:0',
-            'meals_reimbursement' => 'boolean',
-            'expense_estimation' => $expenseRules,
-            'cancellation_reason' => 'nullable|string|max:1000',
-            'note' => 'nullable|string|max:5000',
-            'conclusion' => 'nullable|string|max:5000',
-        ]);
-
-        // Calculate the number of days based on start and end datetimes
-        $startDate = new DateTime($validatedData['datetime_start']);
-        $endDate = new DateTime($validatedData['datetime_end']);
-        $endDate->modify('+1 day'); // Include the end day
-        $interval = new DateInterval('P1D'); // 1 day interval
-        $dateRange = new DatePeriod($startDate, $interval, $endDate);
-        $days = iterator_count($dateRange);
-
-        // Set the value for 'not_reimbursed_meals'
-        $notReimbursedMeals = '';
-        $checkboxNames = ['b', 'l', 'd']; // Checkbox names prefix
-        foreach ($checkboxNames as $prefix) {
-            for ($i = 0; $i < $days; $i++) {
-                $checkboxName = $prefix . $i;
-                if (!$request->has($checkboxName)) {
-                    $notReimbursedMeals .= '0'; // Checkbox not present, mark as not reimbursed
-                } else {
-                    $notReimbursedMeals .= '1'; // Checkbox present, mark as reimbursed
-                }
-            }
-        }
-        $validatedData['not_reimbursed_meals'] = $notReimbursedMeals;
-
         // Check if the authenticated user is an admin
         $isAdmin = Auth::user()->hasRole('admin');
 
-        // Check if the trip is in a valid state for updating by non-admin user
-        if (!$isAdmin && !in_array($trip->state, [TripState::NEW, TripState::CONFIRMED])) {
-            throw ValidationException::withMessages(['state' => 'Invalid state for updating.']);
+        // Admin updating the trip
+        if ($isAdmin) {
+            // Validate and update based on trip state
+            switch ($trip->state) {
+                case TripState::NEW:
+                    $validatedData = $request->validate([
+                        // Add validation rules
+                    ]);
+                    break;
+
+                case TripState::CONFIRMED:
+                    $validatedData = $request->validate([
+                        // Add validation rules
+                    ]);
+                    break;
+
+                case TripState::UPDATED:
+                    $validatedData = $request->validate([
+                        // Add validation rules
+                    ]);
+                    break;
+
+                case TripState::COMPLETED:
+                    $validatedData = $request->validate([
+                        // Add validation rules
+                    ]);
+                    break;
+
+                default:
+                    throw ValidationException::withMessages(['state' => 'Invalid state for updating.']);
+            }
+
+            // Update the trip with the provided data
+            $trip->update($validatedData);
+
+        } else { // Non-admin user updating the trip
+
+            // Validate and update based on trip state
+            switch ($trip->state) {
+                case TripState::CONFIRMED:
+                    $validatedData = $request->validate([
+                        'datetime_start' => 'required|date',
+                        'datetime_end' => 'required|date|after:datetime_start',
+                        'place_start' => 'nullable|string|max:200',
+                        'place_end' => 'nullable|string|max:200',
+                    ]);
+
+                    // Border crossing validation rules for foreign trips
+                    if ($trip->trip_type === TripType::FOREIGN) {
+                        $validationRules['datetime_border_crossing_start'] = 'nullable|date';
+                        $validationRules['datetime_border_crossing_end'] = 'nullable|date';
+                    }
+
+                    // Update the trip with the provided data
+                    $trip->update($validatedData);
+
+                    // Change the state to UPDATED
+                    $trip->update(['state' => TripState::UPDATED]);
+                    break;
+
+                // Updating an UPDATED state trip
+                case TripState::UPDATED:
+                    $validatedData = $request->validate([
+                        'travelling_expense_eur' => 'nullable|numeric',
+                        'accommodation_expense_eur' => 'nullable|numeric',
+                        // Add validation rules
+                        'conclusion' => 'nullable|string|max:5000',
+                    ]);
+
+                    // Update the trip with the provided data
+                    $trip->update($validatedData);
+
+                    // Change the state to COMPLETED
+                    $trip->update(['state' => TripState::COMPLETED]);
+                    break;
+
+                // Updating a wrong state trip
+                default:
+                    throw ValidationException::withMessages(['state' => 'Invalid state for updating.']);
+            }
+            //Sending mails
+            $message = '';
+            $recipient = 'admin@example.com';
+            $viewTemplate = 'emails.new_trip_admin';
+
+            // Create an instance of the SimpleMail class
+            $email = new SimpleMail($message, $recipient, $viewTemplate);
+
+            // Send the email
+            Mail::to($recipient)->send($email);
         }
-
-        // Update the trip with the calculated 'not_reimbursed_meals' value
-        $trip->update($validatedData);
-
-        // Change the state to 'UPDATED' if not admin
-        if (!$isAdmin) {
-            $trip->update(['state' => TripState::UPDATED]);
-        }
-
-        //Sending mails
-        $message = '';
-        $recipient = 'admin@example.com';
-        $viewTemplate = 'emails.new_trip_admin';
-
-        // Create an instance of the SimpleMail class
-        $email = new SimpleMail($message, $recipient, $viewTemplate);
-
-        // Send the email
-        Mail::to($recipient)->send($email);
 
         return redirect()->route('business-trips.edit', $trip);
-
     }
 
     /**
@@ -329,7 +325,7 @@ class BusinessTripController extends Controller
      */
     public function close(BusinessTrip $trip) {
         // Check if the trip is in a valid state for closing
-        if ($trip->state !== TripState::CONFIRMED) {
+        if ($trip->state !== TripState::COMPLETED) {
             throw ValidationException::withMessages(['state' => 'Invalid state for closing.']);
         }
 
@@ -344,11 +340,21 @@ class BusinessTripController extends Controller
      * Updating state of the trip to cancellation request
      * @throws ValidationException
      */
-    public function requestCancellation(BusinessTrip $trip): \Illuminate\Http\RedirectResponse
+    public function requestCancellation(Request $request, BusinessTrip $trip): \Illuminate\Http\RedirectResponse
     {
+        // Validate the cancellation reason
+        $validator = Validator::make($request->all(), [
+            'cancellation_reason' => 'required|string|max:1000',
+        ]);
+
+        // Check if the validation fails
+        if ($validator->fails()) {
+            throw ValidationException::withMessages(['cancellation_reason' => 'Cancellation reason is required.']);
+        }
+
         // Check if the current state of the trip allows cancellation request
         if (in_array($trip->state,
-            [TripState::NEW, TripState::CONFIRMED, TripState::UPDATED])) {
+            [TripState::NEW, TripState::CONFIRMED])) {
             // Change the state to CANCELLATION_REQUEST
             $trip->update(['state' => TripState::CANCELLATION_REQUEST]);
 
