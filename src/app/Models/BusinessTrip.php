@@ -27,6 +27,15 @@ class BusinessTrip extends Model
         'meals_reimbursement' => 'boolean'
     ];
 
+    protected $fillable = [
+        'user_id', 'type', 'country_id', 'transport_id', 'place', 'event_url', 'upload_name', 'sofia_id',
+        'state', 'datetime_start', 'datetime_end', 'place_start', 'place_end', 'datetime_border_crossing_start',
+        'datetime_border_crossing_end', 'trip_purpose_id', 'purpose_details', 'iban', 'conference_fee_id',
+        'reimbursement_id', 'spp_symbol_id', 'accommodation_expense_id', 'travelling_expense_id',
+        'other_expense_id', 'allowance_id', 'not_reimbursed_meals', 'meals_reimbursement', 'advance_amount',
+        'expense_estimation', 'cancellation_reason', 'note', 'conclusion'
+    ];
+
     // Foreign relationships
 
     /**
