@@ -11,6 +11,7 @@ use App\Models\User;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use App\Enums\TripState;
 
 return new class extends Migration {
     /**
@@ -34,8 +35,8 @@ return new class extends Migration {
             $table->string('event_url', 200)->nullable();
             $table->string('upload_name', 200)->nullable();
 
-            $table->string('sofia_id', 40)->nullable();
-            $table->unsignedSmallInteger('state');
+            $table->string('sofia_id', 40)->default('0000');
+            $table->unsignedSmallInteger('state')->default(TripState::NEW->value);
 
 
             // Start and end of the trip
