@@ -28,7 +28,7 @@
             {{ $tripType == TripType::DOMESTIC ? "Tuzemská cesta" : "Zahraničná cesta"}}
             </span>
             <span class="badge badge-pill badge-danger">
-            Stav: {{ $trip->state->name}}
+            Stav: {{ $trip->state->inSlovak()}}
             </span>
             <span class="badge badge-pill badge-danger">
             Identifikátor: {{ $trip->sofia_id ?? '0000'}}
