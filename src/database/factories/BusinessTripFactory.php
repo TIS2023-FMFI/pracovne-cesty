@@ -55,7 +55,7 @@ class BusinessTripFactory extends Factory
                 Str::random(16) . '.' . fake()->fileExtension()
             ]),
 
-            'sofia_id' => fake()->optional()->numerify('##########'),
+            'sofia_id' => fake()->numerify('##########'),
             'state' => fake()->randomElement(TripState::cases()),
 
 
