@@ -56,7 +56,6 @@ class UserController extends Controller
         $userType = match($request->user_types) {
             'externist' => UserType::EXTERN,
             'student' => UserType::STUDENT,
-            default => throw new Exception("Invalid user type"),
         };
 
         $user = User::create([
@@ -67,7 +66,7 @@ class UserController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
-        $user->user_type = $userType->value;
+        $user->user_type = $userType;
         $user->save();
 
         return redirect()->route('login');
@@ -94,7 +93,7 @@ class UserController extends Controller
         $user = User::where('username', $credentials['username'])->first();
 
         if ($user) {
-            if (in_array($user->user_type, [UserType::EMPLOYEE->value, UserType::PHD_STUDENT->value])) {
+            if (in_array($user->user_type, [UserType::EMPLOYEE, UserType::PHD_STUDENT])) {
                 SynchronizationController::syncSingleUser($user->id);
             }
             if (Auth::attempt($credentials)) {
@@ -110,27 +109,31 @@ class UserController extends Controller
 
 
     /**
-     * Generate and send an invitation link to an external employee.
+     * Generate and send an invitation link to multiple external employees.
      *
      * @param Request $request
      * @return RedirectResponse
      */
     public function invite(Request $request) {
-        $email = $request->input('email');
-        $token = Str::random(40);
-        $expiresAt = Carbon::now()->addDays(7);
+        $emails = explode(';', $request->input('email'));
 
-        $link = InvitationLink::create([
-            'email' => $email,
-            'token' => $token,
-            'expires_at' => $expiresAt,
-        ]);
+        foreach ($emails as $email) {
+            $email = trim($email);
+            $token = bin2hex(random_bytes(20));
+            $expiresAt = Carbon::now()->addDays(7);
 
-        $url = url('/register?token=' . $token);
-        $messageText = "Pre registráciu kliknite na tento odkaz: " . $url;
+            InvitationLink::create([
+                'email' => $email,
+                'token' => $token,
+                'expires_at' => $expiresAt,
+            ]);
 
-        Mail::to($email)->send(new SimpleMail($messageText, $email, 'emails.registration_externist'));
+            $url = url('/register?token=' . $token);
+            $messageText = "Pre registráciu kliknite na tento odkaz: " . $url;
 
-        return back()->with('success', 'Pozvánka bola úspešne odoslaná.');
+            Mail::to($email)->send(new SimpleMail($messageText, $email, 'emails.registration_externist'));
+        }
+        return back()->with('success', 'Pozvánky boli úspešne odoslané.');
     }
+
 }

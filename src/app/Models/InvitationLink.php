@@ -7,8 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class InvitationLink extends Model
 {
-    use HasFactory;
-
     /**
      * The attributes that are mass assignable.
      *
