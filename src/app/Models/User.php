@@ -5,13 +5,14 @@ namespace App\Models;
 use App\Enums\UserStatus;
 use App\Enums\UserType;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Spatie\Permission\Traits\HasRoles;
 
-class User extends Model
+class User extends Authenticatable
 {
-    use HasFactory;
+    use HasFactory, HasRoles;
 
     protected $connection = 'cesty';
     protected $table = 'users';
@@ -25,13 +26,8 @@ class User extends Model
 
     // Mass assignable attributes
     protected $fillable = [
-        'first_name',
-        'last_name',
-        'personal_id',
-        'email',
-        'username',
-        'password',
-        'status'
+        'first_name', 'last_name', 'personal_id',
+        'email', 'username', 'password', 'status'
     ];
 
     /**
@@ -53,5 +49,10 @@ class User extends Model
     public function pritomnostUser(): HasOne
     {
         return $this->hasOne(PritomnostUser::class, 'personal_id', 'personal_id');
+    }
+
+    public function isAdmin(): bool
+    {
+        return UserType::from($this->user_type) === UserType::ADMIN;
     }
 }
