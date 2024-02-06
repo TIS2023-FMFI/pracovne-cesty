@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\UserStatus;
 use App\Enums\UserType;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -27,7 +28,7 @@ return new class extends Migration {
             $table->string('username', 255)->unique();
             $table->string('password', 255);
 
-            $table->unsignedSmallInteger('status');
+            $table->unsignedSmallInteger('status')->default(UserStatus::ACTIVE->value);
             $table->dateTime('last_login')->nullable();
 
             $table->rememberToken();
