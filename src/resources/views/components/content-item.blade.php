@@ -1,5 +1,5 @@
 <a
-    href="trips/{{ $id }}"
+    href="trips/{{ $id }}/edit"
     class="text-decoration-none text-dark border-bottom">
     <div class="container my-2 py-2 border-bottom">
         <div class="row">
