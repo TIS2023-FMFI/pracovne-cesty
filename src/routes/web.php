@@ -42,10 +42,6 @@ Route::controller(BusinessTripController::class)
                 Route::get('/create', 'create')
                     ->name('create');
 
-                // Show trip details
-                Route::get('/{trip}', 'show')
-                    ->name('details');
-
                 // Show the edit form
                 Route::get('/{trip}/edit', 'edit')
                     ->name('edit');
