@@ -3,10 +3,13 @@
 namespace App\Models;
 
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class InvitationLink extends Model
 {
+    use HasFactory;
+
     protected $fillable = ['email', 'token', 'expires_at', 'used'];
 
     protected $casts = [
