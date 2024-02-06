@@ -18,14 +18,14 @@
                 <div class="container d-flex justify-content-end py-2">
                     @auth
                         <span>
-                          Prihlásený ako {{auth()->user()->first_name.auth()->user()->last_name}}
+                          Prihlásený ako {{Auth::user()->first_name.' '.Auth::user()->last_name}}
                         </span>
                         <form method="POST" action="/logout">
                             @csrf
                             <button> <i></i> Odhlásiť sa </button>
                         </form>
                     @else
-                        <form method="POST" action="/user/authenticate">
+                        <form method="POST" action="/user">
                             @csrf
                             <label for="username" class="text-white">Prihlasovacie meno: </label>
                             <input name="username" id="username"/>
