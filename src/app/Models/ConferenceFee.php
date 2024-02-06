@@ -10,6 +10,8 @@ class ConferenceFee extends Model
 {
     use HasFactory;
 
+    protected $fillable = ['organiser_name', 'organiser_address', 'ico', 'iban', 'amount'];
+
     /**
      * Get the business trip associated with the conference fee
      *

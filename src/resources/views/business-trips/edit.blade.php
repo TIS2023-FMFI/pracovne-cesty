@@ -80,7 +80,7 @@
                 <div class="row">
                     <div class="col">
                         <x-content-section title="Začiatok cesty">
-                            <x-simple-input name="place start" label="Miesto" :value="$trip->place_start"/>
+                            <x-simple-input name="place_start" label="Miesto" :value="$trip->place_start"/>
                             <x-simple-input name="datetime_start" type="datetime-local" label="Dátum a čas"
                                             :value="$trip->datetime_start"/>
                             @if($tripType == TripType::FOREIGN)

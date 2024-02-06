@@ -61,11 +61,11 @@ Route::controller(BusinessTripController::class)
                     ->name('add-comment');
 
                 // Export the trip details as the selected document
-                Route::post('/{trip}/export', 'exportPdf')
+                Route::get('/{trip}/export', 'exportPdf')
                     ->name('export');
 
                 // Download attachment in the trip
-                Route::post('/{trip}/attachment', 'getAttachment')
+                Route::get('/{trip}/attachment', 'getAttachment')
                     ->name('attachment');
             });
 

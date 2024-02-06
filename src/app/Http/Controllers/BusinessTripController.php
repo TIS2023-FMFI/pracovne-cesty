@@ -3,14 +3,29 @@
 namespace App\Http\Controllers;
 
 use App\Enums\DocumentType;
-use App\Models\BusinessTrip;
-use App\Models\Staff;
 use App\Enums\PositionTitle;
+use App\Enums\TripState;
+use App\Enums\TripType;
+use App\Mail\SimpleMail;
+use App\Models\BusinessTrip;
+use App\Models\ConferenceFee;
+use App\Models\Contribution;
+use App\Models\Expense;
+use App\Models\Reimbursement;
+use App\Models\Staff;
+use App\Models\TripContribution;
+use App\Models\User;
+use DateInterval;
+use DatePeriod;
+use DateTime;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\ValidationException;
 use mikehaertl\pdftk\Pdf;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
@@ -20,22 +35,31 @@ class BusinessTripController extends Controller
     /**
      * Returning view with details from all trips
      */
-    public function index() {
-        return view();
+    public static function index() {
+        // Check if the user is an admin
+        if (Auth::user()->hasRole('admin')) {
+            // Retrieve all trips and users for admin
+            $trips = BusinessTrip::paginate(15);
+            $users = User::all();
+        } else {
+            // Retrieve only user's trips for regular users
+            $trips = Auth::user()->businessTrips()->paginate(15);
+            // No need for a list of users
+            $users = null;
+        }
+
+        // Return the dashboard view with trips and users
+        return view('dashboard', [
+            'trips' => $trips,
+            'users' => $users,
+        ]);
     }
 
     /**
-     * Returning view with the trip details
-     */
-    public function show(BusinessTrip $b) {
-        return view();
-    }
-
-    /**
-     * Returning view with the form for addding of the new trip
+     * Returning view with the form for adding of the new trip
      */
     public function create() {
-        return view();
+        return view('business-trips.create');
     }
 
     /**
@@ -45,47 +69,471 @@ class BusinessTripController extends Controller
      * Sending mail with mail component to admin
      */
     public function store(Request $request) {
+        // Get the authenticated user's ID
+        $user = Auth::user();
 
+        $rule = 'nullable';
+        if ($user->user_type->isExternal()){
+            $rule = 'required';
+        }
+
+        // Validate user data
+        $validatedUserData = $request->validate([
+            'first_name' => 'required|string|max:50',
+            'last_name' => 'required|string|max:50',
+            'academic_degrees' => 'nullable|string|max:30',
+            'department' => 'required|string|max:10',
+            'address' => $rule . '|string|max:200',
+        ]);
+
+        //Validate trip data
+        $validatedData = $request->validate([
+            'country_id' => 'required|exists:countries,id',
+            'transport_id' => 'required|exists:transports,id',
+            'spp_symbol_id' => 'required|exists:spp_symbols,id',
+            'place' => 'required|string|max:200',
+            'place_start' => 'required|string|max:200',
+            'place_end' => 'required|string|max:200',
+            'datetime_start' => 'required|date',
+            'datetime_end' => 'required|date|after:datetime_start',
+            'trip_purpose_id' => 'required|integer|min:0',
+            'purpose_details' => 'nullable|string|max:50',
+            'iban' => $rule . '|string|max:34',
+        ]);
+
+        // Add the authenticated user's ID to the validated data
+        $validatedData['user_id'] = $user->id;
+
+        // Set the type of trip based on the selected country
+        $selectedCountry = $request->input('country');
+        $validatedData['type'] = $selectedCountry === 'Slovensko' ? TripType::DOMESTIC : TripType::FOREIGN;
+
+        // Contributions validation
+        $contributions = Contribution::all()->pluck('name', 'id');
+        $checkedContributions = [];
+
+        // Check for checked contributions checkboxes
+        $isContribution = 0;
+        foreach($contributions as $id => $name) {
+            if ($request->has('contribution_' . $id)) {
+                $validatedContributionData = $request->validate([
+                    'contribution_' . $id . '_detail' => 'nullable|string|max:200',
+                ]);
+                $updContributionData = self::array_key_replace(
+                    'contribution_' . $id . '_detail',
+                    'detail',
+                    $validatedContributionData
+                );
+                $updContributionData['contribution_id'] = $id;
+                array_push($checkedContributions, $updContributionData);
+                $isContribution = 1;
+            }
+        }
+
+        $isReimbursement = 0;
+        if ($request->has('reimbursement')){
+            Log::info('is checked');
+            $validatedReimbursements = $request->validate([
+               'reimbursement_spp_symbol_id' => 'required|exists:spp_symbols,id',
+               'reimbursement_date' => 'required|date',
+            ]);
+
+            $updReimbursement = self::array_key_replace(
+                'reimbursement_spp_symbol_id',
+                'spp_symbol_id',
+                $validatedReimbursements
+            );
+            $isReimbursement = 1;
+        }
+
+        $isConferenceFee = 0;
+        if ($request->has('conference_fee')){
+            $validatedConferenceFee = $request->validate([
+                'organiser_name' => 'required|string|max:100',
+                'ico' => 'nullable|string|max:8',
+                'organiser_address' => 'required|string|max:200',
+                'organiser_iban' => 'required|string|max:34',
+                'amount' => 'required|string|max:20',
+            ]);
+
+            $updConferenceFee = self::array_key_replace(
+                'organiser_iban',
+                'iban',
+                $validatedConferenceFee
+            );
+            $isConferenceFee = 1;
+        }
+
+        //Logic to store the trip based on the validated data
+        $trip = BusinessTrip::create($validatedData);
+        if ($isReimbursement){
+            $reimbursement = Reimbursement::create($updReimbursement);
+            $trip->update(['reimbursement_id' => $reimbursement->id]);
+        }
+
+        if ($isConferenceFee) {
+            $ConferenceFee = ConferenceFee::create($updConferenceFee);
+            $trip->update(['conference_fee_id' => $ConferenceFee->id]);
+        }
+
+        if ($isContribution) {
+            foreach ($checkedContributions as $contribution) {
+                $contribution['business_trip_id'] = $trip->id;
+                TripContribution::create($contribution);
+            }
+
+        }
+
+        //Handle file uploads
+        if ($request->hasFile('upload_name')) {
+            $file = $request->file('upload_name');
+
+            //Store the file in the storage/app/trips directory
+            $upload_name = Storage::disk('uploads')->putFile('', $file);
+
+            //Save the file path in the model
+            $trip->update(['upload_name' => $upload_name]);
+        }
+
+        // Update user details
+        $user->update($validatedUserData);
+
+        //Sending mails
+        $message = '';
+        $recipient = 'admin@example.com';
+        $viewTemplate = 'emails.new_trip_admin';
+
+        // Create an instance of the SimpleMail class
+        $email = new SimpleMail($message, $recipient, $viewTemplate);
+
+        // Send the email
+        Mail::to($recipient)->send($email);
+
+        //Redirecting to the homepage
+        return redirect()->route('homepage');
+
+    }
+
+    /**
+     * Get the attachment from a business trip.
+     */
+    public function getAttachment(BusinessTrip $trip) {
+        // Check if the trip has an attachment
+        if (!$trip->upload_name) {
+            abort(404, 'File not found'); // Or other error handling
+        }
+
+        // Build the file path
+        $filePath = Storage::disk('uploads')->path($trip->upload_name);
+
+        // Check if the file exists
+        if (Storage::disk('uploads')->missing($trip->upload_name)) {
+            abort(404, 'File not found'); // Or other error handling
+        }
+
+        // Download the file
+        return Storage::disk('uploads')->download($trip->upload_name);
     }
 
     /**
      * Returning the view with the trip editing form
+     * @throws \Exception
      */
-    public function edit(BusinessTrip $b) {
-        return view();
+    public function edit(BusinessTrip $trip) {
+        Log::info($trip);
+        $startDate = new DateTime($trip->datetime_start);
+        $endDate = new DateTime($trip->datetime_end);
+        $endDate->modify('+1 day'); // Include the end day
+        $interval = new DateInterval('P1D');
+        $dateRange = new DatePeriod($startDate, $interval, $endDate);
+
+        $days = iterator_count($dateRange);
+
+        return view('business-trips.edit',  [
+            'trip' => $trip,
+            'days' => $days,
+        ]);
+
     }
 
     /**
-     * Validation as in create(), should check if user is admin/not
      * Redirecting to the trip editing form
      * Sending mail with mail component to admin
+     * @throws ValidationException
+     * @throws Exception
      */
-    public function update(Request $request, BusinessTrip $b) {
+    public function update(Request $request, BusinessTrip $trip) {
+        // Check if the authenticated user is an admin
+        $isAdmin = Auth::user()->hasRole('admin');
 
+        // Admin updating the trip
+        if ($isAdmin) {
+            // Validate and update based on trip state
+            switch ($trip->state) {
+                case TripState::NEW:
+                    $validatedData = $request->validate([
+                        // Add NEW validation rules
+                    ]);
+                    break;
+
+                case TripState::CONFIRMED:
+                    $validatedData = $request->validate([
+                        // Add CONFIRMED validation rules
+                    ]);
+                    break;
+
+                case TripState::UPDATED:
+                    $validatedData = $request->validate([
+                        // Add UPDATED validation rules
+                    ]);
+                    break;
+
+                case TripState::COMPLETED:
+                    $validatedData = $request->validate([
+                        // Add COMPLETED validation rules
+                    ]);
+                    break;
+
+                default:
+                    throw ValidationException::withMessages(['state' => 'Invalid state for updating.']);
+            }
+
+            // Update the trip with the provided data
+            $trip->update($validatedData);
+
+        } else { // Non-admin user updating the trip
+
+            // Validate and update based on trip state
+            switch ($trip->state) {
+                case TripState::CONFIRMED:
+                    $validatedData = $request->validate([
+                        'datetime_start' => 'required|date',
+                        'datetime_end' => 'required|date|after:datetime_start',
+                        'place_start' => 'nullable|string|max:200',
+                        'place_end' => 'nullable|string|max:200',
+                    ]);
+
+                    // Border crossing validation rules for foreign trips
+                    if ($trip->type === TripType::FOREIGN) {
+                        $validatedData['datetime_border_crossing_start'] = 'nullable|date';
+                        $validatedData['datetime_border_crossing_end'] = 'nullable|date';
+                    }
+
+                    // Update the trip with the provided data
+                    $trip->update($validatedData);
+
+                    // Change the state to UPDATED
+                    $trip->update(['state' => TripState::UPDATED]);
+                    break;
+
+                // Updating an UPDATED state trip
+                case TripState::UPDATED:
+                    // Validation rules for expense-related fields
+                    $expenses = ['travelling', 'accommodation', 'allowance', 'advance', 'other'];
+                    $expenseRules = [];
+                    $expenseValidatedData = [];
+
+                    foreach ($expenses as $expenseName) {
+                        $eurKey = $expenseName . '_expense_eur';
+                        if ($trip->type === TripType::FOREIGN) {
+                            $foreignKey = $expenseName . '_expense_foreign';
+                            $expenseRules[$foreignKey] = ['nullable', 'string'];
+                        }
+                        $reimburseKey = $expenseName . '_reimburse';
+
+                        // Rules for each expense-related field
+                        $expenseRules[$eurKey] = 'nullable|string';
+                        $expenseRules[$reimburseKey] = 'nullable|boolean';
+
+                        $validatedData = $request->validate([
+                            $eurKey => $expenseRules[$eurKey],
+                            $reimburseKey => $expenseRules[$reimburseKey],
+                        ]);
+                        if ($trip->type === TripType::FOREIGN) {
+                            $validatedData = array_merge($validatedData, $request->validate([
+                                $foreignKey => $expenseRules[$foreignKey]]));
+                        }
+                        $expenseValidatedData[$expenseName] = $validatedData;
+                    }
+
+                    foreach ($expenseValidatedData as $name => $expenseData){
+                         $data = [
+                           'amount_eur' => $expenseData[$name.'_expense_eur'],
+                           'amount_foreign' => $trip->type === TripType::FOREIGN ? $expenseData[$name.'_expense_foreign'] : null,
+                           'reimburse' => !array_key_exists($name . '_expense_reimburse', $expenseData),
+                         ];
+                         $expense = $trip->{$name . 'Expense'};
+                         if ($expense == null){
+                             Expense::create($data);
+                             $trip->update([$name.'_expense_id' => $expense->id]);
+                         }
+                         else {
+                             $expense->update($data);
+                         }
+                    }
+
+                    // Change the state to COMPLETED
+                    $trip->update(['state' => TripState::COMPLETED]);
+                    break;
+
+                // Updating a wrong state trip
+                default:
+                    throw ValidationException::withMessages(['state' => 'Invalid state for updating.']);
+            }
+            //Sending mails
+            $message = '';
+            $recipient = 'admin@example.com';
+            $viewTemplate = 'emails.new_trip_admin';
+
+            // Create an instance of the SimpleMail class
+            $email = new SimpleMail($message, $recipient, $viewTemplate);
+
+            // Send the email
+            Mail::to($recipient)->send($email);
+        }
+
+        return redirect()->route('trips.edit', $trip);
     }
 
     /**
-     * Next 3 functions could be combined to changeState(Request $request, BuisenessTrip $b)
-     *
      * Updating state of the trip to cancelled
      * Adding cancellation reason
+     * @throws ValidationException
      */
-    public function cancel(BusinessTrip $b) {
+    public function cancel(Request $request, BusinessTrip $trip) {
+        // Check if the trip is in a valid state for cancellation
+        if (!in_array($trip->state, [TripState::NEW, TripState::CONFIRMED, TripState::CANCELLATION_REQUEST])) {
+            throw ValidationException::withMessages(['state' => 'Invalid state for cancellation.']);
+        }
+        // Cancel the trip and add cancellation reason if provided
+        $data = ['state' => TripState::CANCELLED];
+        if ($request->has('cancellation_reason')) {
+            $data['cancellation_reason'] = $request->input('cancellation_reason');
+        }
+        $trip->update($data);
+
+        //Send cancellation email to user
+
+        // Retrieve user's email associated with the trip
+        $recipient = $trip->user->email;
+
+        $message = '';
+        $viewTemplate = 'emails.cancellation_user';
+
+        // Create an instance of the SimpleMail class
+        $email = new SimpleMail($message, $recipient, $viewTemplate);
+
+        // Send the email
+        Mail::to($recipient)->send($email);
+
+        return redirect()->route('business-trips.edit', $trip);
 
     }
 
     /**
-     * Same as update(), updating state of the trip to confirmed
+     * Updating state of the trip to confirmed
+     * @throws ValidationException
      */
-    public function confirm() {
+    public function confirm(Request $request, BusinessTrip $trip) {
+        // Check if the trip is in a valid state for confirmation
+        if ($trip->state !== TripState::NEW) {
+            throw ValidationException::withMessages(['state' => 'Invalid state for confirmation.']);
+        }
+
+        // Validate the sofia_id
+        $validatedData = $request->validate([
+            'sofia_id' => 'required|string|max:40',
+        ]);
+
+        // Confirm the trip and record sofia_id
+        $trip->update(['state' => TripState::CONFIRMED, 'sofia_id' => $validatedData['sofia_id']]);
+
+        return redirect()->route('business-trips.edit', $trip);
 
     }
 
     /**
-     * Same as update, updating state to closed
+     * Updating state to closed
+     * @throws ValidationException
      */
-    public function close() {
+    public function close(BusinessTrip $trip) {
+        // Check if the trip is in a valid state for closing
+        if ($trip->state !== TripState::COMPLETED) {
+            throw ValidationException::withMessages(['state' => 'Invalid state for closing.']);
+        }
 
+        //Close the trip
+        $trip->update(['state' => TripState::CLOSED]);
+
+        return redirect()->route('business-trips.edit', $trip);
+
+    }
+
+    /**
+     * Updating state of the trip to cancellation request
+     * @throws ValidationException
+     */
+    public function requestCancellation(Request $request, BusinessTrip $trip): \Illuminate\Http\RedirectResponse
+    {
+        // Validate the cancellation reason
+        $validator = Validator::make($request->all(), [
+            'cancellation_reason' => 'required|string|max:1000',
+        ]);
+
+        // Check if the validation fails
+        if ($validator->fails()) {
+            throw ValidationException::withMessages(['cancellation_reason' => 'Cancellation reason is required.']);
+        }
+
+        // Check if the current state of the trip allows cancellation request
+        if (in_array($trip->state,
+            [TripState::NEW, TripState::CONFIRMED])) {
+            // Change the state to CANCELLATION_REQUEST
+            $trip->update(['state' => TripState::CANCELLATION_REQUEST]);
+
+            // Send email notification to the admin
+            $message = '';
+            $recipient = 'admin@example.com';
+            $viewTemplate = 'emails.cancellation_request_admin';
+
+            // Create an instance of the SimpleMail class
+            $email = new SimpleMail($message, $recipient, $viewTemplate);
+
+            // Send the email
+            Mail::to($recipient)->send($email);
+        } else {
+            throw ValidationException::withMessages(['state' => 'Invalid state for cancellation request.']);
+        }
+
+        return redirect()->route('request-cancel', $trip->id)->with('success', 'Cancellation request submitted successfully.');
+    }
+
+    /**
+     * Adding comment to trip
+     */
+    public function addComment(Request $request, BusinessTrip $trip): \Illuminate\Http\RedirectResponse
+    {
+        // Validate the incoming request
+        $request->validate([
+            'comment' => 'required|string|max:5000',
+        ]);
+
+        // Update the trip's note with the new comment
+        $trip->update(['note' => $request->input('comment')]);
+
+        // Send email notification to the admin
+        $message = '';
+        $recipient = 'admin@example.com';
+        $viewTemplate = 'emails.new_note_admin';
+
+        // Create an instance of the SimpleMail class
+        $email = new SimpleMail($message, $recipient, $viewTemplate);
+
+        // Send the email
+        Mail::to($recipient)->send($email);
+
+        // Redirect or respond with a success message
+        return redirect()->route('business-trips.edit', $trip->id)->with('message', 'Comment added successfully.');
     }
 
     /**
