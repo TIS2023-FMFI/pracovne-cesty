@@ -16,7 +16,6 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
-use Random\RandomException;
 
 
 class UserController extends Controller
@@ -24,11 +23,12 @@ class UserController extends Controller
     /**
      * Display the user registration form.
      *
+     * @param string $email Email address of the user trying to register
      * @return View
      */
-    public function create(): View
+    public static function create(string $email): View
     {
-        return view('users.register');
+        return view('users.register', ['email' => $email]);
     }
 
     /**
@@ -65,6 +65,14 @@ class UserController extends Controller
             'password' => Hash::make($request->password),
             'user_type' => $request->user_types,
         ]);
+
+        // Invalidate invitation link after the registration
+        $link = InvitationLink::where('email', $request->email)->first();
+
+        if ($link) {
+            $link->used = true;
+            $link->save();
+        }
 
         return redirect()->route('login');
     }
@@ -111,7 +119,7 @@ class UserController extends Controller
      *
      * @param Request $request
      * @return RedirectResponse
-     * @throws RandomException
+     * @throws Exception
      */
     public function invite(Request $request): RedirectResponse
     {
@@ -148,6 +156,9 @@ class UserController extends Controller
             $successMessage .= " Pozvánka nebola odoslaná na tieto e-maily, pretože už sú v systéme: $rejectedEmailsList.";
         }
 
-        return back()->with('success', $successMessage)->with('rejected', $rejectedEmails)->with('invited', $invitedEmails);
+        return back()
+            ->with('success', $successMessage)
+            ->with('rejected', $rejectedEmails)
+            ->with('invited', $invitedEmails);
     }
 }
