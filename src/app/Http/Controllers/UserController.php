@@ -150,15 +150,14 @@ class UserController extends Controller
             $invitedEmails[] = $email;
         }
 
-        $successMessage = 'Pozvánky boli úspešne odoslané.';
+        $invitedEmailsList = implode(', ', $invitedEmails);
+        $message = "Pozvánky boli úspešne odoslané na tieto adresy: $invitedEmailsList";
+
         if (!empty($rejectedEmails)) {
             $rejectedEmailsList = implode(', ', $rejectedEmails);
-            $successMessage .= " Pozvánka nebola odoslaná na tieto e-maily, pretože už sú v systéme: $rejectedEmailsList.";
+            $message .= "\nPozvánka nebola odoslaná na tieto e-maily, pretože už sú v systéme: $rejectedEmailsList";
         }
 
-        return back()
-            ->with('success', $successMessage)
-            ->with('rejected', $rejectedEmails)
-            ->with('invited', $invitedEmails);
+        return back()->with('message', $message);
     }
 }
