@@ -22,4 +22,17 @@ enum UserType: int
             self::ADMIN => 'admin',
         };
     }
+
+    /**
+     * Decides if user type is external to the faculty
+     *
+     * @return bool
+     */
+    public function isExternal(): bool
+    {
+        return match ($this) {
+            self::EMPLOYEE, self::PHD_STUDENT, self::ADMIN => false,
+            self::STUDENT, self::EXTERN => true,
+        };
+    }
 }
