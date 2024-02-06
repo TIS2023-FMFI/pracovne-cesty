@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\TripState;
 use App\Models\ConferenceFee;
 use App\Models\Country;
 use App\Models\Expense;
@@ -34,8 +35,8 @@ return new class extends Migration {
             $table->string('event_url', 200)->nullable();
             $table->string('upload_name', 200)->nullable();
 
-            $table->string('sofia_id', 40)->nullable();
-            $table->unsignedSmallInteger('state');
+            $table->string('sofia_id', 40)->default('0000');
+            $table->unsignedSmallInteger('state')->default(TripState::NEW->value);
 
 
             // Start and end of the trip
