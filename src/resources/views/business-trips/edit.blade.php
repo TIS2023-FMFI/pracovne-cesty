@@ -9,6 +9,7 @@
     use App\Enums\DocumentType;
     use App\Enums\UserType;
     use App\Enums\SppStatus;
+    use Illuminate\Support\Facades\Auth;
 
     $countries = Country::all()->pluck('name', 'id');
     $transports = Transport::all()->pluck('name', 'id');
@@ -25,6 +26,8 @@
     $tripType = $trip->type;
     $tripState = $trip->state;
     $tripUserType = $trip->user->user_type;
+
+    $isAdmin = Auth::user()->hasRole('admin');
 @endphp
 
 <x-layout>
@@ -44,7 +47,7 @@
         <form method="POST" action="/trips/{{ $trip->id }}" enctype="multipart/form-data">
             @csrf
             @method('PUT')
-            <x-content-section title="Osobné údaje">
+            <x-content-section title="Osobné údaje" :disabled="!$isAdmin || $tripState == TripState::CLOSED">
                 <div class="form-row">
                     <div class="col">
                         <x-simple-input name="first_name" label="Meno" :value="$trip->user->first_name"/>
@@ -79,7 +82,7 @@
             <div class="container">
                 <div class="row">
                     <div class="col">
-                        <x-content-section title="Začiatok cesty">
+                        <x-content-section title="Začiatok cesty" :disabled="$tripState == TripState::CLOSED">
                             <x-simple-input name="place_start" label="Miesto" :value="$trip->place_start"/>
                             <x-simple-input name="datetime_start" type="datetime-local" label="Dátum a čas"
                                             :value="$trip->datetime_start"/>
@@ -91,7 +94,7 @@
                         </x-content-section>
                     </div>
                     <div class="col">
-                        <x-content-section title="Koniec cesty">
+                        <x-content-section title="Koniec cesty" :disabled="$tripState == TripState::CLOSED">
                             <x-simple-input name="place_end" label="Miesto" :value="$trip->place_end"/>
                             <x-simple-input name="datetime_end" type="datetime-local" label="Dátum a čas"
                                             :value="$trip->datetime_end"/>
@@ -105,7 +108,7 @@
                 </div>
             </div>
 
-            <x-content-section title="Cieľ cesty">
+            <x-content-section title="Cieľ cesty" :disabled="!$isAdmin || $tripState == TripState::CLOSED">
                 <div class="form-row">
                     <div class="col">
                         <x-simple-input name="place" label="Miesto" :value="$trip->place"/>
@@ -153,8 +156,8 @@
                 </div>
             </x-content-section>
 
-            @if(in_array($tripUserType, [UserType::STUDENT, UserType::EXTERN]))
-                <x-content-section title="Prínos pre fakultu">
+            @if($tripUserType->isExternal())
+                <x-content-section title="Prínos pre fakultu" :disabled="!$isAdmin || $tripState == TripState::CLOSED">
                     @foreach($contributions as $id => $name)
                         @php
                             $contribution = $trip->contributions->where('id', $id)->first();
@@ -182,7 +185,11 @@
                 $reimbursementDate = $isReimbursed ? $trip->reimbursement->reimbursement_date->format('Y-m-d') : '';
             @endphp
 
-            <x-content-section title="Financovanie" x-data="{reimbursementShow: {{ $isReimbursed ? 'true' : 'false' }} }">
+            <x-content-section
+                title="Financovanie"
+                x-data="{reimbursementShow: {{ $isReimbursed ? 'true' : 'false' }} }"
+                :disabled="$tripState == TripState::CLOSED"
+            >
                 <x-slot:description>
                     V prípade refundácie, prosím, vyberte ako ŠPP prvok 2 ten prvok, z ktorého budú peniaze neskôr
                     vrátené do ŠPP prvku 1. Ako dátum vrátenia peňazí uveďte iba orientačný, predpokladaný dátum.
@@ -221,8 +228,10 @@
                 $amount = $wantsConferenceFee ? $trip->conferenceFee->amount : '';
             @endphp
 
-            <x-content-section title="Úhrada konferenčného poplatku"
-                               x-data="{conferenceFeeShow: {{ $wantsConferenceFee ? 'true' : 'false' }} }">
+            <x-content-section
+                title="Úhrada konferenčného poplatku"
+                x-data="{conferenceFeeShow: {{ $wantsConferenceFee ? 'true' : 'false' }} }"
+                :disabled="!$isAdmin || $tripState == TripState::CLOSED">
                 <x-checkbox name="conference_fee"
                             label="Mám záujem o úhradu konferenčného poplatku pred cestou priamo z pracoviska"
                             control="conferenceFeeShow" :checked="$wantsConferenceFee"></x-checkbox>
@@ -260,7 +269,11 @@
                     $mealsReimbursement = $trip->meals_reimbursement ?? true;
                     $doesNotWantMeals = !$mealsReimbursement;
                 @endphp
-                <x-content-section title="Náklady" x-data="{mealsTableHide: {{ $doesNotWantMeals ? 'true' : 'false'}} }">
+                <x-content-section
+                    title="Náklady"
+                    x-data="{mealsTableHide: {{ $doesNotWantMeals ? 'true' : 'false'}} }"
+                    :disabled="!$isAdmin || $tripState == TripState::CLOSED"
+                >
                     <x-slot:description>
                         Pre každý druh nákladov môžete použiť aj oba stĺpce naraz. Ak si preplatenie nejakého druhu nákladov nenárokujete, nezabudnite to, prosím, uviesť.
                     </x-slot:description>
@@ -362,7 +375,7 @@
                 </x-content-section>
 
 
-                <x-content-section title="Správa">
+                <x-content-section title="Správa" :disabled="!$isAdmin || $tripState == TripState::CLOSED">
                     <x-textarea name="conclusion" label="Výsledky cesty" :value="$trip->conclusion ?? ''" rows="10"></x-textarea>
                 </x-content-section>
 
