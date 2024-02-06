@@ -23,6 +23,7 @@ class DatabaseSeeder extends Seeder
 
             // With factories
             // Without foreign references
+            InvitationLinkSeeder::class,
             SppSymbolSeeder::class,
             ConferenceFeeSeeder::class,
             ExpenseSeeder::class,

@@ -5,6 +5,7 @@ namespace Database\Factories;
 use App\Enums\UserStatus;
 use App\Enums\UserType;
 use App\Models\User;
+use Hash;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 
@@ -45,7 +46,7 @@ class UserFactory extends Factory
 
             'user_type' => fake()->randomElement(UserType::cases()),
             'username' => fake()->userName(),
-            'password' => password_hash(fake()->password(), PASSWORD_BCRYPT),
+            'password' => Hash::make('password'),
 
             'status' => fake()->randomElement(UserStatus::cases()),
             'last_login' => fake()->dateTimeThisDecade()
