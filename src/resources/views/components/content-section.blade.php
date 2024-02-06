@@ -1,6 +1,6 @@
-@props(['title' => '', 'description' => ''])
+@props(['title' => '', 'description' => '', 'disabled' => false])
 
-<fieldset {{ $attributes->merge(['class' => 'border-bottom pb-4 mb-4']) }}>
+<fieldset class="border-bottom pb-4 mb-4" @disabled($disabled)>
     @if($title != '')
         <b>{{ $title }}</b>
     @endif
