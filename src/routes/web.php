@@ -3,6 +3,7 @@
 use App\Http\Controllers\BusinessTripController;
 use App\Http\Controllers\SPPController;
 use App\Http\Controllers\UserController;
+use App\Models\BusinessTrip;
 use App\Models\InvitationLink;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -61,7 +62,9 @@ Route::controller(BusinessTripController::class)
                     ->name('add-comment');
 
                 // Export the trip details as the selected document
-                Route::get('/{trip}/export', 'exportPdf')
+                Route::get('/{trip}/export', static function (BusinessTrip $trip, Request $request) {
+                    return BusinessTripController::exportPdf($trip->id, $request->query('fileType'));
+                })
                     ->name('export');
 
                 // Download attachment in the trip

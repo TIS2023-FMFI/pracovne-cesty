@@ -551,7 +551,7 @@ class BusinessTripController extends Controller
      * @example
      * $response = $object->exportPdf(123, 0);
      */
-    public function exportPdf(int $tripId, int $documentType): JsonResponse | BinaryFileResponse
+    public static function exportPdf(int $tripId, int $documentType): JsonResponse | BinaryFileResponse
     {
         $trip = BusinessTrip::find($tripId);
         if (!$trip) {
