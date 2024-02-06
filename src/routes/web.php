@@ -3,6 +3,8 @@
 use App\Http\Controllers\BusinessTripController;
 use App\Http\Controllers\SPPController;
 use App\Http\Controllers\UserController;
+use App\Models\InvitationLink;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -97,27 +99,40 @@ Route::controller(UserController::class)
     ->prefix('user')
     ->name('user.')
     ->group(static function () {
-        // Log user in
-        // Intended for the login button
-        Route::post('/', 'authenticate')
-            ->middleware('guest')
-            ->name('login');
-
         // Invite a new user
         // Intended for the invitation submit button
         Route::post('/invite', 'invite')
             ->middleware('role:admin')
             ->name('invite');
 
-        Route::middleware('role:traveller|admin')
-            ->group(static function () {
-                // Log user out
-                Route::post('/logout', 'logout')
-                    ->name('logout');
+        // Log user out
+        Route::post('/logout', 'logout')
+            ->middleware('role:traveller|admin')
+            ->name('logout');
 
-                // Show the register form
-                Route::get('/register', 'create')
+        Route::middleware('guest')
+            ->group(static function () {
+                // Log user in
+                // Intended for the login button
+                Route::post('/', 'authenticate')
+                    ->name('login');
+
+                // Show the registration form based on a given token
+                Route::get('/register', static function (Request $request) {
+                    $token = $request->query('token');
+
+                    if (!InvitationLink::isValid($token)) {
+                        abort(403, 'Invalid token');
+                    }
+
+                    $link = InvitationLink::where('token', $token)->first();
+                    return UserController::create($link->email);
+                })
                     ->name('register');
+
+                // Submit the registration form
+                Route::post('/register/store', 'store')
+                    ->name('register-submit');
             });
     });
 
