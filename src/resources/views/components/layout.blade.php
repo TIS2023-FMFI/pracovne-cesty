@@ -20,10 +20,8 @@
     <div class="header-top-panel">
         <div class="container d-flex justify-content-end py-2">
             @auth
-                <span>
-                          Prihlásený ako {{Auth::user()->first_name.' '.Auth::user()->last_name}}
-                        </span>
-                <form method="POST" action="/logout">
+                <span>Prihlásený ako {{Auth::user()->first_name.' '.Auth::user()->last_name}}</span>
+                <form method="POST" action="/user/logout">
                     @csrf
                     <button><i></i> Odhlásiť sa</button>
                 </form>
