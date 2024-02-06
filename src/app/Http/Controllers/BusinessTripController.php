@@ -357,11 +357,19 @@ class BusinessTripController extends Controller
                     }
 
                     foreach ($expenseValidatedData as $name => $expenseData){
-                        $expense = Expense::create($expenseData);
-                        $expense->update(['amount_eur' => $expenseData[$name.'expense_eur']]);
-                        $expense->update(['amount_foreign' => $expenseData[$name.'expense_foreign']]);
-                        $expense->update(['reimburse' => $expenseData[$name.'expense_reimburse']]);
-                        $trip->update([$name.'_id' => $expense->id]);
+                         $data = [
+                           'amount_eur' => $expenseData[$name.'_expense_eur'],
+                           'amount_foreign' => $trip->type === TripType::FOREIGN ? $expenseData[$name.'_expense_foreign'] : null,
+                           'reimburse' => !array_key_exists($name . '_expense_reimburse', $expenseData),
+                         ];
+                         $expense = $trip->{$name . 'Expense'};
+                         if ($expense == null){
+                             Expense::create($data);
+                             $trip->update([$name.'_expense_id' => $expense->id]);
+                         }
+                         else {
+                             $expense->update($data);
+                         }
                     }
 
                     // Change the state to COMPLETED
@@ -384,7 +392,7 @@ class BusinessTripController extends Controller
             Mail::to($recipient)->send($email);
         }
 
-        return redirect()->route('business-trips.edit', $trip);
+        return redirect()->route('trips.edit', $trip);
     }
 
     /**
