@@ -471,7 +471,7 @@
         @if($tripState != TripState::NEW)
             <x-content-section title="Dokumenty na stiahnutie">
                 <div>
-                    @if(in_array($tripUserType, [UserType::EXTERN, UserType::STUDENT]))
+                    @if($tripUserType->isExternal())
                         <x-document-export-icon :id="$trip->id" :docType="DocumentType::COMPENSATION_AGREEMENT"/>
                     @endif
 
