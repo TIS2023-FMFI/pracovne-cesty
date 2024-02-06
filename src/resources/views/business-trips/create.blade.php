@@ -13,7 +13,8 @@
     $contributions = Contribution::all()->pluck('name', 'id');
     $spp_symbols = SppSymbol::where('status', SppStatus::ACTIVE)->pluck('spp_symbol', 'id');
 
-//    $userType = auth()->user()->user_type;
+    $user = Auth::user();
+    $userType = $user->user_type;
 
 @endphp
 
@@ -24,24 +25,24 @@
             <x-content-section title="Osobné údaje">
                 <div class="form-row">
                     <div class="col">
-                        <x-simple-input name="first_name" label="Meno"/>
+                        <x-simple-input name="first_name" label="Meno" :value="$user->first_name"/>
                     </div>
                     <div class="col">
-                        <x-simple-input name="last_name" label="Priezvisko"/>
+                        <x-simple-input name="last_name" label="Priezvisko" :value="$user->last_name"/>
                     </div>
                     <div class="col">
-                        <x-simple-input name="academic_degrees" label="Tituly"/>
+                        <x-simple-input name="academic_degrees" label="Tituly" :value="$user->academic_degrees ?? ''"/>
                     </div>
                 </div>
 
-                <x-simple-input name="address" label="Bydlisko"/>
+                <x-simple-input name="address" label="Bydlisko" :value="$user->address ?? ''"/>
 
                 <div class="form-row">
                     <div class="col">
-                        <x-simple-input name="personal_id" label="Osobné číslo"/>
+                        <x-simple-input name="personal_id" label="Osobné číslo" :value="$user->personal_id ?? ''"/>
                     </div>
                     <div class="col">
-                        <x-simple-input name="department" label="Pracovisko"/>
+                        <x-simple-input name="department" label="Pracovisko" :value="$user->department ?? ''"/>
                     </div>
                 </div>
 
@@ -102,25 +103,25 @@
                     </div>
                 </x-content-section>
 
-{{--            @if(in_array($userType, [UserType::STUDENT, UserType::EXTERN]))--}}
-            <x-content-section title="Prínos pre fakultu">
-                <x-slot:description>
-                    Označte prínosy pre fakultu, ktoré sa týkajú Vašej pracovnej cesty. Môžete ich aj špecifikovať.
-                </x-slot:description>
+            @if($userType->isExternal())
+                <x-content-section title="Prínos pre fakultu">
+                    <x-slot:description>
+                        Označte prínosy pre fakultu, ktoré sa týkajú Vašej pracovnej cesty. Môžete ich aj špecifikovať.
+                    </x-slot:description>
 
-                @foreach($contributions as $id => $name)
-                    <div x-data="{ contributionDetail: { checked: false, value: '' } }" class="input-group mb-3">
-                        <div class="input-group-prepend">
-                            <div class="input-group-text">
-                                <input type="checkbox" name="contribution_{{ $id }}" x-model="contributionDetail.checked" x-on:change="if (!contributionDetail.checked) { contributionDetail.value = '' }">
+                    @foreach($contributions as $id => $name)
+                        <div x-data="{ contributionDetail: { checked: false, value: '' } }" class="input-group mb-3">
+                            <div class="input-group-prepend">
+                                <div class="input-group-text">
+                                    <input type="checkbox" name="contribution_{{ $id }}" x-model="contributionDetail.checked" x-on:change="if (!contributionDetail.checked) { contributionDetail.value = '' }">
+                                </div>
+                                <span class="input-group-text">{{ $name }}</span>
                             </div>
-                            <span class="input-group-text">{{ $name }}</span>
+                            <input type="text" name="contribution_{{ $id }}_detail" x-model="contributionDetail.value" class="form-control">
                         </div>
-                        <input type="text" name="contribution_{{ $id }}_detail" x-model="contributionDetail.value" class="form-control">
-                    </div>
-                @endforeach
-            </x-content-section>
-{{--            @endif--}}
+                    @endforeach
+                </x-content-section>
+            @endif
 
             <x-content-section title="Financovanie" x-data="{reimbursementShow: false}">
                 <x-slot:description>
