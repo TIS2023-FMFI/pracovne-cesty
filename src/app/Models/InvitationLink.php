@@ -7,12 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class InvitationLink extends Model
 {
-    protected $fillable = [
-        'email',
-        'token',
-        'expires_at',
-        'used',
-    ];
+    protected $fillable = ['email', 'token', 'expires_at', 'used'];
 
     protected $casts = [
         'expires_at' => 'datetime',
