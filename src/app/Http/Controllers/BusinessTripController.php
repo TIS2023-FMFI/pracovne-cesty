@@ -8,8 +8,11 @@ use App\Enums\TripState;
 use App\Enums\TripType;
 use App\Mail\SimpleMail;
 use App\Models\BusinessTrip;
+use App\Models\ConferenceFee;
+use App\Models\Contribution;
 use App\Models\Reimbursement;
 use App\Models\Staff;
+use App\Models\TripContribution;
 use App\Models\User;
 use DateInterval;
 use DatePeriod;
@@ -31,7 +34,7 @@ class BusinessTripController extends Controller
     /**
      * Returning view with details from all trips
      */
-    public function index() {
+    public static function index() {
         // Check if the user is an admin
         if (Auth::user()->hasRole('admin')) {
             // Retrieve all trips and users for admin
@@ -66,9 +69,18 @@ class BusinessTripController extends Controller
      */
     public function store(Request $request) {
         // Get the authenticated user's ID
-        $user = Auth::user();
+     //   $user = Auth::user();
 
-        //Validate data
+        // Validate user data
+        $validatedUserData = $request->validate([
+            'first_name' => 'required|string|max:50',
+            'last_name' => 'required|string|max:50',
+            'academic_degrees' => 'nullable|string|max:30',
+            'department' => 'required|string|max:10',
+            'address' => 'required|string|max:200',
+        ]);
+
+        //Validate trip data
         $validatedData = $request->validate([
             'country_id' => 'required|exists:countries,id',
             'transport_id' => 'required|exists:transports,id',
@@ -84,34 +96,51 @@ class BusinessTripController extends Controller
         ]);
 
         // Add the authenticated user's ID to the validated data
-        $validatedData['user_id'] = $user->id;
+        $validatedData['user_id'] = 1;// $user->id;
 
         // Set the type of trip based on the selected country
         $selectedCountry = $request->input('country');
         $validatedData['type'] = $selectedCountry === 'Slovensko' ? TripType::DOMESTIC : TripType::FOREIGN;
 
-        //Logic to store the trip based on the validated data
-        $trip = new BusinessTrip($validatedData);
+        // Contributions validation
+        $contributions = Contribution::all()->pluck('name', 'id');
+        $checkedContributions = [];
 
-        if ($request->has('reimbursement')){
-            $validatedReimbursements = $request->validate([
-               'reimbursement_spp_symbol_id' => 'required|exists:spp_symbols, id',
-               'reimbursement_date_id' => 'required|date',
-            ]);
-
-            $map_function = function ($value, $key) {
-                if ($key === 'reimbursement_spp_symbol_id') {
-                    $key = 'spp_symbol_id';
-                }
-            };
-
-            $updReimbursement = array_map($map_function, $validatedReimbursements);
-
-            $reimbursement = new Reimbursement($updReimbursement);
-
-            $trip->update(['reimbursement_id' => $reimbursement->id]);
+        // Check for checked contributions checkboxes
+        $isContribution = 0;
+        foreach($contributions as $id => $name) {
+            if ($request->has('contribution_' . $id)) {
+                $validatedContributionData = $request->validate([
+                    'contribution_' . $id . '_detail' => 'nullable|string|max:200',
+                ]);
+                $updContributionData = self::array_key_replace(
+                    'contribution_' . $id . '_detail',
+                    'detail',
+                    $validatedContributionData
+                );
+                $updContributionData['contribution_id'] = $id;
+                array_push($checkedContributions, $updContributionData);
+                $isContribution = 1;
+            }
         }
 
+        $isReimbursement = 0;
+        if ($request->has('reimbursement')){
+            Log::info('is checked');
+            $validatedReimbursements = $request->validate([
+               'reimbursement_spp_symbol_id' => 'required|exists:spp_symbols,id',
+               'reimbursement_date' => 'required|date',
+            ]);
+
+            $updReimbursement = self::array_key_replace(
+                'reimbursement_spp_symbol_id',
+                'spp_symbol_id',
+                $validatedReimbursements
+            );
+            $isReimbursement = 1;
+        }
+
+        $isConferenceFee = 0;
         if ($request->has('conference_fee')){
             $validatedConferenceFee = $request->validate([
                 'organiser_name' => 'required|string|max:100',
@@ -121,47 +150,47 @@ class BusinessTripController extends Controller
                 'amount' => 'required|string|max:20',
             ]);
 
-            $map_function = function ($value, $key) {
-                if ($key === 'organiser_iban') {
-                    $key = 'iban';
-                }
-            };
+            $updConferenceFee = self::array_key_replace(
+                'organiser_iban',
+                'iban',
+                $validatedConferenceFee
+            );
+            $isConferenceFee = 1;
+        }
 
-            $updConferenceFee = array_map($map_function, $validatedConferenceFee);
+        //Logic to store the trip based on the validated data
+        $trip = BusinessTrip::create($validatedData);
+        if ($isReimbursement){
+            $reimbursement = Reimbursement::create($updReimbursement);
+            $trip->update(['reimbursement_id' => $reimbursement->id]);
+        }
 
-            $ConferenceFee = new Reimbursement($updConferenceFee);
-
+        if ($isConferenceFee) {
+            $ConferenceFee = ConferenceFee::create($updConferenceFee);
             $trip->update(['conference_fee_id' => $ConferenceFee->id]);
         }
 
+        if ($isContribution) {
+            foreach ($checkedContributions as $contribution) {
+                $contribution['business_trip_id'] = $trip->id;
+                TripContribution::create($contribution);
+            }
 
+        }
 
         //Handle file uploads
         if ($request->hasFile('upload_name')) {
             $file = $request->file('upload_name');
 
             //Store the file in the storage/app/trips directory
-            $upload_name = uniqid('', true) . '.' . $file->extension();
-            Storage::disk('uploads')->put($upload_name, $file);
+            $upload_name = Storage::disk('uploads')->putFile('', $file);
 
             //Save the file path in the model
-            $trip->upload_name = $upload_name;
+            $trip->update(['upload_name' => $upload_name]);
         }
 
-        //Save the model to the DB
-        $trip->save();
-
-        // Validate user data
-        $validatedUserData = $request->validate([
-            'first_name' => 'required|string|max:50',
-            'last_name' => 'required|string|max:50',
-            'academic_degrees' => 'nullable|string|max:30',
-            'department' => 'required|string|max:10',
-            'address' => 'required|string|max:200',
-        ]);
-
         // Update user details
-        $user->update($validatedUserData);
+        //     $user->update($validatedUserData);
 
         //Sending mails
         $message = '';
@@ -175,7 +204,7 @@ class BusinessTripController extends Controller
         Mail::to($recipient)->send($email);
 
         //Redirecting to the homepage
-        return redirect()->route('components.homepage');
+        return redirect()->route('homepage');
 
     }
 
@@ -205,6 +234,7 @@ class BusinessTripController extends Controller
      * @throws \Exception
      */
     public function edit(BusinessTrip $trip) {
+        Log::info($trip);
         $startDate = new DateTime($trip->datetime_start);
         $endDate = new DateTime($trip->datetime_end);
         $endDate->modify('+1 day'); // Include the end day
