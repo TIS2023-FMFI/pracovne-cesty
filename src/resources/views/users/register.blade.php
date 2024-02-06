@@ -6,7 +6,7 @@ use App\Enums\UserType;
 
 <x-layout>
     <x-content-box title="Registrácia">
-        <form action="users/store">
+        <form action="/user/register/store" method="POST">
             @csrf
             <x-content-section>
                 <div class="form-row">
@@ -27,11 +27,11 @@ use App\Enums\UserType;
                     </div>
                 </div>
                 <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="radio" name="user_types" id="type1" :value="{{UserType::EXTERN->value}}">
+                    <input class="form-check-input" type="radio" name="user_types" id="type1" value="{{UserType::EXTERN->value}}">
                     <label class="form-check-label" for="type1">Externista</label>
                 </div>
                 <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="radio" name="user_types" id="type2" value=""{{UserType::STUDENT->value}}"">
+                    <input class="form-check-input" type="radio" name="user_types" id="type2" value="{{UserType::STUDENT->value}}">
                     <label class="form-check-label" for="type2">Študent</label>
                 </div>
             </x-content-section>
