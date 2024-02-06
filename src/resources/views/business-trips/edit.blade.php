@@ -14,10 +14,13 @@
     $transports = Transport::all()->pluck('name', 'id');
     $purposes = TripPurpose::all()->pluck('name', 'id');
     $contributions = Contribution::all()->pluck('name', 'id');
-    $spp_symbols = SppSymbol::where('status', SppStatus::ACTIVE)
-        ->orWhere('id', $trip->sppSymbol->id)
-        ->orWhere('id', $trip->reimbursement->sppSymbol->id)
-        ->pluck('spp_symbol', 'id');
+
+    $spp_symbols_query = SppSymbol::where('status', SppStatus::ACTIVE)
+        ->orWhere('id', $trip->sppSymbol->id);
+    if ($trip->reimbursement) {
+        $spp_symbols_query->orWhere('id', $trip->reimbursement->sppSymbol->id);
+    }
+    $spp_symbols = $spp_symbols_query->pluck('spp_symbol', 'id');
 
     $tripType = $trip->type;
     $tripState = $trip->state;
@@ -468,7 +471,7 @@
         @if($tripState != TripState::NEW)
             <x-content-section title="Dokumenty na stiahnutie">
                 <div>
-                    @if(in_array($tripUserType, [UserType::EXTERN, UserType::STUDENT]))
+                    @if($tripUserType->isExternal())
                         <x-document-export-icon :id="$trip->id" :docType="DocumentType::COMPENSATION_AGREEMENT"/>
                     @endif
 
