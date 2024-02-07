@@ -147,7 +147,7 @@ class UserController extends Controller
                 'expires_at' => $expiresAt,
             ]);
 
-            $url = url('/register?token=' . $token);
+            $url = route('user.register', ['token' => $token]);
             $messageText = "Pre registráciu kliknite na tento odkaz: " . $url;
 
             Mail::to($email)->send(new SimpleMail($messageText, $email, 'emails.registration_externist'));
