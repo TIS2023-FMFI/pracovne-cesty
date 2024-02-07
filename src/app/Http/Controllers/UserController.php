@@ -12,6 +12,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
@@ -52,6 +53,7 @@ class UserController extends Controller
         ]);
 
         if ($validator->fails()) {
+            Log::info("registration failed");
             return redirect()->back()
                 ->withErrors($validator)
                 ->withInput();
@@ -74,7 +76,7 @@ class UserController extends Controller
             $link->save();
         }
 
-        return redirect()->route('login');
+        return redirect()->route('homepage');
     }
 
     /**
