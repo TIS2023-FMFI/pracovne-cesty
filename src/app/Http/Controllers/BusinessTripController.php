@@ -58,7 +58,7 @@ class BusinessTripController extends Controller
     /**
      * Returning view with the form for adding of the new trip
      */
-    public function create() {
+    public static function create() {
         return view('business-trips.create');
     }
 
@@ -68,7 +68,7 @@ class BusinessTripController extends Controller
      * Redirecting to the homepage
      * Sending mail with mail component to admin
      */
-    public function store(Request $request) {
+    public static function store(Request $request) {
         // Get the authenticated user's ID
         $user = Auth::user();
 
@@ -88,6 +88,7 @@ class BusinessTripController extends Controller
 
         //Validate trip data
         $validatedData = $request->validate([
+            'iban' => $rule . '|string|max:34',
             'country_id' => 'required|exists:countries,id',
             'transport_id' => 'required|exists:transports,id',
             'spp_symbol_id' => 'required|exists:spp_symbols,id',
@@ -97,8 +98,7 @@ class BusinessTripController extends Controller
             'datetime_start' => 'required|date',
             'datetime_end' => 'required|date|after:datetime_start',
             'trip_purpose_id' => 'required|integer|min:0',
-            'purpose_details' => 'nullable|string|max:50',
-            'iban' => $rule . '|string|max:34',
+            'purpose_details' => 'nullable|string|max:50'
         ]);
 
         // Add the authenticated user's ID to the validated data
@@ -209,15 +209,24 @@ class BusinessTripController extends Controller
         // Send the email
         Mail::to($recipient)->send($email);
 
-        //Redirecting to the homepage
-        return redirect()->route('homepage');
+        // Check if it was too late to add trip and inform user
+        $warningMessage = null;
+        $currentDate = new DateTime();
+        $startDate = new DateTime($trip->datetime_start);
+        $days = $trip->type == TripType::DOMESTIC ? '4' : '11';
+        $newDate = $currentDate->modify("+ ".$days." weekday");
+        if ($startDate < $newDate) {
+            $warningMessage = 'Vaša pracovná cesta bude pridaná, ale nie je to v súlade s pravidlami. Cestu vždy pridávajte minimálne 4 pracovné dni pred jej začiatkom v prípade, že ide o tuzemskú cestu a 11 pracovných dní pred začiatkom v prípade zahraničnej cesty.';
+        }
 
+        //Redirecting to the homepage
+        return redirect()->route('homepage')->with('warning', $warningMessage);
     }
 
     /**
      * Get the attachment from a business trip.
      */
-    public function getAttachment(BusinessTrip $trip) {
+    public static function getAttachment(BusinessTrip $trip) {
         // Check if the trip has an attachment
         if (!$trip->upload_name) {
             abort(404, 'File not found'); // Or other error handling
@@ -237,23 +246,15 @@ class BusinessTripController extends Controller
 
     /**
      * Returning the view with the trip editing form
-     * @throws \Exception
+     * @throws Exception
      */
-    public function edit(BusinessTrip $trip) {
-        Log::info($trip);
-        $startDate = new DateTime($trip->datetime_start);
-        $endDate = new DateTime($trip->datetime_end);
-        $endDate->modify('+1 day'); // Include the end day
-        $interval = new DateInterval('P1D');
-        $dateRange = new DatePeriod($startDate, $interval, $endDate);
-
-        $days = iterator_count($dateRange);
+    public static function edit(BusinessTrip $trip) {
+        $days = self::getTripDurationInDays($trip);
 
         return view('business-trips.edit',  [
             'trip' => $trip,
             'days' => $days,
         ]);
-
     }
 
     /**
@@ -262,7 +263,7 @@ class BusinessTripController extends Controller
      * @throws ValidationException
      * @throws Exception
      */
-    public function update(Request $request, BusinessTrip $trip) {
+    public static function update(Request $request, BusinessTrip $trip) {
         // Check if the authenticated user is an admin
         $isAdmin = Auth::user()->hasRole('admin');
 
@@ -400,7 +401,7 @@ class BusinessTripController extends Controller
      * Adding cancellation reason
      * @throws ValidationException
      */
-    public function cancel(Request $request, BusinessTrip $trip) {
+    public static function cancel(Request $request, BusinessTrip $trip) {
         // Check if the trip is in a valid state for cancellation
         if (!in_array($trip->state, [TripState::NEW, TripState::CONFIRMED, TripState::CANCELLATION_REQUEST])) {
             throw ValidationException::withMessages(['state' => 'Invalid state for cancellation.']);
@@ -434,7 +435,7 @@ class BusinessTripController extends Controller
      * Updating state of the trip to confirmed
      * @throws ValidationException
      */
-    public function confirm(Request $request, BusinessTrip $trip) {
+    public static function confirm(Request $request, BusinessTrip $trip) {
         // Check if the trip is in a valid state for confirmation
         if ($trip->state !== TripState::NEW) {
             throw ValidationException::withMessages(['state' => 'Invalid state for confirmation.']);
@@ -456,7 +457,7 @@ class BusinessTripController extends Controller
      * Updating state to closed
      * @throws ValidationException
      */
-    public function close(BusinessTrip $trip) {
+    public static function close(BusinessTrip $trip) {
         // Check if the trip is in a valid state for closing
         if ($trip->state !== TripState::COMPLETED) {
             throw ValidationException::withMessages(['state' => 'Invalid state for closing.']);
@@ -473,7 +474,7 @@ class BusinessTripController extends Controller
      * Updating state of the trip to cancellation request
      * @throws ValidationException
      */
-    public function requestCancellation(Request $request, BusinessTrip $trip): \Illuminate\Http\RedirectResponse
+    public static function requestCancellation(Request $request, BusinessTrip $trip): \Illuminate\Http\RedirectResponse
     {
         // Validate the cancellation reason
         $validator = Validator::make($request->all(), [
@@ -511,7 +512,7 @@ class BusinessTripController extends Controller
     /**
      * Adding comment to trip
      */
-    public function addComment(Request $request, BusinessTrip $trip): \Illuminate\Http\RedirectResponse
+    public static function addComment(Request $request, BusinessTrip $trip): \Illuminate\Http\RedirectResponse
     {
         // Validate the incoming request
         $request->validate([
@@ -745,5 +746,20 @@ class BusinessTripController extends Controller
 
         Log::error("PDF file does not exist after generation: " . $outputPath);
         return response()->json(['error' => 'Failed to generate PDF, file not found'], 500);
+    }
+
+    /**
+     * @param BusinessTrip $trip
+     * @return int
+     * @throws Exception
+     */
+    private static function getTripDurationInDays(BusinessTrip $trip): int
+    {
+        $startDate = new DateTime($trip->datetime_start);
+        $endDate = new DateTime($trip->datetime_end);
+        $interval = new DateInterval('P1D');
+        $dateRange = new DatePeriod($startDate, $interval, $endDate);
+
+        return iterator_count($dateRange);
     }
 }
