@@ -15,7 +15,6 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 
@@ -41,19 +40,24 @@ class UserController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
-        $validUserTypes = [UserType::EXTERN->value, UserType::STUDENT->value];
+        // Verify that submitted email is signed by a token
+        $request->validate(['email' => 'required|string|email|max:127|unique:users']);
+        $link = InvitationLink::where('email', $request->email)->first();
 
+        if (!$link || !InvitationLink::isValid($link->token)) {
+            return redirect()->back();
+        }
+
+        $validUserTypes = implode(',', [UserType::EXTERN->value, UserType::STUDENT->value]);
         $validator = Validator::make($request->all(), [
             'first_name' => 'required|string|max:50',
             'last_name' => 'required|string|max:50',
-            'email' => 'required|string|email|max:127|unique:users',
             'username' => 'required|string|max:255|unique:users',
             'password' => 'required|string|max:255',
-            'user_types' => ['required', Rule::in($validUserTypes)],
+            'user_types' => 'required|in:' . $validUserTypes
         ]);
 
         if ($validator->fails()) {
-            Log::info("registration failed");
             return redirect()->back()
                 ->withErrors($validator)
                 ->withInput();
@@ -62,7 +66,7 @@ class UserController extends Controller
         $user = User::create([
             'first_name' => $request->first_name,
             'last_name' => $request->last_name,
-            'email' => $request->email,
+            'email' => $link->email,
             'username' => $request->username,
             'password' => Hash::make($request->password)
         ]);
@@ -70,13 +74,9 @@ class UserController extends Controller
         $user->user_type = UserType::from($request->user_types);
         $user->save();
 
-        // Invalidate invitation link after the registration
-        $link = InvitationLink::where('email', $request->email)->first();
-
-        if ($link) {
-            $link->used = true;
-            $link->save();
-        }
+        // Invalidate the token used for this registration
+        $link->used = true;
+        $link->save();
 
         return redirect()->route('homepage');
     }
