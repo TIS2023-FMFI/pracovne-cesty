@@ -572,15 +572,18 @@ class BusinessTripController extends Controller
         $data = [];
         switch ($docType) {
             case DocumentType::FOREIGN_TRIP_AFFIDAVIT:
-                $tripDuration = $trip->datetime_start->diff($trip->datetime_end);
-                $tripDurationFormatted = $tripDuration->format('%d dni %h hodin %i minut');
-                $name = $trip->user->academic_degrees
-                    ? $trip->user->academic_degrees . ' ' . $trip->user->first_name . ' ' . $trip->user->last_name
-                    : $trip->user->first_name . ' ' . $trip->user->last_name;
+                $tripDurationFormatted = $trip->datetime_start->format('d.m.Y')
+                    . ' - '
+                    . $trip->datetime_end->format('d.m.Y');
+
+                $name = ($trip->user->academic_degrees ?? '')
+                    . ' ' . $trip->user->first_name
+                    . ' ' . $trip->user->last_name;
+
                 $data = [
                     'order_number' => $trip->sofia_id,
                     'trip_duration' => $tripDurationFormatted,
-                    'adress' => $trip->place,
+                    'address' => $trip->place . ', ' . $trip->country->name,
                     'name' => $name,
                 ];
                 break;
@@ -589,20 +592,23 @@ class BusinessTripController extends Controller
                 $contributions = $trip->contributions;
                 $dean = Staff::where('position', PositionTitle::DEAN)->first();
                 $secretary = Staff::where('position', PositionTitle::SECRETARY)->first();
+
                 $data = [
                     'first_name' => $trip->user->first_name,
                     'last_name' => $trip->user->last_name,
                     'academic_degree' => $trip->user->academic_degrees,
                     'address' => $trip->user->address,
-                    'contribution1' => $contributions->get(0) ? 'true' : null,
-                    'contribution2' => $contributions->get(1) ? 'true' : null,
-                    'contribution3' => $contributions->get(2) ? 'true' : null,
+                    'contribution1' => $contributions->get(0) ? 'yes1' : null,
+                    'contribution2' => $contributions->get(1) ? 'yes2' : null,
+                    'contribution3' => $contributions->get(2) ? 'yes3' : null,
                     'department' => $trip->user->department,
                     'place' => $trip->country->name . ', ' . $trip->place,
                     'datetime_start' => $trip->datetime_start->format('d-m-Y'),
                     'datetime_end' => $trip->datetime_end->format('d-m-Y'),
                     'transport' => $trip->transport->name,
-                    'trip_purpose' => $trip->tripPurpose->name . (isset($trip->purpose_details) ? ' - ' . $trip->purpose_details : ''),
+                    'trip_purpose' => $trip
+                            ->tripPurpose
+                            ->name . (isset($trip->purpose_details) ? ' - ' . $trip->purpose_details : ''),
                     'fund' => $trip->sppSymbol->fund,
                     'functional_region' => $trip->sppSymbol->functional_region,
                     'financial_centre' => $trip->sppSymbol->financial_centre,
@@ -610,18 +616,20 @@ class BusinessTripController extends Controller
                     'account' => $trip->sppSymbol->account,
                     'grantee' => $trip->sppSymbol->grantee,
                     'iban' => $trip->iban,
-                    'incumbent_name1' => $dean ? $dean->incumbent_name : 'N/A',
-                    'incumbent_name2' => $secretary ? $secretary->incumbent_name : 'N/A',
-                    'contribution1_text' => $contributions->get(0) ? $contributions->get(0)->pivot->detail : null,
-                    'contribution2_text' => $contributions->get(1) ? $contributions->get(1)->pivot->detail : null,
-                    'contribution3_text' => $contributions->get(2) ? $contributions->get(2)->pivot->detail : null,
+                    'incumbent_name1' => $dean->incumbent_name ?? null,
+                    'incumbent_name2' => $secretary->incumbent_name ?? null,
+                    'position_name1' => $dean->position_name ?? null,
+                    'position_name2' => $secretary->position_name ?? null,
+                    'contribution1_text' => $contributions->get(0)->pivot->detail ?? null,
+                    'contribution2_text' => $contributions->get(1)->pivot->detail ?? null,
+                    'contribution3_text' => $contributions->get(2)->pivot->detail ?? null,
                 ];
                 break;
 
             case DocumentType::CONTROL_SHEET:
                 $data = [
                     'spp_symbol' => $trip->sppSymbol->spp_symbol,
-                    'expense_estimation' => $trip->conference_fee->amount,
+                    'expense_estimation' => $trip->expense_estimation,
                     'source1' => $trip->sppSymbol->fund,
                     'functional_region1' => $trip->sppSymbol->functional_region,
                     'spp_symbol1' => $trip->sppSymbol->spp_symbol,
@@ -632,37 +640,39 @@ class BusinessTripController extends Controller
 
             case DocumentType::PAYMENT_ORDER:
                 $data = [
-                    'advance_amount' => $trip->conference_fee->amount,
+                    'advance_amount' => $trip->advance_amount,
                     'grantee' => $trip->sppSymbol->grantee,
                     'address' => $trip->conference_fee->organiser_address,
                     'source' => $trip->sppSymbol->fund,
                     'functional_region' => $trip->sppSymbol->functional_region,
                     'spp_symbol' => $trip->sppSymbol->spp_symbol,
-                    'financial_centre' => $trip->sppSymbol->functional_region,
+                    'financial_centre' => $trip->sppSymbol->financial_centre,
                     'iban' => $trip->iban,
                 ];
                 break;
 
             case DocumentType::DOMESTIC_REPORT:
-                $name = $trip->user->academic_degrees
-                    ? $trip->user->academic_degrees . ' ' . $trip->user->first_name . ' ' . $trip->user->last_name
-                    : $trip->user->first_name . ' ' . $trip->user->last_name;
-                $mealsReimbursementText = $trip->meals_reimbursement == 1
+                $name = ($trip->user->academic_degrees ?? '')
+                    . ' ' . $trip->user->first_name
+                    . ' ' . $trip->user->last_name;
+
+                $mealsReimbursementText = $trip->meals_reimbursement
                     ? 'mám záujem o preplatenie'
                     : 'nemám záujem o preplatenie';
+
                 $data = [
                     'name' => $name,
                     'department' => $trip->user->department,
-                    'date_start' => $trip->datetime_start->format('d-m-Y'),
-                    'date_end' => $trip->datetime_end->format('d-m-Y'),
-                    'spp_symbol' => $trip->spp_symbols->spp_symbol,
+                    'date_start' => $trip->datetime_start->format('d.m.Y'),
+                    'date_end' => $trip->datetime_end->format('d.m.Y'),
+                    'spp_symbol' => $trip->sppSymbol->spp_symbol,
                     'time_start' => $trip->datetime_start->format('H:i'),
                     'time_end' => $trip->datetime_end->format('H:i'),
                     'transport' => $trip->transport->name,
-                    'travelling_expense' => $trip->travellingExpense ? $trip->travellingExpense->amount_eur : null,
-                    'accommodation_expense' => $trip->accommodationExpense ? $trip->accommodationExpense->amount_eur : null,
-                    'other_expenses' => $trip->otherExpense ? $trip->otherExpense->amount_eur : null,
-                    'allowance' => $trip->allowanceExpense ? $trip->allowanceExpense->amount_eur : null,
+                    'travelling_expense' => $trip->travellingExpense->amount_eur ?? null,
+                    'accommodation_expense' => $trip->accommodationExpense->amount_eur ?? null,
+                    'other_expenses' => $trip->otherExpense->amount_eur ?? null,
+                    'allowance' => $trip->allowanceExpense->amount_eur ?? null,
                     'conclusion' => $trip->conclusion,
                     'iban' => $trip->iban,
                     'address' => $trip->user->address,
@@ -671,9 +681,10 @@ class BusinessTripController extends Controller
                 break;
 
             case DocumentType::FOREIGN_REPORT:
-                $mealsReimbursementText = $trip->meals_reimbursement == 1
+                $mealsReimbursementText = $trip->meals_reimbursement
                     ? 'mám záujem o preplatenie'
                     : 'nemám záujem o preplatenie';
+
                 $data = [
                     'name' => $trip->user->first_name . ' ' . $trip->user->last_name,
                     'department' => $trip->user->department,
@@ -685,18 +696,18 @@ class BusinessTripController extends Controller
                     'place' => $trip->place,
                     'spp_symbol' => $trip->sppSymbol->spp_symbol,
                     'transport' => $trip->transport->name,
-                    'travelling_expense_foreign' => $trip->travellingExpense && isset($trip->travellingExpense->amount_foreign) ? $trip->travellingExpense->amount_foreign : null,
-                    'travelling_expense' => $trip->travellingExpense ? $trip->travellingExpense->amount_eur : null,
-                    'accommodation_expense_foreign' => $trip->accommodationExpense ? $trip->accommodationExpense->amount_foreign : null,
-                    'accommodation_expense' => $trip->accommodationExpense ? $trip->accommodationExpense->amount_eur : null,
-                    'allowance_foreign' => $trip->allowanceExpense ? $trip->allowanceExpense->amount_foreign : null,
-                    'allowance' => $trip->allowanceExpense ? $trip->allowanceExpense->amount_eur : null,
+                    'travelling_expense_foreign' => $trip->travellingExpense->amount_foreign ?? null,
+                    'travelling_expense' => $trip->travellingExpense->amount_eur ?? null,
+                    'accommodation_expense_foreign' => $trip->accommodationExpense->amount_foreign ?? null,
+                    'accommodation_expense' => $trip->accommodationExpense->amount_eur ?? null,
+                    'allowance_foreign' => $trip->allowanceExpense->amount_foreign ?? null,
+                    'allowance' => $trip->allowanceExpense->amount_eur ?? null,
                     'meals_reimbursement' => $mealsReimbursementText,
-                    'other_expenses_foreign' => $trip->otherExpense ? $trip->otherExpense->amount_foreign : null,
-                    'other_expenses' => $trip->otherExpense ? $trip->otherExpense->amount_eur : null,
+                    'other_expenses_foreign' => $trip->otherExpense->amount_foreign ?? null,
+                    'other_expenses' => $trip->otherExpense->amount_eur ?? null,
                     'conclusion' => $trip->conclusion,
                     'iban' => $trip->iban,
-                    'advance_expense_foreign' => $trip->advanceExpense ? $trip->advanceExpense->amount_foreign : null,
+                    'advance_expense_foreign' => $trip->advanceExpense->amount_foreign ?? null,
                     'invitation_case_charges' => $trip->expense_estimation,
                 ];
                 break;
@@ -720,6 +731,8 @@ class BusinessTripController extends Controller
         try {
             $pdf->fillForm($data);
             $pdf->flatten();
+            $pdf->replacementFont(public_path('DejaVuSans.ttf'));
+            $pdf->needAppearances();
             $pdf->saveAs($outputPath);
         } catch (Exception $e) {
             Log::error("Error during PDF manipulation: " . $e->getMessage());
