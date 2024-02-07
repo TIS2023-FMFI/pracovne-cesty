@@ -720,6 +720,8 @@ class BusinessTripController extends Controller
         try {
             $pdf->fillForm($data);
             $pdf->flatten();
+            $pdf->replacementFont(public_path('DejaVuSans.ttf'));
+            $pdf->needAppearances();
             $pdf->saveAs($outputPath);
         } catch (Exception $e) {
             Log::error("Error during PDF manipulation: " . $e->getMessage());
