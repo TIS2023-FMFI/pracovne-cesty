@@ -12,7 +12,6 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\View\View;
@@ -129,7 +128,12 @@ class UserController extends Controller
     {
         $inputEmails = explode(';', $request->input('email'));
         $cleanedEmails = array_map('trim', $inputEmails);
-        $existingEmails = User::whereIn('email', $cleanedEmails)->pluck('email')->toArray();
+
+        $existingEmails = array_merge(
+            User::whereIn('email', $cleanedEmails)->pluck('email')->toArray(),
+            InvitationLink::whereIn('email', $cleanedEmails)->pluck('email')->toArray()
+        );
+
         $rejectedEmails = [];
         $invitedEmails = [];
 
@@ -154,8 +158,12 @@ class UserController extends Controller
             $invitedEmails[] = $email;
         }
 
-        $invitedEmailsList = implode(', ', $invitedEmails);
-        $message = "Pozvánky boli úspešne odoslané na tieto adresy: $invitedEmailsList";
+        $message = "";
+
+        if (!empty($invitedEmails)) {
+            $invitedEmailsList = implode(', ', $invitedEmails);
+            $message .= "Pozvánky boli úspešne odoslané na tieto adresy: $invitedEmailsList";
+        }
 
         if (!empty($rejectedEmails)) {
             $rejectedEmailsList = implode(', ', $rejectedEmails);
