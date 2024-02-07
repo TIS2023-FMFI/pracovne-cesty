@@ -49,7 +49,7 @@ class UserController extends Controller
             'email' => 'required|string|email|max:127|unique:users',
             'username' => 'required|string|max:255|unique:users',
             'password' => 'required|string|max:255',
-            'user_types' => ['required', 'integer', Rule::in($validUserTypes)],
+            'user_types' => ['required', Rule::in($validUserTypes)],
         ]);
 
         if ($validator->fails()) {
@@ -64,9 +64,11 @@ class UserController extends Controller
             'last_name' => $request->last_name,
             'email' => $request->email,
             'username' => $request->username,
-            'password' => Hash::make($request->password),
-            'user_type' => $request->user_types,
+            'password' => Hash::make($request->password)
         ]);
+
+        $user->user_type = UserType::from($request->user_types);
+        $user->save();
 
         // Invalidate invitation link after the registration
         $link = InvitationLink::where('email', $request->email)->first();
