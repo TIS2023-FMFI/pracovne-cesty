@@ -39,7 +39,7 @@
 
                 <div class="form-row">
                     <div class="col">
-                        <x-simple-input name="personal_id" label="Osobné číslo" :value="$user->personal_id ?? ''"/>
+                        <x-simple-input name="personal_id" label="Osobné číslo" :disabled="true" :value="$user->personal_id ?? ''"/>
                     </div>
                     <div class="col">
                         <x-simple-input name="department" label="Pracovisko" :value="$user->department ?? ''"/>
