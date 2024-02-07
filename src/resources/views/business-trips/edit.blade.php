@@ -7,7 +7,6 @@
     use App\Enums\TripType;
     use App\Enums\TripState;
     use App\Enums\DocumentType;
-    use App\Enums\UserType;
     use App\Enums\SppStatus;
     use Illuminate\Support\Facades\Auth;
 
@@ -56,15 +55,15 @@
                         <x-simple-input name="last_name" label="Priezvisko" :value="$trip->user->last_name"/>
                     </div>
                     <div class="col">
-                        <x-simple-input name="academic_degrees" label="Tituly" :value="$trip->user->academic_degrees"/>
+                        <x-simple-input name="academic_degrees" label="Tituly" :value="$trip->user->academic_degrees ?? ''"/>
                     </div>
                 </div>
 
-                <x-simple-input name="address" label="Bydlisko" :value="$trip->user->address"/>
+                <x-simple-input name="address" label="Bydlisko" :value="$trip->user->address ?? ''"/>
 
                 <div class="form-row">
                     <div class="col">
-                        <x-simple-input name="personal_id" label="Osobné číslo" :value="$trip->user->personal_id"/>
+                        <x-simple-input name="personal_id" label="Osobné číslo" :value="$trip->user->personal_id ?? ''"/>
                     </div>
                     <div class="col">
                         <x-simple-input name="department" label="Pracovisko" :value="$trip->user->department"/>
