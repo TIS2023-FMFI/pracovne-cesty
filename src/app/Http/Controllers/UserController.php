@@ -84,12 +84,12 @@ class UserController extends Controller
     /**
      * Log the user out of the application.
      *
-     * @return View
+     * @return RedirectResponse
      */
-    public function logout(): View
+    public function logout(): RedirectResponse
     {
         Auth::logout();
-        return view('homepage');
+        return redirect()->route('homepage');
     }
 
     /**
