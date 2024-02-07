@@ -104,7 +104,7 @@ class UserController extends Controller
         $user = User::where('username', $credentials['username'])->first();
 
         if ($user) {
-            if (in_array($user->user_type, [UserType::EMPLOYEE, UserType::PHD_STUDENT])) {
+            if (in_array($user->user_type, [UserType::EMPLOYEE, UserType::PHD_STUDENT], true)) {
                 SynchronizationController::syncSingleUser($user->id);
             }
             if (Auth::attempt($credentials)) {
@@ -134,7 +134,7 @@ class UserController extends Controller
         $invitedEmails = [];
 
         foreach ($cleanedEmails as $email) {
-            if (in_array($email, $existingEmails)) {
+            if (in_array($email, $existingEmails, true)) {
                 $rejectedEmails[] = $email;
                 continue;
             }
