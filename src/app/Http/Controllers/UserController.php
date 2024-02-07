@@ -38,7 +38,7 @@ class UserController extends Controller
      * @return RedirectResponse
      * @throws Exception
      */
-    public function store(Request $request): RedirectResponse
+    public function store(UserRegistrationRequest  $request): RedirectResponse
     {
         $validUserTypes = [UserType::EXTERN->value, UserType::STUDENT->value];
 
