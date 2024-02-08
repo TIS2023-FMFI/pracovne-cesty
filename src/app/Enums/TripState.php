@@ -46,4 +46,12 @@ enum TripState: int
             self::CANCELLED => 'Stornovaná',
         };
     }
+
+    public function isFinal(): bool
+    {
+        return match ($this) {
+            self::NEW, self::CONFIRMED, self::UPDATED, self::COMPLETED, self::CANCELLATION_REQUEST => false,
+            self::CLOSED, self::CANCELLED => true,
+        };
+    }
 }
