@@ -14,7 +14,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 
@@ -40,15 +39,21 @@ class UserController extends Controller
      */
     public function store(UserRegistrationRequest  $request): RedirectResponse
     {
-        $validUserTypes = [UserType::EXTERN->value, UserType::STUDENT->value];
+        // Verify that submitted email is signed by a token
+        $request->validate(['email' => 'required|string|email|max:127|unique:users']);
+        $link = InvitationLink::where('email', $request->email)->first();
 
+        if (!$link || !InvitationLink::isValid($link->token)) {
+            return redirect()->back();
+        }
+
+        $validUserTypes = implode(',', [UserType::EXTERN->value, UserType::STUDENT->value]);
         $validator = Validator::make($request->all(), [
             'first_name' => 'required|string|max:50',
             'last_name' => 'required|string|max:50',
-            'email' => 'required|string|email|max:127|unique:users',
             'username' => 'required|string|max:255|unique:users',
             'password' => 'required|string|max:255',
-            'user_types' => ['required', 'integer', Rule::in($validUserTypes)],
+            'user_types' => 'required|in:' . $validUserTypes
         ]);
 
         if ($validator->fails()) {
@@ -60,32 +65,30 @@ class UserController extends Controller
         $user = User::create([
             'first_name' => $request->first_name,
             'last_name' => $request->last_name,
-            'email' => $request->email,
+            'email' => $link->email,
             'username' => $request->username,
-            'password' => Hash::make($request->password),
-            'user_type' => $request->user_types,
+            'password' => Hash::make($request->password)
         ]);
 
-        // Invalidate invitation link after the registration
-        $link = InvitationLink::where('email', $request->email)->first();
+        $user->user_type = UserType::from($request->user_types);
+        $user->save();
 
-        if ($link) {
-            $link->used = true;
-            $link->save();
-        }
+        // Invalidate the token used for this registration
+        $link->used = true;
+        $link->save();
 
-        return redirect()->route('login');
+        return redirect()->route('homepage');
     }
 
     /**
      * Log the user out of the application.
      *
-     * @return View
+     * @return RedirectResponse
      */
-    public function logout(): View
+    public function logout(): RedirectResponse
     {
         Auth::logout();
-        return view('homepage');
+        return redirect()->route('homepage');
     }
 
     /**
@@ -100,7 +103,7 @@ class UserController extends Controller
         $user = User::where('username', $credentials['username'])->first();
 
         if ($user) {
-            if (in_array($user->user_type, [UserType::EMPLOYEE, UserType::PHD_STUDENT])) {
+            if (in_array($user->user_type, [UserType::EMPLOYEE, UserType::PHD_STUDENT], true)) {
                 SynchronizationController::syncSingleUser($user->id);
             }
             if (Auth::attempt($credentials)) {
@@ -125,12 +128,17 @@ class UserController extends Controller
     {
         $inputEmails = explode(';', $request->input('email'));
         $cleanedEmails = array_map('trim', $inputEmails);
-        $existingEmails = User::whereIn('email', $cleanedEmails)->pluck('email')->toArray();
+
+        $existingEmails = array_merge(
+            User::whereIn('email', $cleanedEmails)->pluck('email')->toArray(),
+            InvitationLink::whereIn('email', $cleanedEmails)->pluck('email')->toArray()
+        );
+
         $rejectedEmails = [];
         $invitedEmails = [];
 
         foreach ($cleanedEmails as $email) {
-            if (in_array($email, $existingEmails)) {
+            if (in_array($email, $existingEmails, true)) {
                 $rejectedEmails[] = $email;
                 continue;
             }
@@ -143,15 +151,19 @@ class UserController extends Controller
                 'expires_at' => $expiresAt,
             ]);
 
-            $url = url('/register?token=' . $token);
+            $url = route('user.register', ['token' => $token]);
             $messageText = "Pre registráciu kliknite na tento odkaz: " . $url;
 
             Mail::to($email)->send(new SimpleMail($messageText, $email, 'emails.registration_externist'));
             $invitedEmails[] = $email;
         }
 
-        $invitedEmailsList = implode(', ', $invitedEmails);
-        $message = "Pozvánky boli úspešne odoslané na tieto adresy: $invitedEmailsList";
+        $message = "";
+
+        if (!empty($invitedEmails)) {
+            $invitedEmailsList = implode(', ', $invitedEmails);
+            $message .= "Pozvánky boli úspešne odoslané na tieto adresy: $invitedEmailsList";
+        }
 
         if (!empty($rejectedEmails)) {
             $rejectedEmailsList = implode(', ', $rejectedEmails);

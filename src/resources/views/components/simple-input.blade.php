@@ -9,7 +9,8 @@
                 id="{{ $name }}"
                 name="{{ $name }}"
                 value="{{ old($name, $value) }}"
-                {{ $isDisabled() ? 'disabled' : '' }}
+                @disabled($disabled)
+                @readonly($readonly)
             />
 
             @error($name)
