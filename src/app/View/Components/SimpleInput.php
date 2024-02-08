@@ -16,6 +16,7 @@ class SimpleInput extends Component
         public string $label = '',
         public string $type = 'text',
         public bool $disabled = false,
+        public bool $readonly = false,
         public string $value = '',
     )
     {
