@@ -123,7 +123,10 @@
                 </x-content-section>
             @endif
 
-            <x-content-section title="Financovanie" x-data="{reimbursementShow: false}">
+            @php
+                $reimbursementShow = old('reimbursement');
+            @endphp
+            <x-content-section title="Financovanie" x-data="{reimbursementShow: {{$reimbursementShow ? 'true' : 'false'}} }">
                 <x-slot:description>
                     V prípade refundácie, prosím, vyberte ako ŠPP prvok 2 ten prvok, z ktorého budú peniaze neskôr vrátené do ŠPP prvku 1. Ako dátum vrátenia peňazí uveďte iba orientačný, predpokladaný dátum.
                 </x-slot:description>
@@ -148,7 +151,10 @@
 
             </x-content-section>
 
-            <x-content-section title="Úhrada konferenčného poplatku" x-data="{conferenceFeeShow: false}">
+            @php
+                $conferenceFeeShow = old('conference_fee');
+            @endphp
+            <x-content-section title="Úhrada konferenčného poplatku" x-data="{conferenceFeeShow: {{$conferenceFeeShow ? 'true' : 'false'}} }">
                 <x-checkbox name="conference_fee" label="Mám záujem o úhradu konferenčného poplatku pred cestou priamo z pracoviska" control="conferenceFeeShow"/>
                 <x-hideable-section control="conferenceFeeShow">
                     <div class="form-row">

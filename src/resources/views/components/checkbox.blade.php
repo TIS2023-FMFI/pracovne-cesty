@@ -1,4 +1,4 @@
-@props(['name', 'label' => '', 'control' => ''])
+@props(['name', 'label' => '', 'control' => '', 'checked' => false])
 
 <div class="custom-control custom-checkbox">
         <input

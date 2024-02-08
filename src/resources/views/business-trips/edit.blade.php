@@ -74,7 +74,6 @@
                     <div class="col-6">
                         <x-simple-input name="iban" label="Číslo účtu" :value="$trip->user->iban ?? ''"/>
                     </div>
-
                 </div>
 
             </x-content-section>
@@ -85,6 +84,7 @@
                             <x-simple-input name="place_start" label="Miesto" :value="$trip->place_start"/>
                             <x-simple-input name="datetime_start" type="datetime-local" label="Dátum a čas"
                                             :value="$trip->datetime_start"/>
+
                             @if($tripType == TripType::FOREIGN)
                                 <x-simple-input name="datetime_border_crossing_start" type="datetime-local"
                                                 label="Dátum a čas prekročenia hraníc"
@@ -97,6 +97,7 @@
                             <x-simple-input name="place_end" label="Miesto" :value="$trip->place_end"/>
                             <x-simple-input name="datetime_end" type="datetime-local" label="Dátum a čas"
                                             :value="$trip->datetime_end"/>
+
                             @if($tripType == TripType::FOREIGN)
                                 <x-simple-input name="datetime_border_crossing_end" type="datetime-local"
                                                 label="Dátum a čas prekročenia hraníc"
@@ -179,13 +180,13 @@
             @endif
 
             @php
-                $isReimbursed = $trip->reimbursement != null;
+                $isReimbursed = old('reimbursement', $trip->reimbursement != null);
                 $spp2 = $isReimbursed ? $trip->reimbursement->spp_symbol_id : '';
                 $reimbursementDate = $isReimbursed ? $trip->reimbursement->reimbursement_date->format('Y-m-d') : '';
             @endphp
 
             <x-content-section
-                title="Financovanie"
+                title="Financovanie {{old('reimbursement')}}"
                 x-data="{reimbursementShow: {{ $isReimbursed ? 'true' : 'false' }} }"
                 :disabled="$tripState == TripState::CLOSED"
             >
@@ -370,14 +371,12 @@
                             </table>
                         </div>
                     </x-content-section>
-
                 </x-content-section>
 
 
                 <x-content-section title="Správa" :disabled="!$isAdmin || $tripState == TripState::CLOSED">
                     <x-textarea name="conclusion" label="Výsledky cesty" :value="$trip->conclusion ?? ''" rows="10"></x-textarea>
                 </x-content-section>
-
             @endif
 
             <div class="d-flex justify-content-end">
@@ -406,7 +405,7 @@
             </form>
         </x-content-section>
 
-        @if($tripState == TripState::NEW)
+        @if($isAdmin && $tripState == TripState::NEW)
             <x-content-section title="Potvrdenie cesty">
                 <x-slot:description>
                     Po zaevidovaní v systéme SOFIA sem vložte identifikátor cesty a potvrdťe ju. Zmeníte tak jej stav.
@@ -426,7 +425,7 @@
             </x-content-section>
         @endif
 
-        @if($tripState == TripState::COMPLETED)
+        @if($isAdmin && $tripState == TripState::COMPLETED)
             <x-content-section title="Vyúčtovanie cesty">
                 <x-slot:description>
                     Tu si môžete označiť, že ste zaevidovali správu a náklady v systéme SOFIA. Zmeníte tak stav cesty na uzavretú.
@@ -463,7 +462,7 @@
             </x-content-section>
         @endif
 
-        @if(in_array($tripState, [TripState::NEW, TripState::CONFIRMED, TripState::CANCELLATION_REQUEST]))
+        @if($isAdmin && !$tripState->isFinal()))
             <x-content-section title="Stornovanie">
                 <x-slot:description>
                     Ako administrátor môžete stornovať pracovnú cestu.
