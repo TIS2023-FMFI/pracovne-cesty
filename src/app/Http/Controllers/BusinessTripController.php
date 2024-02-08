@@ -68,7 +68,7 @@ class BusinessTripController extends Controller
      * Redirecting to the homepage
      * Sending mail with mail component to admin
      */
-    public function store(Request $request) {
+    public function store(BusinessTripRequest $request) {
         // Get the authenticated user's ID
         $user = Auth::user();
 
@@ -261,7 +261,7 @@ class BusinessTripController extends Controller
      * @throws ValidationException
      * @throws Exception
      */
-    public function update(Request $request, BusinessTrip $trip) {
+    public function update(BusinessTripRequest $request, BusinessTrip $trip) {
         // Check if the authenticated user is an admin
         $isAdmin = Auth::user()->hasRole('admin');
 

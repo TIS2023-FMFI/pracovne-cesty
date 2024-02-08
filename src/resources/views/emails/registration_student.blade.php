@@ -9,7 +9,7 @@
     <div class="header">Vitajte v Pracovných Cestách</div>
     <div class="content">
         Vážený študent, <br>
-        Vaša registrácia bola úspešne dokončená.
+        Vaša žiadosť o registráciu bola úspešne zaregistrovaná.
         {{ $messageText }}
     </div>
     <div class="footer">

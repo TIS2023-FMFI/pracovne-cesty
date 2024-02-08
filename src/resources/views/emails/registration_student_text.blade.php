@@ -2,7 +2,7 @@ Vitajte v Pracovných Cestách
 
 Vážený študent,
 
-Vaša registrácia bola úspešne dokončená.
+Vaša žiadosť o registráciu bola úspešne zaregistrovaná.
 {{ $messageText }}
 
 S pozdravom,

@@ -25,7 +25,7 @@ class SPPController extends Controller
      * Validating data
      * Saving new spp symbol in DB
      */
-    public function store(Request $request): RedirectResponse
+    public function store(SppSymbolRequest $request): RedirectResponse
     {
         $validatedData = $request->validate([
             'fund' => 'required|string',
