@@ -243,7 +243,6 @@ class BusinessTripController extends Controller
         Log::info($trip);
         $startDate = new DateTime($trip->datetime_start);
         $endDate = new DateTime($trip->datetime_end);
-        $endDate->modify('+1 day'); // Include the end day
         $interval = new DateInterval('P1D');
         $dateRange = new DatePeriod($startDate, $interval, $endDate);
 
