@@ -159,7 +159,7 @@ class UserController extends Controller
                 continue;
             }
 
-            $token = bin2hex(random_bytes(20));
+            $token = bin2hex(random_bytes(10));
             $expiresAt = Carbon::now()->addDays(7);
 
             InvitationLink::create([
