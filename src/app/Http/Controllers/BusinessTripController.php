@@ -316,8 +316,10 @@ class BusinessTripController extends Controller
 
                     // Border crossing validation rules for foreign trips
                     if ($trip->type === TripType::FOREIGN) {
-                        $validatedData['datetime_border_crossing_start'] = 'nullable|date';
-                        $validatedData['datetime_border_crossing_end'] = 'nullable|date';
+                        array_merge($validatedData, $request->validate([
+                            'datetime_border_crossing_start' =>  'required|date',
+                            'datetime_border_crossing_end' => 'required|date'
+                        ]));
                     }
 
                     // Update the trip with the provided data
