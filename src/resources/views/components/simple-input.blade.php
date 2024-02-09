@@ -4,7 +4,7 @@
             @endif
 
             <input
-                class="form-control"
+                class="form-control @error($name) is-invalid @enderror"
                 type="{{ $type }}"
                 id="{{ $name }}"
                 name="{{ $name }}"
@@ -13,7 +13,7 @@
             />
 
             @error($name)
-            <p>{{ $message }}</p>
+                <p class="invalid-feedback">{{ $message }}</p>
             @enderror
 
 
