@@ -37,17 +37,24 @@ class BusinessTripController extends Controller
 
     /**
      * Returning view with details from all trips
+     * @throws Exception
      */
     public static function index()
     {
+        $user = Auth::user();
+
+        if (!$user) {
+            throw new Exception();
+        }
+
         // Check if the user is an admin
-        if (Auth::user()->hasRole('admin')) {
+        if ($user->hasRole('admin')) {
             // Retrieve all trips and users for admin
             $trips = BusinessTrip::paginate(15);
             $users = User::all();
         } else {
             // Retrieve only user's trips for regular users
-            $trips = Auth::user()->businessTrips()->paginate(15);
+            $trips = $user->businessTrips()->paginate(15);
             // No need for a list of users
             $users = null;
         }
@@ -72,11 +79,17 @@ class BusinessTripController extends Controller
      * Also managing uploaded files from the form
      * Redirecting to the homepage
      * Sending mail with mail component to admin
+     *
+     * @throws Exception
      */
     public static function store(Request $request): RedirectResponse
     {
         // Get the authenticated user's ID
         $user = Auth::user();
+
+        if (!$user) {
+            throw new Exception();
+        }
 
         // Validate all necessary data
         $validatedUserData = self::validateUserData($request);
@@ -196,6 +209,11 @@ class BusinessTripController extends Controller
         }
         // Check if the authenticated user is an admin
         $user = Auth::user();
+
+        if (!$user) {
+            throw new Exception();
+        }
+
         $isAdmin = $user->hasRole('admin');
 
         $tripState = $trip->state;
@@ -656,10 +674,16 @@ class BusinessTripController extends Controller
     /**
      * @param Request $request
      * @return array
+     * @throws Exception
      */
     public static function validateUserData(Request $request): array
     {
         $user = Auth::user();
+
+        if (!$user) {
+            throw new Exception();
+        }
+
         $rule = 'nullable';
         if ($user->user_type->isExternal()) {
             $rule = 'required';
@@ -680,10 +704,16 @@ class BusinessTripController extends Controller
     /**
      * @param Request $request
      * @return array
+     * @throws Exception
      */
     public static function validateUpdatableTripData(Request $request): array
     {
         $user = Auth::user();
+
+        if (!$user) {
+            throw new Exception();
+        }
+
         $rule = 'nullable';
         if ($user->user_type->isExternal()) {
             $rule = 'required';
