@@ -11,7 +11,9 @@
     use Illuminate\Support\Facades\Auth;
 
     $countries = Country::all()->pluck('name', 'id');
-    $transports = Transport::all()->pluck('name', 'id');
+    $transports = Transport::where('user_visible', 1)
+        ->orWhere('id', $trip->transport_id)
+        ->pluck('name', 'id');
     $purposes = TripPurpose::all()->pluck('name', 'id');
     $contributions = Contribution::all()->pluck('name', 'id');
 
@@ -33,7 +35,7 @@
     <x-content-box title="{{ $trip->tripPurpose->name.' '.$trip->place }}">
         <div class="mb-3">
             <span class="badge badge-pill badge-danger">
-            {{ $tripType == TripType::DOMESTIC ? "Tuzemská cesta" : "Zahraničná cesta"}}
+            {{ $tripType->inSlovak() }}
             </span>
             <span class="badge badge-pill badge-danger">
             Stav: {{ $trip->state->inSlovak()}}
@@ -43,10 +45,16 @@
             </span>
         </div>
 
+        <div>
+            <p class="alert alert-secondary">
+                {{ $tripState->description() }}
+            </p>
+        </div>
+
         <form method="POST" action="/trips/{{ $trip->id }}" enctype="multipart/form-data">
             @csrf
             @method('PUT')
-            <x-content-section title="Osobné údaje" :disabled="!$isAdmin || $tripState == TripState::CLOSED">
+            <x-content-section title="Osobné údaje" :disabled="!$isAdmin || $tripState->isFinal()">
                 <div class="form-row">
                     <div class="col">
                         <x-simple-input name="first_name" label="Meno" :value="$trip->user->first_name"/>
@@ -69,46 +77,61 @@
                         <x-simple-input name="department" label="Pracovisko" :value="$trip->user->department"/>
                     </div>
                 </div>
+            </x-content-section>
 
+            <x-content-section
+                title="Neviem netuším"
+                :disabled="$tripState->isFinal() || (!$isAdmin && $tripState!=TripState::CONFIRMED)">
                 <div class="form-row">
-                    <div class="col-6">
-                        <x-simple-input name="iban" label="Číslo účtu" :value="$trip->user->iban ?? ''"/>
+                    <div class="col">
+                        <x-simple-input name="iban" label="Číslo účtu" :value="$trip->iban ?? ''"/>
+                    </div>
+                    <div class="col">
+                        <x-dropdown-input name="transport_id" label="Dopravný prostriedok" :values="$transports"
+                                          :selected="$trip->transport_id"/>
                     </div>
                 </div>
-
             </x-content-section>
-            <div class="container">
-                <div class="row">
-                    <div class="col">
-                        <x-content-section title="Začiatok cesty" :disabled="$tripState == TripState::CLOSED">
-                            <x-simple-input name="place_start" label="Miesto" :value="$trip->place_start"/>
-                            <x-simple-input name="datetime_start" type="datetime-local" label="Dátum a čas"
-                                            :value="$trip->datetime_start"/>
 
-                            @if($tripType == TripType::FOREIGN)
-                                <x-simple-input name="datetime_border_crossing_start" type="datetime-local"
-                                                label="Dátum a čas prekročenia hraníc"
-                                                :value="$trip->datetime_border_crossing_start ?? ''"/>
-                            @endif
-                        </x-content-section>
-                    </div>
-                    <div class="col">
-                        <x-content-section title="Koniec cesty" :disabled="$tripState == TripState::CLOSED">
-                            <x-simple-input name="place_end" label="Miesto" :value="$trip->place_end"/>
-                            <x-simple-input name="datetime_end" type="datetime-local" label="Dátum a čas"
-                                            :value="$trip->datetime_end"/>
+            <div class="form-row">
+                <div class="col">
+                    <x-content-section
+                        title="Začiatok cesty"
+                        :disabled="$tripState->isFinal() || (!$isAdmin && $tripState!=TripState::CONFIRMED)">
 
-                            @if($tripType == TripType::FOREIGN)
-                                <x-simple-input name="datetime_border_crossing_end" type="datetime-local"
-                                                label="Dátum a čas prekročenia hraníc"
-                                                :value="$trip->datetime_border_crossing_end ?? ''"/>
-                            @endif
-                        </x-content-section>
-                    </div>
+                        <x-simple-input name="place_start" label="Miesto" :value="$trip->place_start"/>
+                        <x-simple-input name="datetime_start" type="datetime-local" label="Dátum a čas"
+                                        :value="$trip->datetime_start"/>
+
+                        @if($tripType == TripType::FOREIGN)
+                            <x-simple-input name="datetime_border_crossing_start" type="datetime-local"
+                                            label="Dátum a čas prekročenia hraníc"
+                                            :value="$trip->datetime_border_crossing_start ?? ''"/>
+                        @endif
+                    </x-content-section>
+                </div>
+                <div class="col">
+                    <x-content-section
+                        title="Koniec cesty"
+                        :disabled="$tripState->isFinal() || (!$isAdmin && $tripState!=TripState::CONFIRMED)">
+
+                        <x-simple-input name="place_end" label="Miesto" :value="$trip->place_end"/>
+                        <x-simple-input name="datetime_end" type="datetime-local" label="Dátum a čas"
+                                        :value="$trip->datetime_end"/>
+
+                        @if($tripType == TripType::FOREIGN)
+                            <x-simple-input name="datetime_border_crossing_end" type="datetime-local"
+                                            label="Dátum a čas prekročenia hraníc"
+                                            :value="$trip->datetime_border_crossing_end ?? ''"/>
+                        @endif
+                    </x-content-section>
                 </div>
             </div>
 
-            <x-content-section title="Cieľ cesty" :disabled="!$isAdmin || $tripState == TripState::CLOSED">
+            <x-content-section
+                title="Cieľ cesty"
+                :disabled="!$isAdmin || $tripState == TripState::CLOSED">
+
                 <div class="form-row">
                     <div class="col">
                         <x-simple-input name="place" label="Miesto" :value="$trip->place"/>
@@ -128,10 +151,6 @@
                     </div>
                 </div>
                 <div class="form-row">
-                    <div class="col">
-                        <x-dropdown-input name="transport_id" label="Dopravný prostriedok" :values="$transports"
-                                          :selected="$trip->transport_id"/>
-                    </div>
                     <div class="col">
                         <x-simple-input name="event_url" label="Link na udalosť" :value="$trip->event_url ?? ''"/>
                     </div>
@@ -157,7 +176,10 @@
             </x-content-section>
 
             @if($tripUserType->isExternal())
-                <x-content-section title="Prínos pre fakultu" :disabled="!$isAdmin || $tripState == TripState::CLOSED">
+                <x-content-section
+                    title="Prínos pre fakultu"
+                    :disabled="!$isAdmin || $tripState == TripState::CLOSED">
+
                     @foreach($contributions as $id => $name)
                         @php
                             $contribution = $trip->contributions->where('id', $id)->first();
@@ -180,16 +202,16 @@
             @endif
 
             @php
-                $isReimbursed = old('reimbursement', $trip->reimbursement != null);
+                $isReimbursed = $trip->reimbursement != null;
                 $spp2 = $isReimbursed ? $trip->reimbursement->spp_symbol_id : '';
                 $reimbursementDate = $isReimbursed ? $trip->reimbursement->reimbursement_date->format('Y-m-d') : '';
             @endphp
 
             <x-content-section
-                title="Financovanie {{old('reimbursement')}}"
-                x-data="{reimbursementShow: {{ $isReimbursed ? 'true' : 'false' }} }"
-                :disabled="$tripState == TripState::CLOSED"
-            >
+                title="Financovanie"
+                x-data="{reimbursementShow: {{ old('reimbursement', $isReimbursed) ? 'true' : 'false' }} }"
+                :disabled="$tripState->isFinal() || (!$isAdmin && $tripState!=TripState::CONFIRMED)">
+
                 <x-slot:description>
                     V prípade refundácie, prosím, vyberte ako ŠPP prvok 2 ten prvok, z ktorého budú peniaze neskôr
                     vrátené do ŠPP prvku 1. Ako dátum vrátenia peňazí uveďte iba orientačný, predpokladaný dátum.
@@ -232,9 +254,14 @@
                 title="Úhrada konferenčného poplatku"
                 x-data="{conferenceFeeShow: {{ $wantsConferenceFee ? 'true' : 'false' }} }"
                 :disabled="!$isAdmin || $tripState == TripState::CLOSED">
-                <x-checkbox name="conference_fee"
-                            label="Mám záujem o úhradu konferenčného poplatku pred cestou priamo z pracoviska"
-                            control="conferenceFeeShow" :checked="$wantsConferenceFee"></x-checkbox>
+
+                <div class="form-row">
+                    <div class="col">
+                        <x-checkbox name="conference_fee"
+                                    label="Mám záujem o úhradu konferenčného poplatku pred cestou priamo z pracoviska"
+                                    control="conferenceFeeShow" :checked="$wantsConferenceFee"></x-checkbox>
+                    </div>
+                </div>
                 <x-hideable-section control="conferenceFeeShow">
                     <div class="form-row">
                         <div class="col">
@@ -263,77 +290,91 @@
             </x-content-section>
 
             @if(in_array($tripState, [TripState::UPDATED, TripState::COMPLETED, TripState::CLOSED]) )
-
                 @php
-                    $expenses = ['travelling' => 'Cestovné', 'accommodation' => 'Ubytovanie', 'allowance' => 'Záloha za cestu', 'advance' => 'Vložné', 'other' => 'Iné'];
+                    $expenses = ['travelling' => 'Cestovné', 'accommodation' => 'Ubytovanie', 'advance' => 'Vložné', 'other' => 'Iné'];
+                    if($tripType == TripType::FOREIGN) {
+                        $expenses = array_merge($expenses, ['allowance' => 'Záloha za cestu']);
+                    }
                     $mealsReimbursement = $trip->meals_reimbursement ?? true;
                     $doesNotWantMeals = !$mealsReimbursement;
                 @endphp
+
                 <x-content-section
                     title="Náklady"
                     x-data="{mealsTableHide: {{ $doesNotWantMeals ? 'true' : 'false'}} }"
-                    :disabled="!$isAdmin || $tripState == TripState::CLOSED"
-                >
+                    :disabled="$tripState->isFinal() || (!$isAdmin && $tripState!=TripState::UPDATED)">
+
                     <x-slot:description>
                         Pre každý druh nákladov môžete použiť aj oba stĺpce naraz. Ak si preplatenie nejakého druhu nákladov nenárokujete, nezabudnite to, prosím, uviesť.
                     </x-slot:description>
 
-                    <table class="table">
-                        <thead>
-                        <tr>
-                            <th>Druh nákladov</th>
-                            <th>Suma v EUR</th>
-                            @if ($tripType == TripType::FOREIGN)
-                                <th>Suma v cudzej mene</th>
-                            @endif
-                            <th></th>
-                        </tr>
-                        </thead>
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Druh nákladov</th>
+                                    <th>Suma v EUR</th>
+                                    @if ($tripType == TripType::FOREIGN)
+                                        <th>Suma v cudzej mene</th>
+                                    @endif
+                                    <th></th>
+                                </tr>
+                            </thead>
 
-                        @foreach($expenses as $expenseName => $label)
-                            @php
-                                $expense = $trip->{$expenseName . 'Expense'};
-                                $amountEur = $expense->amount_eur ?? '';
-                                $amountForeign = $expense->amount_foreign ?? '';
-                                $reimburse = $expense->reimburse ?? false;
-                            @endphp
+                            @foreach($expenses as $expenseName => $label)
+                                @php
+                                    $expense = $trip->{$expenseName . 'Expense'};
+                                    $amountEur = $expense->amount_eur ?? '';
+                                    $amountForeign = $expense->amount_foreign ?? '';
+                                    $reimburse = $expense->reimburse ?? false;
+                                @endphp
+
+                                <tr>
+                                    <td>{{ $label }}</td>
+                                    <td>
+                                        <x-simple-input name="{{ $expenseName }}_expense_eur"
+                                                        :value="$amountEur ?? ''"></x-simple-input>
+                                    </td>
+                                    @if ($tripType == TripType::FOREIGN)
+                                        <td>
+                                            <x-simple-input name="{{ $expenseName }}_expense_foreign" :value="$amountForeign ?? ''"></x-simple-input>
+                                        </td>
+                                    @endif
+
+                                    <td>
+                                        <x-checkbox name="{{ $expenseName }}_expense_reimburse" :checked="$reimburse" label="Nenárokujem si"></x-checkbox>
+                                    </td>
+                                </tr>
+                            @endforeach
+
                             <tr>
                                 <td>
-                                    {{ $label }}
+                                    Stravné
                                 </td>
                                 <td>
-                                    <x-simple-input name="{{ $expenseName }}_expense_eur"
-                                                    :value="$amountEur ?? ''"></x-simple-input>
+                                    <x-checkbox name="no_meals_reimbursed" label="Nenárokujem si vôbec" :checked="$doesNotWantMeals" control="mealsTableHide"/>
                                 </td>
-                                @if ($tripType == TripType::FOREIGN)
-                                    <td>
-                                        <x-simple-input name="{{ $expenseName }}_expense_foreign" :value="$amountForeign ?? ''"></x-simple-input>
-                                    </td>
-                                @endif
-
-                                <td>
-                                    <x-checkbox name="{{ $expenseName }}_expense_reimburse" :checked="$reimburse" label="Nenárokujem si"></x-checkbox>
-                                </td>
+                                <td colspan="2"></td>
                             </tr>
-                        @endforeach
+                        </table>
+                    </div>
 
-                        <tr>
-                            <td>
-                                Stravné
-                            </td>
-                            <td>
-                                <x-checkbox name="no_meals_reimbursed" label="Nenárokujem si vôbec" :checked="$doesNotWantMeals" control="mealsTableHide"/>
-                            </td>
-                            <td colspan="2"></td>
-                        </tr>
-                    </table>
+                    <div class="form-row">
+                        <div class="col">
+                            <x-simple-input name="expense_estimation" label="V prípade pozvania druhou stranou odhadnite preplatené výdavky" :value="$trip->expense_estimation ?? ''"/>
+                        </div>
+                    </div>
 
-                    <x-content-section title="Zrážky zo stravného" x-show="!mealsTableHide">
+                    <x-content-section
+                        title="Zrážky zo stravného"
+                        x-show="!mealsTableHide"
+                        class="border-bottom-0 pb-0">
+
                         <x-slot:description>
                             Vyberte, prosím, ktoré jedlá si <b>nežiadate</b> preplatiť.
                         </x-slot:description>
 
-                        <div>
+                        <div class="table-responsive">
                             <table class="table" x-data="{checkBreakfast: false, checkLunch: false, checkDinner: false}">
                                 <thead>
                                 <tr>
@@ -346,7 +387,7 @@
 
                                 <tbody>
                                 @php
-//                                 $meals = $trip->not_reimbursed_meals;
+    //                                 $meals = $trip->not_reimbursed_meals;
                                     $meals = $meals ?? str_repeat('0', $days*3);
                                     $currentDate = clone $trip->datetime_start;
                                 @endphp
@@ -354,13 +395,13 @@
                                     <tr>
                                         <td>{{ $currentDate->format('d.m.') }}</td>
                                         <td>
-                                            <input type="checkbox" :name="{{ 'b'.$i }}" x-init="$el.checked = '{{$meals[$i * 3]}}' === '1'" x-bind:checked="checkBreakfast">
+                                            <input type="checkbox" name="{{ 'b'.$i }}" x-init="$el.checked = {{$meals[$i * 3 + 1] === 1 ? 'true' : 'false'}}" x-bind:checked="checkBreakfast">
                                         </td>
                                         <td>
-                                            <input type="checkbox" :name="{{ 'l'.$i }}" x-init="$el.checked = '{{$meals[$i * 3 + 1]}}' === '1'" x-bind:checked="checkLunch">
+                                            <input type="checkbox" name="{{ 'l'.$i }}" x-init="$el.checked = {{$meals[$i * 3 + 1] === 1 ? 'true' : 'false'}}" x-bind:checked="checkLunch">
                                         </td>
                                         <td>
-                                            <input type="checkbox" :name="{{ 'd'.$i }}" x-init="$el.checked = '{{$meals[$i * 3 + 2]}}' === '1'" x-bind:checked="checkDinner" >
+                                            <input type="checkbox" name="{{ 'd'.$i }}" x-init="$el.checked = {{$meals[$i * 3 + 2] === 1 ? 'true' : 'false'}}" x-bind:checked="checkDinner" >
                                         </td>
                                     </tr>
 
@@ -374,7 +415,10 @@
                 </x-content-section>
 
 
-                <x-content-section title="Správa" :disabled="!$isAdmin || $tripState == TripState::CLOSED">
+                <x-content-section
+                    title="Správa"
+                    :disabled="$tripState->isFinal() || (!$isAdmin && $tripState!=TripState::UPDATED)">
+
                     <x-textarea name="conclusion" label="Výsledky cesty" :value="$trip->conclusion ?? ''" rows="10"></x-textarea>
                 </x-content-section>
             @endif
@@ -462,7 +506,7 @@
             </x-content-section>
         @endif
 
-        @if($isAdmin && !$tripState->isFinal()))
+        @if($isAdmin && !$tripState->isFinal())
             <x-content-section title="Stornovanie">
                 <x-slot:description>
                     Ako administrátor môžete stornovať pracovnú cestu.
