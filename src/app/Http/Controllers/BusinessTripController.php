@@ -153,7 +153,9 @@ class BusinessTripController extends Controller
         $days = $trip->type == TripType::DOMESTIC ? '4' : '11';
         $newDate = $currentDate->modify("+ ".$days." weekday");
         if ($startDate < $newDate) {
-            $warningMessage = 'Vaša pracovná cesta bude pridaná, ale nie je to v súlade s pravidlami. Cestu vždy pridávajte minimálne 4 pracovné dni pred jej začiatkom v prípade, že ide o tuzemskú cestu, a 11 pracovných dní pred začiatkom v prípade zahraničnej cesty.';
+            $warningMessage = 'Vaša pracovná cesta bude pridaná, ale nie je to v súlade s pravidlami.
+                               Cestu vždy pridávajte minimálne 4 pracovné dni pred jej začiatkom v prípade,
+                               že ide o tuzemskú cestu, a 11 pracovných dní pred začiatkom v prípade zahraničnej cesty.';
         }
 
         //Redirecting to the homepage

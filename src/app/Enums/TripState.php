@@ -51,11 +51,27 @@ enum TripState: int
     {
         return match ($this) {
             self::NEW => 'Cesta je v stave Nová. To znamená, že zatiaľ nebola potvrdená administrátorom.',
-            self::CONFIRMED => 'Cesta je v stave Potvrdená. Administrátor ju potvrdil a zaevidoval, ceste pridelil číselný identifikátor. Teraz je možné aktualizovať niektoré z dávnejšie uvedených údajov. Vykonajte tak až po absolvovaní cesty, keď si budete istý presnosťou nových údajov.',
-            self::UPDATED => 'Cesta je v stave Doplnená. Údaje, ktoré bolo po jej absolvovaní možné zmeniť, boli aktualizované alebo potvrdené. Teraz treba doplniť údaje o výdavkoch a výsledkoch cesty.',
-            self::COMPLETED => 'Cesta je v stave Ukončená. Sú pri nej zaevidované všetky potrebné údaje. Čaká sa na kontrolu od administrátora.',
-            self::CLOSED => 'Cesta je v stave Spracovaná. Už sa v nej nedajú vykonávať žiadne zmeny vycestovaným ani administrátorom. Administrátor skontroloval a zaevidoval všetky údaje.',
-            self::CANCELLATION_REQUEST => 'Pre cestu bola odoslaná žiadosť o stornovanie. Čaká sa na jej potvrdenie administrátorom.',
+
+            self::CONFIRMED => 'Cesta je v stave Potvrdená.
+                                Administrátor ju potvrdil a zaevidoval, ceste pridelil číselný identifikátor.
+                                Teraz je možné aktualizovať niektoré z dávnejšie uvedených údajov.
+                                Vykonajte tak až po absolvovaní cesty, keď si budete istý presnosťou nových údajov.',
+
+            self::UPDATED => 'Cesta je v stave Doplnená.
+                              Údaje, ktoré bolo po jej absolvovaní možné zmeniť, boli aktualizované alebo potvrdené.
+                              Teraz treba doplniť údaje o výdavkoch a výsledkoch cesty.',
+
+            self::COMPLETED => 'Cesta je v stave Ukončená.
+                                Sú pri nej zaevidované všetky potrebné údaje.
+                                Čaká sa na kontrolu od administrátora.',
+
+            self::CLOSED => 'Cesta je v stave Spracovaná.
+                             Už sa v nej nedajú vykonávať žiadne zmeny vycestovaným ani administrátorom.
+                             Administrátor skontroloval a zaevidoval všetky údaje.',
+
+            self::CANCELLATION_REQUEST => 'Pre cestu bola odoslaná žiadosť o stornovanie.
+                                           Čaká sa na jej potvrdenie administrátorom.',
+
             self::CANCELLED => 'Cesta je v stave Stornovaná. Nedajú sa v nej vykonávať žiadne ďalšie zmeny.',
         };
     }
