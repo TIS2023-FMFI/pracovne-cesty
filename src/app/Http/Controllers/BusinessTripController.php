@@ -152,6 +152,7 @@ class BusinessTripController extends Controller
         $startDate = new DateTime($trip->datetime_start);
         $days = $trip->type == TripType::DOMESTIC ? '4' : '11';
         $newDate = $currentDate->modify("+ ".$days." weekday");
+        $days = $trip->type === TripType::DOMESTIC ? '4' : '11';
         if ($startDate < $newDate) {
             $warningMessage = 'Vaša pracovná cesta bude pridaná, ale nie je to v súlade s pravidlami.
                                Cestu vždy pridávajte minimálne 4 pracovné dni pred jej začiatkom v prípade,
@@ -229,7 +230,7 @@ class BusinessTripController extends Controller
             list($isReimbursement, $validatedReimbursementData) = self::validateReimbursementData($request);
             list($isConferenceFee, $validatedConferenceFeeData) = self::validateConferenceFeeData($request);
 
-            if (in_array($tripState, [TripState::UPDATED, TripState::COMPLETED])) {
+            if (in_array($tripState, [TripState::UPDATED, TripState::COMPLETED], true)) {
                 $validatedExpensesData = self::validateExpensesData($trip, $request);
                 // meals table !!
                 array_merge($validatedTripData, $request->validate(
@@ -310,7 +311,7 @@ class BusinessTripController extends Controller
     public static function cancel(Request $request, BusinessTrip $trip): RedirectResponse
     {
         // Check if the trip is in a valid state for cancellation
-        if (!in_array($trip->state, [TripState::NEW, TripState::CONFIRMED, TripState::CANCELLATION_REQUEST])) {
+        if (!in_array($trip->state, [TripState::NEW, TripState::CONFIRMED, TripState::CANCELLATION_REQUEST], true)) {
             throw ValidationException::withMessages(['state' => 'Invalid state for cancellation.']);
         }
         // Cancel the trip and add cancellation reason if provided
@@ -397,8 +398,7 @@ class BusinessTripController extends Controller
         }
 
         // Check if the current state of the trip allows cancellation request
-        if (in_array($trip->state,
-            [TripState::NEW, TripState::CONFIRMED])) {
+        if (in_array($trip->state, [TripState::NEW, TripState::CONFIRMED], true)) {
             // Change the state to CANCELLATION_REQUEST
             $trip->update(['state' => TripState::CANCELLATION_REQUEST]);
 
@@ -816,7 +816,7 @@ class BusinessTripController extends Controller
     {
 //        dd($request);
         $expenses = ['travelling', 'accommodation', 'advance', 'other'];
-        if($trip->type == TripType::FOREIGN) {
+        if ($trip->type === TripType::FOREIGN) {
             $expenses[] = 'allowance';
         }
         $validatedExpensesData = [];
