@@ -88,8 +88,9 @@ class BusinessTripController extends Controller
         $validatedTripData['user_id'] = $user->id;
 
         // Set the type of trip based on the selected country
-        $selectedCountry = $request->input('country')
-        $validatedTripData['type'] = $selectedCountry === 152 ? TripType::DOMESTIC : TripType::FOREIGN;
+        $selectedCountry = $request->input('country');
+        $validatedTripData['type'] = $selectedCountry === Country::getIdOf('Slovensko')
+            ? TripType::DOMESTIC : TripType::FOREIGN;
 
         //Logic to store the trip based on the validated data
         $trip = BusinessTrip::create($validatedTripData);
