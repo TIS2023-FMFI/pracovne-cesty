@@ -205,7 +205,11 @@ class BusinessTripController extends Controller
 
             if (in_array($tripState, [TripState::UPDATED, TripState::COMPLETED])) {
                 $validatedExpensesData = self::validateExpensesData($trip, $request);
-                array_merge($validatedTripData, $request->validate(['conclusion' => 'required|max:5000']));
+                // meals table !!
+                array_merge($validatedTripData, $request->validate(
+                    ['conclusion' => 'required|max:5000',
+                        'expense_estimation' => 'nullable|max:20']));
+
                 // all validations complete
                 self::createOrUpdateExpenses($validatedExpensesData, $trip);
             }
@@ -240,8 +244,10 @@ class BusinessTripController extends Controller
                 case TripState::UPDATED:
                     // Validation rules for expense-related fields
                     $validatedExpensesData = self::validateExpensesData($trip, $request);
-                    //meals table
-                    $validatedTripData = $request->validate(['conclusion' => 'required|max:5000']);
+                    // !! meals table
+                    $validatedTripData = $request->validate(
+                        ['conclusion' => 'required|max:5000',
+                            'expense_estimation' => 'nullable|max:20']);
 
                     self::createOrUpdateExpenses($validatedExpensesData, $trip);
 
@@ -767,29 +773,20 @@ class BusinessTripController extends Controller
      */
     public static function validateExpensesData(BusinessTrip $trip, Request $request): array
     {
-        $expenses = ['travelling', 'accommodation', 'allowance', 'advance', 'other'];
-        $expenseRules = [];
+        $expenses = ['travelling', 'accommodation', 'advance', 'other'];
+        if($trip->type == TripType::FOREIGN) {
+            $expenses[] = 'allowance';
+        }
         $expenseValidatedData = [];
 
         foreach ($expenses as $expenseName) {
-            $eurKey = $expenseName . '_expense_eur';
-            if ($trip->type === TripType::FOREIGN) {
-                $foreignKey = $expenseName . '_expense_foreign';
-                $expenseRules[$foreignKey] = ['nullable', 'string'];
-            }
-            $reimburseKey = $expenseName . '_reimburse';
-
-            // Rules for each expense-related field
-            $expenseRules[$eurKey] = 'nullable|string';
-            $expenseRules[$reimburseKey] = 'nullable|boolean';
-
             $validatedTripData = $request->validate([
-                $eurKey => $expenseRules[$eurKey],
-                $reimburseKey => $expenseRules[$reimburseKey],
+                $expenseName . '_expense_eur' => 'nullable|string',
+                $expenseName . '_reimburse' => 'nullable|boolean',
             ]);
             if ($trip->type === TripType::FOREIGN) {
                 $validatedTripData = array_merge($validatedTripData, $request->validate([
-                    $foreignKey => $expenseRules[$foreignKey]]));
+                    $expenseName . '_expense_foreign' => 'nullable|string']));
             }
             $expenseValidatedData[$expenseName] = $validatedTripData;
         }
