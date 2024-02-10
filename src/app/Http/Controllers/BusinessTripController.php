@@ -10,6 +10,7 @@ use App\Mail\SimpleMail;
 use App\Models\BusinessTrip;
 use App\Models\ConferenceFee;
 use App\Models\Contribution;
+use App\Models\Country;
 use App\Models\Expense;
 use App\Models\Reimbursement;
 use App\Models\Staff;
@@ -19,8 +20,8 @@ use DateInterval;
 use DatePeriod;
 use DateTime;
 use Exception;
-use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -29,6 +30,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 use mikehaertl\pdftk\Pdf;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class BusinessTripController extends Controller
 {
@@ -36,7 +38,8 @@ class BusinessTripController extends Controller
     /**
      * Returning view with details from all trips
      */
-    public static function index() {
+    public static function index()
+    {
         // Check if the user is an admin
         if (Auth::user()->hasRole('admin')) {
             // Retrieve all trips and users for admin
@@ -59,7 +62,8 @@ class BusinessTripController extends Controller
     /**
      * Returning view with the form for adding of the new trip
      */
-    public static function create() {
+    public static function create()
+    {
         return view('business-trips.create');
     }
 
@@ -69,7 +73,8 @@ class BusinessTripController extends Controller
      * Redirecting to the homepage
      * Sending mail with mail component to admin
      */
-    public static function store(Request $request) {
+    public static function store(Request $request): RedirectResponse
+    {
         // Get the authenticated user's ID
         $user = Auth::user();
 
@@ -145,7 +150,8 @@ class BusinessTripController extends Controller
     /**
      * Get the attachment from a business trip.
      */
-    public static function getAttachment(BusinessTrip $trip) {
+    public static function getAttachment(BusinessTrip $trip): StreamedResponse
+    {
         // Check if the trip has an attachment
         if (!$trip->upload_name) {
             abort(404, 'File not found'); // Or other error handling
@@ -167,7 +173,8 @@ class BusinessTripController extends Controller
      * Returning the view with the trip editing form
      * @throws Exception
      */
-    public static function edit(BusinessTrip $trip) {
+    public static function edit(BusinessTrip $trip)
+    {
         $days = self::getTripDurationInDays($trip);
 
         return view('business-trips.edit',  [
@@ -182,7 +189,8 @@ class BusinessTripController extends Controller
      * @throws ValidationException
      * @throws Exception
      */
-    public static function update(Request $request, BusinessTrip $trip) {
+    public static function update(Request $request, BusinessTrip $trip): RedirectResponse
+    {
         if ($trip->state->isFinal()) {
             throw ValidationException::withMessages(['state' => 'Invalid state for updating.']);
         }
@@ -279,7 +287,8 @@ class BusinessTripController extends Controller
      * Adding cancellation reason
      * @throws ValidationException
      */
-    public static function cancel(Request $request, BusinessTrip $trip) {
+    public static function cancel(Request $request, BusinessTrip $trip): RedirectResponse
+    {
         // Check if the trip is in a valid state for cancellation
         if (!in_array($trip->state, [TripState::NEW, TripState::CONFIRMED, TripState::CANCELLATION_REQUEST])) {
             throw ValidationException::withMessages(['state' => 'Invalid state for cancellation.']);
@@ -314,6 +323,8 @@ class BusinessTripController extends Controller
      * @throws ValidationException
      */
     public static function confirm(Request $request, BusinessTrip $trip) {
+    public static function confirm(Request $request, BusinessTrip $trip): RedirectResponse
+    {
         // Check if the trip is in a valid state for confirmation
         if ($trip->state !== TripState::NEW) {
             throw ValidationException::withMessages(['state' => 'Invalid state for confirmation.']);
@@ -335,7 +346,8 @@ class BusinessTripController extends Controller
      * Updating state to closed
      * @throws ValidationException
      */
-    public static function close(BusinessTrip $trip) {
+    public static function close(BusinessTrip $trip): RedirectResponse
+    {
         // Check if the trip is in a valid state for closing
         if ($trip->state !== TripState::COMPLETED) {
             throw ValidationException::withMessages(['state' => 'Invalid state for closing.']);
@@ -352,7 +364,7 @@ class BusinessTripController extends Controller
      * Updating state of the trip to cancellation request
      * @throws ValidationException
      */
-    public static function requestCancellation(Request $request, BusinessTrip $trip): \Illuminate\Http\RedirectResponse
+    public static function requestCancellation(Request $request, BusinessTrip $trip): RedirectResponse
     {
         // Validate the cancellation reason
         $validator = Validator::make($request->all(), [
@@ -390,7 +402,7 @@ class BusinessTripController extends Controller
     /**
      * Adding comment to trip
      */
-    public static function addComment(Request $request, BusinessTrip $trip): \Illuminate\Http\RedirectResponse
+    public static function addComment(Request $request, BusinessTrip $trip): RedirectResponse
     {
         // Validate the incoming request
         $request->validate([
@@ -430,7 +442,7 @@ class BusinessTripController extends Controller
      * @example
      * $response = $object->exportPdf(123, 0);
      */
-    public static function exportPdf(int $tripId, int $documentType): JsonResponse | BinaryFileResponse
+    public static function exportPdf(int $tripId, int $documentType): JsonResponse|BinaryFileResponse
     {
         $trip = BusinessTrip::find($tripId);
         if (!$trip) {
