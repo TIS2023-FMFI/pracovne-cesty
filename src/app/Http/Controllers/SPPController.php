@@ -6,6 +6,8 @@ use App\Models\SppSymbol;
 use App\Enums\SppStatus;
 use Illuminate\Http\Request;
 use \Illuminate\Http\RedirectResponse;
+use App\Http\Requests\SppSymbolRequest;
+
 
 class SPPController extends Controller
 {
@@ -27,14 +29,7 @@ class SPPController extends Controller
      */
     public function store(SppSymbolRequest $request): RedirectResponse
     {
-        $validatedData = $request->validate([
-            'fund' => 'required|string',
-            'spp_symbol' => 'required|string|unique:spp_symbols,spp_symbol',
-            'functional_region' => 'required|string',
-            'account' => 'required|string',
-            'financial_centre' => 'required|string',
-            'grantee' => 'required|string|max:200',
-            ]);
+        $validatedData = $request->validate();
 
         SppSymbol::create($validatedData);
 

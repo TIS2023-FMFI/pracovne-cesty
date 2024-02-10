@@ -4,6 +4,8 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+
 
 class SppSymbolRequest extends FormRequest
 {
@@ -12,7 +14,8 @@ class SppSymbolRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return Auth::check();
+        Log::info('SppSymbolRequest: authorize method called');
+        return true;
     }
 
     /**
@@ -20,6 +23,7 @@ class SppSymbolRequest extends FormRequest
      */
     public function messages(): array
     {
+        Log::info('SppSymbolRequest: messages method called');
         return [
             'required' => 'Pole :attribute je povinné.',
             'string' => 'Pole :attribute musí byť reťazec.',
@@ -33,6 +37,7 @@ class SppSymbolRequest extends FormRequest
      */
     public function attributes(): array
     {
+        Log::info('SppSymbolRequest: attributes method called');
         return [
             'fund' => 'fond',
             'spp_symbol' => 'symbol ŠPP',
@@ -41,6 +46,23 @@ class SppSymbolRequest extends FormRequest
             'financial_centre' => 'finančné centrum',
             'grantee' => 'príjemca',
             'spp' => 'ŠPP prvok',
+        ];
+    }
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array
+     */
+    public function rules(): array
+    {
+        Log::info('SppSymbolRequest: rules method called');
+        return [
+            'fund' => 'required|string',
+            'spp_symbol' => 'required|string|unique:spp_symbols,spp_symbol',
+            'functional_region' => 'required|string',
+            'account' => 'required|string',
+            'financial_centre' => 'required|string',
+            'grantee' => 'required|string|max:200',
         ];
     }
 }
