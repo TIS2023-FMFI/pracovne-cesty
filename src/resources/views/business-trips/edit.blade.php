@@ -296,7 +296,7 @@
                         $expenses = array_merge($expenses, ['allowance' => 'Záloha za cestu']);
                     }
                     $mealsReimbursement = $trip->meals_reimbursement ?? true;
-                    $doesNotWantMeals = !$mealsReimbursement;
+                    $doesNotWantMeals = old('no_meals_reimbursed', !$mealsReimbursement);
                 @endphp
 
                 <x-content-section
@@ -326,7 +326,7 @@
                                     $expense = $trip->{$expenseName . 'Expense'};
                                     $amountEur = $expense->amount_eur ?? '';
                                     $amountForeign = $expense->amount_foreign ?? '';
-                                    $reimburse = $expense->reimburse ?? false;
+                                    $reimburse = $expense ? !$expense->reimburse : false;
                                 @endphp
 
                                 <tr>
@@ -342,7 +342,7 @@
                                     @endif
 
                                     <td>
-                                        <x-checkbox name="{{ $expenseName }}_expense_reimburse" :checked="$reimburse" label="Nenárokujem si"></x-checkbox>
+                                        <x-checkbox name="{{ $expenseName }}_expense_not_reimburse" :checked="$reimburse" label="Nenárokujem si"></x-checkbox>
                                     </td>
                                 </tr>
                             @endforeach
