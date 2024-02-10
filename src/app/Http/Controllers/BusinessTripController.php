@@ -207,8 +207,7 @@ class BusinessTripController extends Controller
                 $validatedExpensesData = self::validateExpensesData($trip, $request);
                 // meals table !!
                 array_merge($validatedTripData, $request->validate(
-                    ['conclusion' => 'required|max:5000',
-                        'expense_estimation' => 'nullable|max:20']));
+                    ['conclusion' => 'required|max:5000']));
 
                 // all validations complete
                 self::createOrUpdateExpenses($validatedExpensesData, $trip);
@@ -246,8 +245,7 @@ class BusinessTripController extends Controller
                     $validatedExpensesData = self::validateExpensesData($trip, $request);
                     // !! meals table
                     $validatedTripData = $request->validate(
-                        ['conclusion' => 'required|max:5000',
-                            'expense_estimation' => 'nullable|max:20']);
+                        ['conclusion' => 'required|max:5000']);
 
                     self::createOrUpdateExpenses($validatedExpensesData, $trip);
 
@@ -309,7 +307,7 @@ class BusinessTripController extends Controller
         // Send the email
         Mail::to($recipient)->send($email);
 
-        return redirect()->route('business-trips.edit', $trip);
+        return redirect()->route('trip.edit', $trip);
 
     }
 
@@ -348,7 +346,7 @@ class BusinessTripController extends Controller
         //Close the trip
         $trip->update(['state' => TripState::CLOSED]);
 
-        return redirect()->route('business-trips.edit', $trip);
+        return redirect()->route('trip.edit', $trip);
 
     }
 
@@ -416,7 +414,7 @@ class BusinessTripController extends Controller
         Mail::to($recipient)->send($email);
 
         // Redirect or respond with a success message
-        return redirect()->route('business-trips.edit', $trip->id)->with('message', 'Comment added successfully.');
+        return redirect()->route('trip.edit', $trip->id)->with('message', 'Comment added successfully.');
     }
 
     /**
@@ -662,6 +660,7 @@ class BusinessTripController extends Controller
             'first_name' => 'required|string|max:50',
             'last_name' => 'required|string|max:50',
             'academic_degrees' => 'nullable|string|max:30',
+            'personal_id' => 'required|string|max:10',
             'department' => 'required|string|max:10',
             'address' => $rule . '|string|max:200',
         ]);
@@ -773,24 +772,34 @@ class BusinessTripController extends Controller
      */
     public static function validateExpensesData(BusinessTrip $trip, Request $request): array
     {
+//        dd($request);
         $expenses = ['travelling', 'accommodation', 'advance', 'other'];
         if($trip->type == TripType::FOREIGN) {
             $expenses[] = 'allowance';
         }
-        $expenseValidatedData = [];
+        $validatedExpensesData = [];
 
         foreach ($expenses as $expenseName) {
-            $validatedTripData = $request->validate([
-                $expenseName . '_expense_eur' => 'nullable|string',
-                $expenseName . '_reimburse' => 'nullable|boolean',
+            $validatedExpenseData = $request->validate([
+                $expenseName . '_expense_eur' => 'nullable|string|max:20',
+                $expenseName . '_expense_not_reimburse' => 'nullable'
             ]);
             if ($trip->type === TripType::FOREIGN) {
-                $validatedTripData = array_merge($validatedTripData, $request->validate([
-                    $expenseName . '_expense_foreign' => 'nullable|string']));
+                $validatedExpenseData = array_merge($validatedExpenseData, $request->validate([
+                    $expenseName . '_expense_foreign' => 'nullable|string:max:20']));
             }
-            $expenseValidatedData[$expenseName] = $validatedTripData;
+
+//            $validatedExpenseData[$expenseName . '_expense_reimburse'] = $request->has($expenseName . '_expense_reimburse');
+            $validatedExpensesData[$expenseName] = $validatedExpenseData;
         }
-        return $expenseValidatedData;
+
+        $validatedExpensesData = array_merge($validatedExpensesData, $request->validate([
+            'expense_estimation' => 'nullable|string|max:20'
+        ]));
+
+        $validatedExpensesData['no_meals_reimbursed'] = $request->has('no_meals_reimbursed');
+//        dd($validatedExpensesData);
+        return $validatedExpensesData;
     }
 
     /**
@@ -800,20 +809,34 @@ class BusinessTripController extends Controller
      */
     public static function createOrUpdateExpenses(array $validatedExpensesData, BusinessTrip $trip): void
     {
+        $trip->update([
+            'expense_estimation' => $validatedExpensesData['expense_estimation'],
+            'meals_reimbursement' => !$validatedExpensesData['no_meals_reimbursed']
+            ]);
+        unset($validatedExpensesData['expense_estimation']);
+        unset($validatedExpensesData['no_meals_reimbursed']);
+
+
         foreach ($validatedExpensesData as $name => $expenseData) {
             $data = [
                 'amount_eur' => $expenseData[$name . '_expense_eur'],
                 'amount_foreign' => $trip->type === TripType::FOREIGN ? $expenseData[$name . '_expense_foreign'] : null,
-                'reimburse' => !array_key_exists($name . '_expense_reimburse', $expenseData),
+                'reimburse' => !array_key_exists($name . '_expense_not_reimburse', $expenseData),
             ];
             $expense = $trip->{$name . 'Expense'};
             if ($expense == null) {
+//                dd($validatedExpensesData, $name, $data);
                 $expense = Expense::create($data);
+
                 $trip->update([$name . '_expense_id' => $expense->id]);
+                $trip->save();
+//                dd($name . '_expense_id', $trip, $expense);
             } else {
                 $expense->update($data);
             }
         }
+
+
     }
 
     /**
