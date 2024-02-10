@@ -77,12 +77,8 @@ class BusinessTripController extends Controller
         $validatedUserData = self::validateUserData($request);
         $validatedTripData = self::validateUpdatableTripData($request) + self::validateFixedTripData($request);
 
-        if ($user->user_type->isExternal()) {
-            $validatedTripContributionsData = self::validateTripContributionsData($request);
-        }
-
-        list($isReimbursement, $validatedReimbursementData) = self::validateReimbursementData($request);
-        list($isConferenceFee, $validatedConferenceFeeData) = self::validateConferenceFeeData($request);
+        [$isReimbursement, $validatedReimbursementData] = self::validateReimbursementData($request);
+        [$isConferenceFee, $validatedConferenceFeeData] = self::validateConferenceFeeData($request);
 
         // Add the authenticated user's ID to the validated data
         $validatedTripData['user_id'] = $user->id;
@@ -103,6 +99,7 @@ class BusinessTripController extends Controller
         }
 
         if ($user->user_type->isExternal()) {
+            $validatedTripContributionsData = self::validateTripContributionsData($request);
             self::createOrUpdateTripContributions($validatedTripContributionsData, $trip);
         }
 
