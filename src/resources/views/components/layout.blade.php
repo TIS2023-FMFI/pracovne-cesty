@@ -7,15 +7,25 @@
     <meta charset="UTF-8"/>
     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script src="https://kit.fontawesome.com/d99df24710.js" crossorigin="anonymous"></script>
+
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css"
           integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <link rel="stylesheet" href="{{asset('css/style.css')}}">
+
     <title>Evidencia pracovných ciest</title>
 </head>
 
-<body>
+<body {{ $attributes }}>
+<div
+    class="overlay"
+    x-show="usersOpen"
+    x-cloak></div>
+
 <header class="header">
     <div class="header-top-panel">
         <div class="container d-flex justify-content-end py-2">
@@ -39,6 +49,14 @@
             @endauth
         </div>
     </div>
+
+    @guest
+        <div class="container d-flex justify-content-end py-2">
+            <x-button color="danger" modal="forgot-password">Zabudnuté heslo</x-button>
+            <x-modals.forgot-password/>
+        </div>
+    @endguest
+
     <div class="container py-3">
         <a href="\" class="text-decoration-none">
             <h1 class="text-white text-uppercase header-h1 d-inline-flex">Pracovné cesty</h1>
