@@ -8,7 +8,7 @@
     use App\Enums\UserType;
 
     $countries = Country::all()->pluck('name', 'id');
-    $transports = Transport::all()->pluck('name', 'id');
+    $transports = Transport::where('user_visible', 1)->pluck('name', 'id');
     $purposes = TripPurpose::all()->pluck('name', 'id');
     $contributions = Contribution::all()->pluck('name', 'id');
     $spp_symbols = SppSymbol::where('status', SppStatus::ACTIVE)->pluck('spp_symbol', 'id');
@@ -39,20 +39,24 @@
 
                 <div class="form-row">
                     <div class="col">
-                        <x-simple-input name="personal_id" label="Osobné číslo" :value="$user->personal_id ?? ''"/>
+                        <x-simple-input name="personal_id" label="Osobné číslo" :readonly="true" :value="$user->personal_id ?? ''"/>
                     </div>
                     <div class="col">
                         <x-simple-input name="department" label="Pracovisko" :value="$user->department ?? ''"/>
                     </div>
                 </div>
+            </x-content-section>
 
+            <x-content-section title="Neviem netuším">
                 <div class="form-row">
-                    <div class="col-6">
+                    <div class="col">
                         <x-simple-input name="iban" label="Číslo účtu"/>
+                    </div>
+                    <div class="col">
+                        <x-dropdown-input name="transport_id" label="Dopravný prostriedok" :values="$transports"/>
                     </div>
                 </div>
             </x-content-section>
-
 
             <div class="form-row">
                 <div class="col">
@@ -69,39 +73,36 @@
                 </div>
             </div>
 
-                <x-content-section title="Cieľ cesty">
-                    <div class="form-row">
-                        <div class="col">
-                            <x-simple-input name="place" label="Miesto"/>
-                        </div>
-                        <div class="col">
-                            <x-dropdown-input name="country_id" label="Štát" :values="$countries"/>
-                        </div>
-
+            <x-content-section title="Cieľ cesty">
+                <div class="form-row">
+                    <div class="col">
+                        <x-simple-input name="place" label="Miesto"/>
                     </div>
-                    <div class="form-row">
-                        <div class="col">
-                            <x-dropdown-input name="trip_purpose_id" label="Účel cesty" :values="$purposes"/>
-                        </div>
-                        <div class="col">
-                            <x-textarea name="purpose_details" label="Špecifikácia účelu"></x-textarea>
-                        </div>
+                    <div class="col">
+                        <x-dropdown-input name="country_id" label="Štát" :values="$countries"/>
                     </div>
 
-                    <div class="form-row">
-                        <div class="col">
-                            <x-dropdown-input name="transport_id" label="Dopravný prostriedok" :values="$transports"/>
-                        </div>
-                        <div class="col">
-                            <x-simple-input name="event_url" label="Link na udalosť"/>
-                        </div>
+                </div>
+                <div class="form-row">
+                    <div class="col">
+                        <x-dropdown-input name="trip_purpose_id" label="Účel cesty" :values="$purposes"/>
                     </div>
-                    <div class="form-row">
-                        <div class="col-sm-6">
-                            <x-simple-input name="upload_name" type="file" label="Vložte pozvánku, plagát alebo iný súbor..."/>
-                        </div>
+                    <div class="col">
+                        <x-textarea name="purpose_details" label="Špecifikácia účelu"></x-textarea>
                     </div>
-                </x-content-section>
+                </div>
+
+                <div class="form-row">
+                    <div class="col">
+                        <x-simple-input name="event_url" label="Link na udalosť"/>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="col-sm-6">
+                        <x-simple-input name="upload_name" type="file" label="Vložte pozvánku, plagát alebo iný súbor..."/>
+                    </div>
+                </div>
+            </x-content-section>
 
             @if($userType->isExternal())
                 <x-content-section title="Prínos pre fakultu">
@@ -123,7 +124,10 @@
                 </x-content-section>
             @endif
 
-            <x-content-section title="Financovanie" x-data="{reimbursementShow: false}">
+            @php
+                $reimbursementShow = old('reimbursement');
+            @endphp
+            <x-content-section title="Financovanie" x-data="{reimbursementShow: {{$reimbursementShow ? 'true' : 'false'}} }">
                 <x-slot:description>
                     V prípade refundácie, prosím, vyberte ako ŠPP prvok 2 ten prvok, z ktorého budú peniaze neskôr vrátené do ŠPP prvku 1. Ako dátum vrátenia peňazí uveďte iba orientačný, predpokladaný dátum.
                 </x-slot:description>
@@ -148,7 +152,10 @@
 
             </x-content-section>
 
-            <x-content-section title="Úhrada konferenčného poplatku" x-data="{conferenceFeeShow: false}">
+            @php
+                $conferenceFeeShow = old('conference_fee');
+            @endphp
+            <x-content-section title="Úhrada konferenčného poplatku" x-data="{conferenceFeeShow: {{$conferenceFeeShow ? 'true' : 'false'}} }">
                 <x-checkbox name="conference_fee" label="Mám záujem o úhradu konferenčného poplatku pred cestou priamo z pracoviska" control="conferenceFeeShow"/>
                 <x-hideable-section control="conferenceFeeShow">
                     <div class="form-row">
