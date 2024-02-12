@@ -82,12 +82,8 @@ class BusinessTripController extends Controller
      *
      * @throws Exception
      */
-<<<<<<< HEAD
-    public function store(BusinessTripRequest $request) {
-=======
     public static function store(Request $request): RedirectResponse
     {
->>>>>>> c398e490f8d8f7b63220041f071f5118dd85a67d
         // Get the authenticated user's ID
         $user = Auth::user();
 
@@ -209,15 +205,11 @@ class BusinessTripController extends Controller
      * @throws ValidationException
      * @throws Exception
      */
-<<<<<<< HEAD
-    public function update(BusinessTripRequest $request, BusinessTrip $trip) {
-=======
     public static function update(Request $request, BusinessTrip $trip): RedirectResponse
     {
         if ($trip->state->isFinal()) {
             throw ValidationException::withMessages(['state' => 'Invalid state for updating.']);
         }
->>>>>>> c398e490f8d8f7b63220041f071f5118dd85a67d
         // Check if the authenticated user is an admin
         $user = Auth::user();
 
@@ -351,7 +343,6 @@ class BusinessTripController extends Controller
      * Updating state of the trip to confirmed
      * @throws ValidationException
      */
-    public static function confirm(Request $request, BusinessTrip $trip) {
     public static function confirm(Request $request, BusinessTrip $trip): RedirectResponse
     {
         // Check if the trip is in a valid state for confirmation

@@ -27,9 +27,32 @@ class SPPController extends Controller
      * Validating data
      * Saving new spp symbol in DB
      */
-    public function store(SppSymbolRequest $request): RedirectResponse
+    public function store(Request $request): RedirectResponse
     {
-        $validatedData = $request->validate();
+        $customMessages = [
+            'required' => 'Pole :attribute je povinné.',
+            'string' => 'Pole :attribute musí byť reťazec.',
+            'max' => 'Pole :attribute môže mať maximálne :max znakov.',
+            'unique' => 'Pole :attribute už existuje.',
+            'exists' => 'Vybrané pole :attribute neexistuje.',
+        ];
+        $customAttributes = [
+            'fund' => 'fond',
+            'spp_symbol' => 'symbol ŠPP',
+            'functional_region' => 'funkčná oblasť',
+            'account' => 'účet',
+            'financial_centre' => 'finančné centrum',
+            'grantee' => 'príjemca',
+            'spp' => 'ŠPP prvok',
+        ];
+        $validatedData = $request->validate([
+            'fund' => 'required|string',
+            'spp_symbol' => 'required|string|unique:spp_symbols,spp_symbol',
+            'functional_region' => 'required|string',
+            'account' => 'required|string',
+            'financial_centre' => 'required|string',
+            'grantee' => 'required|string|max:200',
+            ],$customMessages, $customAttributes);
 
         SppSymbol::create($validatedData);
 
