@@ -5,7 +5,7 @@
         <b>{{ $title }}</b>
     @endif
 
-    <div class="mt-3 px-4">
+    <div class="mt-3 mx-4">
         @if($description != '')
             <div class="mb-4">{{ $description }}</div>
         @endif

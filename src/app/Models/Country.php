@@ -19,4 +19,9 @@ class Country extends Model
     {
         return $this->hasMany(BusinessTrip::class, 'country_id');
     }
+
+    public static function getIdOf(string $country): int
+    {
+        return self::where('name', $country)->first()->id;
+    }
 }

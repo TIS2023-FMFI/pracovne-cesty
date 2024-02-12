@@ -3,7 +3,7 @@
 @endphp
 
 <x-layout>
-    <div class="mb-4">
+    <div class="mb-3">
         <x-link-button href="/trips/create">Pridať pracovnú cestu</x-link-button>
 
         @if($isAdmin)
@@ -26,7 +26,7 @@
                     <x-overview-item content="Nevyúčtované" ref="/?filter=unaccounted"/>
 
                     @foreach($users as $user)
-                        <x-overview-item :content="$user->first_name.' '.$user->last_name" :ref="'/?user='.$user->id"/>
+                        <x-overview-item :content="$user->first_name.' '.$user->last_name" :ref="'?user='.$user->id"/>
                     @endforeach
                 </x-content-box>
             </div>
