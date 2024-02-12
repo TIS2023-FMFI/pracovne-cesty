@@ -145,20 +145,37 @@ class UserController extends Controller
         $inputEmails = explode(';', $request->input('email'));
         $cleanedEmails = array_map('trim', $inputEmails);
 
-        $existingEmails = array_merge(
-            User::whereIn('email', $cleanedEmails)->pluck('email')->toArray(),
-            InvitationLink::whereIn('email', $cleanedEmails)->pluck('email')->toArray()
-        );
-
+        $validEmails = [];
         $rejectedEmails = [];
-        $invitedEmails = [];
 
         foreach ($cleanedEmails as $email) {
+            $validator = Validator::make(
+                ['email' => $email],
+                ['email' => 'required|string|email|max:127']
+            );
+
+            if ($validator->fails()) {
+                $rejectedEmails[] = $email;
+                continue;
+            }
+
+            $validEmails[] = $email;
+        }
+
+        $existingEmails = array_merge(
+            User::whereIn('email', $validEmails)->pluck('email')->toArray(),
+            InvitationLink::whereIn('email', $validEmails)->pluck('email')->toArray()
+        );
+
+        $invitedEmails = [];
+
+        foreach ($validEmails as $email) {
             if (in_array($email, $existingEmails, true)) {
                 $rejectedEmails[] = $email;
                 continue;
             }
-            $token = bin2hex(random_bytes(20));
+
+            $token = bin2hex(random_bytes(10));
             $expiresAt = Carbon::now()->addDays(7);
 
             InvitationLink::create([
@@ -183,7 +200,8 @@ class UserController extends Controller
 
         if (!empty($rejectedEmails)) {
             $rejectedEmailsList = implode(', ', $rejectedEmails);
-            $message .= "\nPozvánka nebola odoslaná na tieto e-maily, pretože už sú v systéme: $rejectedEmailsList";
+            $message .= "\nPozvánka nebola odoslaná na tieto e-maily,
+                         pretože už sú v systéme alebo nemajú správny formát: $rejectedEmailsList";
         }
 
         return back()->with('message', $message);

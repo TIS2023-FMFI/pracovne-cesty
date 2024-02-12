@@ -10,6 +10,7 @@ use App\Mail\SimpleMail;
 use App\Models\BusinessTrip;
 use App\Models\ConferenceFee;
 use App\Models\Contribution;
+use App\Models\Country;
 use App\Models\Expense;
 use App\Models\Reimbursement;
 use App\Models\Staff;
@@ -20,6 +21,7 @@ use DatePeriod;
 use DateTime;
 use Exception;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -28,22 +30,31 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 use mikehaertl\pdftk\Pdf;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class BusinessTripController extends Controller
 {
 
     /**
      * Returning view with details from all trips
+     * @throws Exception
      */
-    public static function index() {
+    public static function index()
+    {
+        $user = Auth::user();
+
+        if (!$user) {
+            throw new Exception();
+        }
+
         // Check if the user is an admin
-        if (Auth::user()->hasRole('admin')) {
+        if ($user->hasRole('admin')) {
             // Retrieve all trips and users for admin
             $trips = BusinessTrip::paginate(15);
             $users = User::all();
         } else {
             // Retrieve only user's trips for regular users
-            $trips = Auth::user()->businessTrips()->paginate(15);
+            $trips = $user->businessTrips()->paginate(15);
             // No need for a list of users
             $users = null;
         }
@@ -58,7 +69,8 @@ class BusinessTripController extends Controller
     /**
      * Returning view with the form for adding of the new trip
      */
-    public function create() {
+    public static function create()
+    {
         return view('business-trips.create');
     }
 
@@ -67,121 +79,50 @@ class BusinessTripController extends Controller
      * Also managing uploaded files from the form
      * Redirecting to the homepage
      * Sending mail with mail component to admin
+     *
+     * @throws Exception
      */
+<<<<<<< HEAD
     public function store(BusinessTripRequest $request) {
+=======
+    public static function store(Request $request): RedirectResponse
+    {
+>>>>>>> c398e490f8d8f7b63220041f071f5118dd85a67d
         // Get the authenticated user's ID
         $user = Auth::user();
 
-        $rule = 'nullable';
-        if ($user->user_type->isExternal()){
-            $rule = 'required';
+        if (!$user) {
+            throw new Exception();
         }
 
-        // Validate user data
-        $validatedUserData = $request->validate([
-            'first_name' => 'required|string|max:50',
-            'last_name' => 'required|string|max:50',
-            'academic_degrees' => 'nullable|string|max:30',
-            'department' => 'required|string|max:10',
-            'address' => $rule . '|string|max:200',
-        ]);
+        // Validate all necessary data
+        $validatedUserData = self::validateUserData($request);
+        $validatedTripData = self::validateUpdatableTripData($request) + self::validateFixedTripData($request);
 
-        //Validate trip data
-        $validatedData = $request->validate([
-            'country_id' => 'required|exists:countries,id',
-            'transport_id' => 'required|exists:transports,id',
-            'spp_symbol_id' => 'required|exists:spp_symbols,id',
-            'place' => 'required|string|max:200',
-            'place_start' => 'required|string|max:200',
-            'place_end' => 'required|string|max:200',
-            'datetime_start' => 'required|date',
-            'datetime_end' => 'required|date|after:datetime_start',
-            'trip_purpose_id' => 'required|integer|min:0',
-            'purpose_details' => 'nullable|string|max:50',
-            'iban' => $rule . '|string|max:34',
-        ]);
+        [$isReimbursement, $validatedReimbursementData] = self::validateReimbursementData($request);
+        [$isConferenceFee, $validatedConferenceFeeData] = self::validateConferenceFeeData($request);
 
         // Add the authenticated user's ID to the validated data
-        $validatedData['user_id'] = $user->id;
+        $validatedTripData['user_id'] = $user->id;
 
         // Set the type of trip based on the selected country
         $selectedCountry = $request->input('country');
-        $validatedData['type'] = $selectedCountry === 'Slovensko' ? TripType::DOMESTIC : TripType::FOREIGN;
-
-        // Contributions validation
-        $contributions = Contribution::all()->pluck('name', 'id');
-        $checkedContributions = [];
-
-        // Check for checked contributions checkboxes
-        $isContribution = 0;
-        foreach($contributions as $id => $name) {
-            if ($request->has('contribution_' . $id)) {
-                $validatedContributionData = $request->validate([
-                    'contribution_' . $id . '_detail' => 'nullable|string|max:200',
-                ]);
-                $updContributionData = self::array_key_replace(
-                    'contribution_' . $id . '_detail',
-                    'detail',
-                    $validatedContributionData
-                );
-                $updContributionData['contribution_id'] = $id;
-                array_push($checkedContributions, $updContributionData);
-                $isContribution = 1;
-            }
-        }
-
-        $isReimbursement = 0;
-        if ($request->has('reimbursement')){
-            Log::info('is checked');
-            $validatedReimbursements = $request->validate([
-               'reimbursement_spp_symbol_id' => 'required|exists:spp_symbols,id',
-               'reimbursement_date' => 'required|date',
-            ]);
-
-            $updReimbursement = self::array_key_replace(
-                'reimbursement_spp_symbol_id',
-                'spp_symbol_id',
-                $validatedReimbursements
-            );
-            $isReimbursement = 1;
-        }
-
-        $isConferenceFee = 0;
-        if ($request->has('conference_fee')){
-            $validatedConferenceFee = $request->validate([
-                'organiser_name' => 'required|string|max:100',
-                'ico' => 'nullable|string|max:8',
-                'organiser_address' => 'required|string|max:200',
-                'organiser_iban' => 'required|string|max:34',
-                'amount' => 'required|string|max:20',
-            ]);
-
-            $updConferenceFee = self::array_key_replace(
-                'organiser_iban',
-                'iban',
-                $validatedConferenceFee
-            );
-            $isConferenceFee = 1;
-        }
+        $validatedTripData['type'] = $selectedCountry === Country::getIdOf('Slovensko')
+            ? TripType::DOMESTIC : TripType::FOREIGN;
 
         //Logic to store the trip based on the validated data
-        $trip = BusinessTrip::create($validatedData);
+        $trip = BusinessTrip::create($validatedTripData);
         if ($isReimbursement){
-            $reimbursement = Reimbursement::create($updReimbursement);
-            $trip->update(['reimbursement_id' => $reimbursement->id]);
+            self::createOrUpdateReimbursement($validatedReimbursementData, $trip);
         }
 
         if ($isConferenceFee) {
-            $ConferenceFee = ConferenceFee::create($updConferenceFee);
-            $trip->update(['conference_fee_id' => $ConferenceFee->id]);
+            self::createOrUpdateConferenceFee($validatedConferenceFeeData, $trip);
         }
 
-        if ($isContribution) {
-            foreach ($checkedContributions as $contribution) {
-                $contribution['business_trip_id'] = $trip->id;
-                TripContribution::create($contribution);
-            }
-
+        if ($user->user_type->isExternal()) {
+            $validatedTripContributionsData = self::validateTripContributionsData($request);
+            self::createOrUpdateTripContributions($validatedTripContributionsData, $trip);
         }
 
         //Handle file uploads
@@ -209,15 +150,28 @@ class BusinessTripController extends Controller
         // Send the email
         Mail::to($recipient)->send($email);
 
-        //Redirecting to the homepage
-        return redirect()->route('homepage');
+        // Check if it was too late to add trip and inform user
+        $warningMessage = null;
+        $currentDate = new DateTime();
+        $startDate = new DateTime($trip->datetime_start);
+        $days = $trip->type == TripType::DOMESTIC ? '4' : '11';
+        $newDate = $currentDate->modify("+ ".$days." weekday");
+        $days = $trip->type === TripType::DOMESTIC ? '4' : '11';
+        if ($startDate < $newDate) {
+            $warningMessage = 'Vaša pracovná cesta bude pridaná, ale nie je to v súlade s pravidlami.
+                               Cestu vždy pridávajte minimálne 4 pracovné dni pred jej začiatkom v prípade,
+                               že ide o tuzemskú cestu, a 11 pracovných dní pred začiatkom v prípade zahraničnej cesty.';
+        }
 
+        //Redirecting to the homepage
+        return redirect()->route('homepage')->with('warning', $warningMessage);
     }
 
     /**
      * Get the attachment from a business trip.
      */
-    public function getAttachment(BusinessTrip $trip) {
+    public static function getAttachment(BusinessTrip $trip): StreamedResponse
+    {
         // Check if the trip has an attachment
         if (!$trip->upload_name) {
             abort(404, 'File not found'); // Or other error handling
@@ -237,22 +191,16 @@ class BusinessTripController extends Controller
 
     /**
      * Returning the view with the trip editing form
-     * @throws \Exception
+     * @throws Exception
      */
-    public function edit(BusinessTrip $trip) {
-        Log::info($trip);
-        $startDate = new DateTime($trip->datetime_start);
-        $endDate = new DateTime($trip->datetime_end);
-        $interval = new DateInterval('P1D');
-        $dateRange = new DatePeriod($startDate, $interval, $endDate);
-
-        $days = iterator_count($dateRange);
+    public static function edit(BusinessTrip $trip)
+    {
+        $days = self::getTripDurationInDays($trip);
 
         return view('business-trips.edit',  [
             'trip' => $trip,
             'days' => $days,
         ]);
-
     }
 
     /**
@@ -261,115 +209,80 @@ class BusinessTripController extends Controller
      * @throws ValidationException
      * @throws Exception
      */
+<<<<<<< HEAD
     public function update(BusinessTripRequest $request, BusinessTrip $trip) {
+=======
+    public static function update(Request $request, BusinessTrip $trip): RedirectResponse
+    {
+        if ($trip->state->isFinal()) {
+            throw ValidationException::withMessages(['state' => 'Invalid state for updating.']);
+        }
+>>>>>>> c398e490f8d8f7b63220041f071f5118dd85a67d
         // Check if the authenticated user is an admin
-        $isAdmin = Auth::user()->hasRole('admin');
+        $user = Auth::user();
+
+        if (!$user) {
+            throw new Exception();
+        }
+
+        $isAdmin = $user->hasRole('admin');
+
+        $tripState = $trip->state;
 
         // Admin updating the trip
         if ($isAdmin) {
-            // Validate and update based on trip state
-            switch ($trip->state) {
-                case TripState::NEW:
-                    $validatedData = $request->validate([
-                        // Add NEW validation rules
-                    ]);
-                    break;
+            $validatedUserData = self::validateUserData($request);
 
-                case TripState::CONFIRMED:
-                    $validatedData = $request->validate([
-                        // Add CONFIRMED validation rules
-                    ]);
-                    break;
+            $validatedTripData = self::validateUpdatableTripData($request) + self::validateFixedTripData($request);
+            $validatedTripContributionsData = self::validateTripContributionsData($request);
+            list($isReimbursement, $validatedReimbursementData) = self::validateReimbursementData($request);
+            list($isConferenceFee, $validatedConferenceFeeData) = self::validateConferenceFeeData($request);
 
-                case TripState::UPDATED:
-                    $validatedData = $request->validate([
-                        // Add UPDATED validation rules
-                    ]);
-                    break;
+            if (in_array($tripState, [TripState::UPDATED, TripState::COMPLETED], true)) {
+                $validatedExpensesData = self::validateExpensesData($trip, $request);
+                // meals table !!
+                array_merge($validatedTripData, $request->validate(
+                    ['conclusion' => 'required|max:5000']));
 
-                case TripState::COMPLETED:
-                    $validatedData = $request->validate([
-                        // Add COMPLETED validation rules
-                    ]);
-                    break;
-
-                default:
-                    throw ValidationException::withMessages(['state' => 'Invalid state for updating.']);
+                // all validations complete
+                self::createOrUpdateExpenses($validatedExpensesData, $trip);
             }
 
+            if ($isReimbursement) {
+                self::createOrUpdateReimbursement($validatedReimbursementData, $trip);
+            }
+
+            if ($isConferenceFee) {
+                self::createOrUpdateConferenceFee($validatedConferenceFeeData, $trip);
+            }
+
+            self::createOrUpdateTripContributions($validatedTripContributionsData, $trip);
+
+            $trip->user->update($validatedUserData);
+
             // Update the trip with the provided data
-            $trip->update($validatedData);
+            $trip->update($validatedTripData);
 
         } else { // Non-admin user updating the trip
 
             // Validate and update based on trip state
             switch ($trip->state) {
                 case TripState::CONFIRMED:
-                    $validatedData = $request->validate([
-                        'datetime_start' => 'required|date',
-                        'datetime_end' => 'required|date|after:datetime_start',
-                        'place_start' => 'nullable|string|max:200',
-                        'place_end' => 'nullable|string|max:200',
-                    ]);
-
-                    // Border crossing validation rules for foreign trips
-                    if ($trip->type === TripType::FOREIGN) {
-                        $validatedData['datetime_border_crossing_start'] = 'nullable|date';
-                        $validatedData['datetime_border_crossing_end'] = 'nullable|date';
-                    }
-
-                    // Update the trip with the provided data
-                    $trip->update($validatedData);
+                    $validatedTripData = self::validateUpdatableTripData($request);
 
                     // Change the state to UPDATED
                     $trip->update(['state' => TripState::UPDATED]);
                     break;
 
-                // Updating an UPDATED state trip
+                // Adding report to an UPDATED state trip
                 case TripState::UPDATED:
                     // Validation rules for expense-related fields
-                    $expenses = ['travelling', 'accommodation', 'allowance', 'advance', 'other'];
-                    $expenseRules = [];
-                    $expenseValidatedData = [];
+                    $validatedExpensesData = self::validateExpensesData($trip, $request);
+                    // !! meals table
+                    $validatedTripData = $request->validate(
+                        ['conclusion' => 'required|max:5000']);
 
-                    foreach ($expenses as $expenseName) {
-                        $eurKey = $expenseName . '_expense_eur';
-                        if ($trip->type === TripType::FOREIGN) {
-                            $foreignKey = $expenseName . '_expense_foreign';
-                            $expenseRules[$foreignKey] = ['nullable', 'string'];
-                        }
-                        $reimburseKey = $expenseName . '_reimburse';
-
-                        // Rules for each expense-related field
-                        $expenseRules[$eurKey] = 'nullable|string';
-                        $expenseRules[$reimburseKey] = 'nullable|boolean';
-
-                        $validatedData = $request->validate([
-                            $eurKey => $expenseRules[$eurKey],
-                            $reimburseKey => $expenseRules[$reimburseKey],
-                        ]);
-                        if ($trip->type === TripType::FOREIGN) {
-                            $validatedData = array_merge($validatedData, $request->validate([
-                                $foreignKey => $expenseRules[$foreignKey]]));
-                        }
-                        $expenseValidatedData[$expenseName] = $validatedData;
-                    }
-
-                    foreach ($expenseValidatedData as $name => $expenseData){
-                         $data = [
-                           'amount_eur' => $expenseData[$name.'_expense_eur'],
-                           'amount_foreign' => $trip->type === TripType::FOREIGN ? $expenseData[$name.'_expense_foreign'] : null,
-                           'reimburse' => !array_key_exists($name . '_expense_reimburse', $expenseData),
-                         ];
-                         $expense = $trip->{$name . 'Expense'};
-                         if ($expense == null){
-                             Expense::create($data);
-                             $trip->update([$name.'_expense_id' => $expense->id]);
-                         }
-                         else {
-                             $expense->update($data);
-                         }
-                    }
+                    self::createOrUpdateExpenses($validatedExpensesData, $trip);
 
                     // Change the state to COMPLETED
                     $trip->update(['state' => TripState::COMPLETED]);
@@ -379,6 +292,10 @@ class BusinessTripController extends Controller
                 default:
                     throw ValidationException::withMessages(['state' => 'Invalid state for updating.']);
             }
+
+            // Update the trip with the provided data
+            $trip->update($validatedTripData);
+
             //Sending mails
             $message = '';
             $recipient = 'admin@example.com';
@@ -391,7 +308,7 @@ class BusinessTripController extends Controller
             Mail::to($recipient)->send($email);
         }
 
-        return redirect()->route('trips.edit', $trip);
+        return redirect()->route('trip.edit', ['trip' => $trip]);
     }
 
     /**
@@ -399,9 +316,10 @@ class BusinessTripController extends Controller
      * Adding cancellation reason
      * @throws ValidationException
      */
-    public function cancel(Request $request, BusinessTrip $trip) {
+    public static function cancel(Request $request, BusinessTrip $trip): RedirectResponse
+    {
         // Check if the trip is in a valid state for cancellation
-        if (!in_array($trip->state, [TripState::NEW, TripState::CONFIRMED, TripState::CANCELLATION_REQUEST])) {
+        if (!in_array($trip->state, [TripState::NEW, TripState::CONFIRMED, TripState::CANCELLATION_REQUEST], true)) {
             throw ValidationException::withMessages(['state' => 'Invalid state for cancellation.']);
         }
         // Cancel the trip and add cancellation reason if provided
@@ -425,7 +343,7 @@ class BusinessTripController extends Controller
         // Send the email
         Mail::to($recipient)->send($email);
 
-        return redirect()->route('business-trips.edit', $trip);
+        return redirect()->route('trip.edit', $trip);
 
     }
 
@@ -433,7 +351,9 @@ class BusinessTripController extends Controller
      * Updating state of the trip to confirmed
      * @throws ValidationException
      */
-    public function confirm(Request $request, BusinessTrip $trip) {
+    public static function confirm(Request $request, BusinessTrip $trip) {
+    public static function confirm(Request $request, BusinessTrip $trip): RedirectResponse
+    {
         // Check if the trip is in a valid state for confirmation
         if ($trip->state !== TripState::NEW) {
             throw ValidationException::withMessages(['state' => 'Invalid state for confirmation.']);
@@ -447,7 +367,7 @@ class BusinessTripController extends Controller
         // Confirm the trip and record sofia_id
         $trip->update(['state' => TripState::CONFIRMED, 'sofia_id' => $validatedData['sofia_id']]);
 
-        return redirect()->route('business-trips.edit', $trip);
+        return redirect()->route('trip.edit', $trip);
 
     }
 
@@ -455,7 +375,8 @@ class BusinessTripController extends Controller
      * Updating state to closed
      * @throws ValidationException
      */
-    public function close(BusinessTrip $trip) {
+    public static function close(BusinessTrip $trip): RedirectResponse
+    {
         // Check if the trip is in a valid state for closing
         if ($trip->state !== TripState::COMPLETED) {
             throw ValidationException::withMessages(['state' => 'Invalid state for closing.']);
@@ -464,7 +385,7 @@ class BusinessTripController extends Controller
         //Close the trip
         $trip->update(['state' => TripState::CLOSED]);
 
-        return redirect()->route('business-trips.edit', $trip);
+        return redirect()->route('trip.edit', $trip);
 
     }
 
@@ -472,7 +393,7 @@ class BusinessTripController extends Controller
      * Updating state of the trip to cancellation request
      * @throws ValidationException
      */
-    public function requestCancellation(Request $request, BusinessTrip $trip): \Illuminate\Http\RedirectResponse
+    public static function requestCancellation(Request $request, BusinessTrip $trip): RedirectResponse
     {
         // Validate the cancellation reason
         $validator = Validator::make($request->all(), [
@@ -485,8 +406,7 @@ class BusinessTripController extends Controller
         }
 
         // Check if the current state of the trip allows cancellation request
-        if (in_array($trip->state,
-            [TripState::NEW, TripState::CONFIRMED])) {
+        if (in_array($trip->state, [TripState::NEW, TripState::CONFIRMED], true)) {
             // Change the state to CANCELLATION_REQUEST
             $trip->update(['state' => TripState::CANCELLATION_REQUEST]);
 
@@ -510,7 +430,7 @@ class BusinessTripController extends Controller
     /**
      * Adding comment to trip
      */
-    public function addComment(Request $request, BusinessTrip $trip): \Illuminate\Http\RedirectResponse
+    public static function addComment(Request $request, BusinessTrip $trip): RedirectResponse
     {
         // Validate the incoming request
         $request->validate([
@@ -532,7 +452,7 @@ class BusinessTripController extends Controller
         Mail::to($recipient)->send($email);
 
         // Redirect or respond with a success message
-        return redirect()->route('business-trips.edit', $trip->id)->with('message', 'Comment added successfully.');
+        return redirect()->route('trip.edit', $trip->id)->with('message', 'Comment added successfully.');
     }
 
     /**
@@ -550,7 +470,7 @@ class BusinessTripController extends Controller
      * @example
      * $response = $object->exportPdf(123, 0);
      */
-    public static function exportPdf(int $tripId, int $documentType): JsonResponse | BinaryFileResponse
+    public static function exportPdf(int $tripId, int $documentType): JsonResponse|BinaryFileResponse
     {
         $trip = BusinessTrip::find($tripId);
         if (!$trip) {
@@ -744,5 +664,291 @@ class BusinessTripController extends Controller
 
         Log::error("PDF file does not exist after generation: " . $outputPath);
         return response()->json(['error' => 'Failed to generate PDF, file not found'], 500);
+    }
+
+    /**
+     * @param BusinessTrip $trip
+     * @return int
+     * @throws Exception
+     */
+    private static function getTripDurationInDays(BusinessTrip $trip): int
+    {
+        $startDate = new DateTime($trip->datetime_start);
+        $endDate = new DateTime($trip->datetime_end);
+        $interval = new DateInterval('P1D');
+        $dateRange = new DatePeriod($startDate, $interval, $endDate);
+
+        return iterator_count($dateRange) + 1;
+    }
+
+    /**
+     * @param Request $request
+     * @return array
+     * @throws Exception
+     */
+    public static function validateUserData(Request $request): array
+    {
+        $user = Auth::user();
+
+        if (!$user) {
+            throw new Exception();
+        }
+
+        $rule = 'nullable';
+        if ($user->user_type->isExternal()) {
+            $rule = 'required';
+        }
+
+        // Validate user data
+        $validatedUserData = $request->validate([
+            'first_name' => 'required|string|max:50',
+            'last_name' => 'required|string|max:50',
+            'academic_degrees' => 'nullable|string|max:30',
+            'personal_id' => 'required|string|max:10',
+            'department' => 'required|string|max:10',
+            'address' => $rule . '|string|max:200',
+        ]);
+        return $validatedUserData;
+    }
+
+    /**
+     * @param Request $request
+     * @return array
+     * @throws Exception
+     */
+    public static function validateUpdatableTripData(Request $request): array
+    {
+        $user = Auth::user();
+
+        if (!$user) {
+            throw new Exception();
+        }
+
+        $rule = 'nullable';
+        if ($user->user_type->isExternal()) {
+            $rule = 'required';
+        }
+
+        $rules = [
+            'iban' => $rule . '|string|max:34',
+            'transport_id' => 'required|exists:transports,id',
+            'spp_symbol_id' => 'required|exists:spp_symbols,id',
+            'place_start' => 'required|string|max:200',
+            'place_end' => 'required|string|max:200',
+            'datetime_start' => 'required|date|after:today',
+            'datetime_end' => 'required|date|after:datetime_start',
+            'datetime_border_crossing_start' => 'sometimes|required|date',
+            'datetime_border_crossing_end' => 'sometimes|required|date'
+        ];
+
+//        // Border crossing validation rules for foreign trips
+//        if ($trip->type === TripType::FOREIGN && in_array($trip->state, [TripState::UPDATED, TripState::COMPLETED])) {
+//            $rules = array_merge($rules, [
+//                'datetime_border_crossing_start' =>  'required|date',
+//                'datetime_border_crossing_end' => 'required|date'
+//            ]);
+//        }
+        //Validate trip data
+        return $request->validate($rules);
+    }
+
+    /**
+     * @param Request $request
+     * @return array
+     */
+    public static function validateFixedTripData(Request $request): array
+    {
+        $validatedData = $request->validate([
+            'country_id' => 'required|exists:countries,id',
+            'transport_id' => 'required|exists:transports,id',
+            'place' => 'required|string|max:200',
+            'trip_purpose_id' => 'required|integer|min:0',
+            'purpose_details' => 'nullable|string|max:50'
+        ]);
+        return $validatedData;
+    }
+
+    /**
+     * @param Request $request
+     * @return array
+     */
+    public static function validateReimbursementData(Request $request): array
+    {
+        if ($request->has('reimbursement')) {
+            $validatedReimbursementData = $request->validate([
+                'reimbursement_spp_symbol_id' => 'required|exists:spp_symbols,id',
+                'reimbursement_date' => 'required|date',
+            ]);
+
+            return array(true, self::array_key_replace(
+                'reimbursement_spp_symbol_id',
+                'spp_symbol_id',
+                $validatedReimbursementData
+            ));
+        }
+
+        return array(false, array());
+    }
+
+    /**
+     * @param Request $request
+     * @return array
+     */
+    public static function validateConferenceFeeData(Request $request): array
+    {
+        if ($request->has('conference_fee')) {
+            $validatedConferenceFee = $request->validate([
+                'organiser_name' => 'required|string|max:100',
+                'ico' => 'nullable|string|max:8',
+                'organiser_address' => 'required|string|max:200',
+                'organiser_iban' => 'required|string|max:34',
+                'amount' => 'required|string|max:20',
+            ]);
+
+            return array(true, self::array_key_replace(
+                'organiser_iban',
+                'iban',
+                $validatedConferenceFee
+            ));
+        }
+
+        return array(false, array());
+    }
+
+    /**
+     * @param BusinessTrip $trip
+     * @param Request $request
+     * @return array
+     */
+    public static function validateExpensesData(BusinessTrip $trip, Request $request): array
+    {
+//        dd($request);
+        $expenses = ['travelling', 'accommodation', 'advance', 'other'];
+        if ($trip->type === TripType::FOREIGN) {
+            $expenses[] = 'allowance';
+        }
+        $validatedExpensesData = [];
+
+        foreach ($expenses as $expenseName) {
+            $validatedExpenseData = $request->validate([
+                $expenseName . '_expense_eur' => 'nullable|string|max:20',
+                $expenseName . '_expense_not_reimburse' => 'nullable'
+            ]);
+            if ($trip->type === TripType::FOREIGN) {
+                $validatedExpenseData = array_merge($validatedExpenseData, $request->validate([
+                    $expenseName . '_expense_foreign' => 'nullable|string:max:20']));
+            }
+
+//            $validatedExpenseData[$expenseName . '_expense_reimburse'] = $request->has($expenseName . '_expense_reimburse');
+            $validatedExpensesData[$expenseName] = $validatedExpenseData;
+        }
+
+        $validatedExpensesData = array_merge($validatedExpensesData, $request->validate([
+            'expense_estimation' => 'nullable|string|max:20'
+        ]));
+
+        $validatedExpensesData['no_meals_reimbursed'] = $request->has('no_meals_reimbursed');
+//        dd($validatedExpensesData);
+        return $validatedExpensesData;
+    }
+
+    /**
+     * @param array $validatedExpensesData
+     * @param BusinessTrip $trip
+     * @return void
+     */
+    public static function createOrUpdateExpenses(array $validatedExpensesData, BusinessTrip $trip): void
+    {
+        $trip->update([
+            'expense_estimation' => $validatedExpensesData['expense_estimation'],
+            'meals_reimbursement' => !$validatedExpensesData['no_meals_reimbursed']
+            ]);
+        unset($validatedExpensesData['expense_estimation']);
+        unset($validatedExpensesData['no_meals_reimbursed']);
+
+
+        foreach ($validatedExpensesData as $name => $expenseData) {
+            $data = [
+                'amount_eur' => $expenseData[$name . '_expense_eur'],
+                'amount_foreign' => $trip->type === TripType::FOREIGN ? $expenseData[$name . '_expense_foreign'] : null,
+                'reimburse' => !array_key_exists($name . '_expense_not_reimburse', $expenseData),
+            ];
+            $expense = $trip->{$name . 'Expense'};
+            if ($expense == null) {
+//                dd($validatedExpensesData, $name, $data);
+                $expense = Expense::create($data);
+
+                $trip->update([$name . '_expense_id' => $expense->id]);
+                $trip->save();
+//                dd($name . '_expense_id', $trip, $expense);
+            } else {
+                $expense->update($data);
+            }
+        }
+
+
+    }
+
+    /**
+     * @param Request $request
+     * @return array
+     */
+    public static function validateTripContributionsData(Request $request): array
+    {
+        // Contributions validation
+        $checkedContributions = [];
+        $contributions = Contribution::all()->pluck('name', 'id');
+
+        // Check for checked contributions checkboxes
+        foreach ($contributions as $id => $name) {
+            if ($request->has('contribution_' . $id)) {
+                $validatedContributionData = $request->validate([
+                    'contribution_' . $id . '_detail' => 'nullable|string|max:200',
+                ]);
+                $updContributionData = self::array_key_replace(
+                    'contribution_' . $id . '_detail',
+                    'detail',
+                    $validatedContributionData
+                );
+                $updContributionData['contribution_id'] = $id;
+                $checkedContributions[] = $updContributionData;
+            }
+        }
+        return $checkedContributions;
+    }
+
+    /**
+     * @param mixed $validatedReimbursementData
+     * @param $trip
+     * @return void
+     */
+    public static function createOrUpdateReimbursement(mixed $validatedReimbursementData, $trip): void
+    {
+        $reimbursement = Reimbursement::create($validatedReimbursementData);
+        $trip->update(['reimbursement_id' => $reimbursement->id]);
+    }
+
+    /**
+     * @param mixed $validatedConferenceFeeData
+     * @param $trip
+     * @return void
+     */
+    public static function createOrUpdateConferenceFee(mixed $validatedConferenceFeeData, $trip): void
+    {
+        $ConferenceFee = ConferenceFee::create($validatedConferenceFeeData);
+        $trip->update(['conference_fee_id' => $ConferenceFee->id]);
+    }
+
+    /**
+     * @param array $validatedTripContributionsData
+     * @param $trip
+     * @return void
+     */
+    public static function createOrUpdateTripContributions(array $validatedTripContributionsData, $trip): void
+    {
+        foreach ($validatedTripContributionsData as $contribution) {
+            $contribution['business_trip_id'] = $trip->id;
+            TripContribution::create($contribution);
+        }
     }
 }
