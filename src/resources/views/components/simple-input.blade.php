@@ -1,3 +1,6 @@
+@props(['label' => '', 'name', 'type' => 'text', 'value' => '', 'disabled' => false, 'readonly' => false])
+
+
 <div class="form-group">
             @if($label != '')
                 <label for="{{ $name }}">{{ $label }}</label>
@@ -11,6 +14,7 @@
                 value="{{ old($name, $value) }}"
                 @disabled($disabled)
                 @readonly($readonly)
+                {{ $attributes }}
             />
 
             @error($name)
