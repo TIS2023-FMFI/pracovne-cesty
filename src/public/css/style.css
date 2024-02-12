@@ -9,3 +9,7 @@
     background-image: url("/images/dai-header.jpg");
 
 }
+
+[x-cloak] {
+    display: none !important;
+}

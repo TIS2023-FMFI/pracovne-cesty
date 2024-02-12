@@ -178,8 +178,8 @@
                 </x-hideable-section>
             </x-content-section>
 
-            <div>
-                <x-button>Vytvoriť cestu</x-button>
+            <div class="d-flex justify-content-end">
+                <x-button>Pridať cestu</x-button>
             </div>
 
         </form>

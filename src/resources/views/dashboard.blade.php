@@ -7,7 +7,7 @@
         <x-link-button href="/trips/create">Pridať pracovnú cestu</x-link-button>
 
         @if($isAdmin)
-            <x-button color="danger" event="open-add-users">Pridať používateľov</x-button>
+            <x-button color="danger" modal="add-users">Pridať používateľov</x-button>
             <x-link-button color="danger" href="/spp">ŠPP prvky</x-link-button>
         @endif
     </div>

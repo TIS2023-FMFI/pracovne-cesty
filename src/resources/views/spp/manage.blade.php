@@ -10,7 +10,12 @@
                             <x-dropdown-input name="spp" :values="$spp_symbols" label="ŠPP prvok:"></x-dropdown-input>
                         </div>
                         <div class="col">
-                            <x-button color="danger">Deaktivovať</x-button>
+                            <div class="d-flex h-100">
+                                <div class="form-group align-self-end">
+                                    <x-button color="danger">Deaktivovať</x-button>
+                                </div>
+                            </div>
+
                         </div>
                     </div>
                 </x-content-section>
