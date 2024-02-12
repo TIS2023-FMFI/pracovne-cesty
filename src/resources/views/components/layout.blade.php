@@ -18,12 +18,12 @@
 <body>
 <header class="header">
     <div class="header-top-panel">
-        <div class="container d-flex justify-content-end py-2">
+        <div class="container d-flex justify-content-end py-2 align-items-end">
             @auth
-                <span>Prihlásený ako {{Auth::user()->first_name.' '.Auth::user()->last_name}}</span>
+                <span class="text-white mx-2">Prihlásený ako: <b>{{Auth::user()->first_name.' '.Auth::user()->last_name}}</b></span>
                 <form method="POST" action="/user/logout">
                     @csrf
-                    <button><i></i> Odhlásiť sa</button>
+                    <button class="btn btn-danger">Odhlásiť sa</button>
                 </form>
             @else
                 <form method="POST" action="/user">
@@ -32,7 +32,7 @@
                     <input name="username" id="username"/>
                     <label for="password" class="text-white">Heslo: </label>
                     <input name="password" id="password" type="password"/>
-                    <button type="submit">
+                    <button>
                         <i class="fa-solid fa-right-to-bracket"></i>
                     </button>
                 </form>

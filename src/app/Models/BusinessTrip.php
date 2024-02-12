@@ -32,7 +32,7 @@ class BusinessTrip extends Model
         'state', 'datetime_start', 'datetime_end', 'place_start', 'place_end', 'datetime_border_crossing_start',
         'datetime_border_crossing_end', 'trip_purpose_id', 'purpose_details', 'iban', 'conference_fee_id',
         'reimbursement_id', 'spp_symbol_id', 'accommodation_expense_id', 'travelling_expense_id',
-        'other_expense_id', 'allowance_id', 'not_reimbursed_meals', 'meals_reimbursement', 'advance_amount',
+        'other_expense_id', 'allowance_expense_id', 'not_reimbursed_meals', 'meals_reimbursement', 'advance_expense_id',
         'expense_estimation', 'cancellation_reason', 'note', 'conclusion'
     ];
 

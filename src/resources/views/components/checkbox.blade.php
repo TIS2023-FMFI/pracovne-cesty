@@ -1,15 +1,17 @@
+@props(['name', 'label' => '', 'control' => '', 'checked' => false])
+
 <div class="custom-control custom-checkbox">
         <input
             type="checkbox"
             id="{{ $name }}"
             name="{{ $name }}"
-            {{ $isChecked() ? 'checked' : '' }}
+            value="{{ $name }}"
             {{ $control != "" ? 'x-model='.$control : '' }}
-            class="custom-control-input"
-
+            {{ $attributes->merge(['class'=>'custom-control-input'])}}
+            @checked(old($name, $checked ))
         />
-        @if($label != '')
-            <label for="{{ $name }}" class="custom-control-label">{{ $label }}</label>
+@if($label != '')
+    <label for="{{ $name }}" class="custom-control-label">{{ $label }}</label>
         @endif
 
 </div>
