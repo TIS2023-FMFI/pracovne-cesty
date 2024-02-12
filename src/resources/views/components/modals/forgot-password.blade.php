@@ -4,7 +4,7 @@
         <x-content-section>
             <x-slot:description>
                 <p>Zabudli ste heslo?</p>
-                <p>Zadajte svoj email, bude vám zaslaná adresoa, kde si môžete nastaviť nové.</p>
+                <p>Zadajte svoj email, bude vám zaslaný link, kde si môžete nastaviť nové heslo.</p>
             </x-slot:description>
             <x-simple-input name="email" label="Emailová adresa"></x-simple-input>
         </x-content-section>

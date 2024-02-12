@@ -52,7 +52,7 @@
 
     @guest
         <div class="container d-flex justify-content-end py-2">
-            <x-button color="danger" modal="forgot-password">Zabudnuté heslo</x-button>
+            <x-button position-absolute color="danger" modal="forgot-password">Zabudnuté heslo?</x-button>
             <x-modals.forgot-password/>
         </div>
     @endguest
@@ -69,12 +69,12 @@
 
 </header>
 
-<main class="container my-3">
+<main class="container my-3 mb-5">
     {{$slot}}
 </main>
 
 
-<footer>
+<footer class="container">
     <p>Projekt tímu z Tvorby informačných systémov pre Katedru aplikovanej informatiky FMFI, 2023</p>
 </footer>
 
