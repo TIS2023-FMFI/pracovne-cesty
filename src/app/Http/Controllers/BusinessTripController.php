@@ -31,8 +31,7 @@ use Illuminate\Validation\ValidationException;
 use mikehaertl\pdftk\Pdf;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\StreamedResponse;
-use Jenssegers\Date\Date;
-use App\Rules\AfterToday;
+
 
 class BusinessTripController extends Controller
 {
@@ -138,7 +137,7 @@ class BusinessTripController extends Controller
         $user->update($validatedUserData);
 
         //Sending mails
-        $message = '';
+        $message = 'ID pridanej cesty: ' . $trip->id . ' Meno a priezvisko cestujúceho: ' . $trip->user->first_name . ' ' . $trip->user->last_name;
         $recipient = 'admin@example.com';
         $viewTemplate = 'emails.new_trip_admin';
 
@@ -327,8 +326,7 @@ class BusinessTripController extends Controller
 
         // Retrieve user's email associated with the trip
         $recipient = $trip->user->email;
-
-        $message = '';
+        $message = 'ID Stornovanej cesty: ' . $trip->id;
         $viewTemplate = 'emails.cancellation_user';
 
         // Create an instance of the SimpleMail class
@@ -404,7 +402,7 @@ class BusinessTripController extends Controller
             $trip->update(['state' => TripState::CANCELLATION_REQUEST]);
 
             // Send email notification to the admin
-            $message = '';
+            $message = 'ID Cesty: ' . $trip->id . ' Meno a priezvisko cestujúceho: ' . $trip->user->first_name . ' ' . $trip->user->last_name;
             $recipient = 'admin@example.com';
             $viewTemplate = 'emails.cancellation_request_admin';
 
@@ -433,8 +431,8 @@ class BusinessTripController extends Controller
         // Update the trip's note with the new comment
         $trip->update(['note' => $request->input('comment')]);
 
-        // Send email notification to the admin
-        $message = '';
+        // Send email notification to the
+        $message = 'ID Cesty ku ktorej bola pridaná poznámka: ' . $trip->id . ' Meno a priezvisko cestujúceho: ' . $trip->user->first_name . ' ' . $trip->user->last_name;
         $recipient = 'admin@example.com';
         $viewTemplate = 'emails.new_note_admin';
 
@@ -729,7 +727,7 @@ class BusinessTripController extends Controller
             'spp_symbol_id' => 'required|exists:spp_symbols,id',
             'place_start' => 'required|string|max:200',
             'place_end' => 'required|string|max:200',
-            'datetime_start' => 'required'|'date'|new AfterToday,
+            'datetime_start' => 'required|date|after:today',
             'datetime_end' => 'required|date|after:datetime_start',
             'datetime_border_crossing_start' => 'sometimes|required|date',
             'datetime_border_crossing_end' => 'sometimes|required|date'

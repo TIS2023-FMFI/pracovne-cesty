@@ -9,7 +9,7 @@
     <div class="header">Nová Cesta Nahlásená</div>
     <div class="content">
         Vážený admin, <br>
-        Bola nahlásená nová cesta. Prosím, skontrolujte detaily.
+        Bola nahlásená nová pracovná cesta.
         {{ $messageText }}
     </div>
     <div class="footer">
