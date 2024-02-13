@@ -135,21 +135,13 @@ class BusinessTripController extends Controller
         if (!$authUser) {
             throw new Exception();
         }
-        $targetUserId = $request->query('user');
-        Log::info("Requested user ID from query: " . $targetUserId);
-
+        $targetUserId = $request->input('target_user');
         $targetUser = $targetUserId ? User::find($targetUserId) : $authUser;
-        Log::info("Found user ID: " . ($targetUser ? $targetUser->id : 'null'));
-
-
 
         if (!$targetUser) {
-            Log::error("User not found for ID: " . $request->query('user'));
+            Log::error("User not found for ID: " . $request->input('target_user'));
             return redirect()->back()->withErrors("Používateľ nebol nájdený.");
         }
-
-        Log::info("Authenticated user ID: " . $authUser->id);
-
 
         $isForDifferentUser = $targetUser->id != $authUser->id && $authUser->hasRole('admin');
 

@@ -22,6 +22,7 @@
     <x-content-box title="Nová pracovná cesta">
         <form method="POST" action="/trips" enctype="multipart/form-data">
             @csrf
+            <x-simple-input name="target_user" :value="$user->id" hidden/>
             <x-content-section title="Osobné údaje">
                 <div class="form-row">
                     <div class="col">
