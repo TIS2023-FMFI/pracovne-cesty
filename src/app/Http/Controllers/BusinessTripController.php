@@ -270,7 +270,9 @@ class BusinessTripController extends Controller
                 case TripState::UPDATED:
                     // Validation rules for expense-related fields
                     $validatedExpensesData = self::validateExpensesData($trip, $request);
-                    // !! meals table
+                    $days = self::getTripDurationInDays($trip);
+                    $validatedMealsData = self::validateMealsData($days, $request);
+                    $validatedTripData['not_reimbursed_meals'] = $validatedMealsData;
                     $validatedTripData = $request->validate(
                         ['conclusion' => 'required|max:5000']);
 
@@ -942,4 +944,27 @@ class BusinessTripController extends Controller
             TripContribution::create($contribution);
         }
     }
+
+    /**
+     * @param Request $request
+     * @param int $days
+     * @return string
+     */
+    public static function validateMealsData(int $days, Request $request): string
+    {
+        $notReimbursedMeals = '';
+        $checkboxNames = ['b', 'l', 'd']; // Checkbox names prefix
+        foreach ($checkboxNames as $prefix) {
+            for ($i = 0; $i < $days; $i++) {
+                $checkboxName = $prefix . $i;
+                if (!$request->has($checkboxName)) {
+                    $notReimbursedMeals .= '0'; // Checkbox not present, mark as not reimbursed
+                } else {
+                    $notReimbursedMeals .= '1'; // Checkbox present, mark as reimbursed
+                }
+            }
+        }
+        return $notReimbursedMeals;
+    }
+
 }
