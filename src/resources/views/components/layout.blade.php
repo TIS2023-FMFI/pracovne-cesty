@@ -25,6 +25,7 @@
 
 <body class="d-flex flex-column min-vh-100">
     <header class="header">
+        <img class="hidden-image" src="{{asset('images/dai-header.jpg')}}" alt="cover">
         <div class="header-top-panel">
             <div class="container d-flex justify-content-end py-2 align-items-end">
                 @auth
