@@ -56,24 +56,28 @@
             @method('PUT')
             <x-content-section title="Osobné údaje" :disabled="!$isAdmin || $tripState->isFinal()">
                 <div class="form-row">
-                    <div class="col">
+                    <div class="col-md col-sm-12">
                         <x-simple-input name="first_name" label="Meno" :value="$trip->user->first_name"/>
                     </div>
-                    <div class="col">
+                    <div class="col-md col-sm-12">
                         <x-simple-input name="last_name" label="Priezvisko" :value="$trip->user->last_name"/>
                     </div>
-                    <div class="col">
+                    <div class="col-md col-sm-12">
                         <x-simple-input name="academic_degrees" label="Tituly" :value="$trip->user->academic_degrees ?? ''"/>
                     </div>
                 </div>
 
-                <x-simple-input name="address" label="Bydlisko" :value="$trip->user->address ?? ''"/>
+                <div class="form-row">
+                    <div class="col-md col-sm-12">
+                        <x-simple-input name="address" label="Bydlisko" :value="$trip->user->address ?? ''"/>
+                    </div>
+                </div>
 
                 <div class="form-row">
-                    <div class="col">
+                    <div class="col-md col-sm-12">
                         <x-simple-input name="personal_id" label="Osobné číslo" :value="$trip->user->personal_id ?? ''"/>
                     </div>
-                    <div class="col">
+                    <div class="col-md col-sm-12">
                         <x-simple-input name="department" label="Pracovisko" :value="$trip->user->department"/>
                     </div>
                 </div>
@@ -83,10 +87,10 @@
                 title="Neviem netuším"
                 :disabled="$tripState->isFinal() || (!$isAdmin && $tripState!=TripState::CONFIRMED)">
                 <div class="form-row">
-                    <div class="col">
+                    <div class="col-md col-sm-12">
                         <x-simple-input name="iban" label="Číslo účtu" :value="$trip->iban ?? ''"/>
                     </div>
-                    <div class="col">
+                    <div class="col-md col-sm-12">
                         <x-dropdown-input name="transport_id" label="Dopravný prostriedok" :values="$transports"
                                           :selected="$trip->transport_id"/>
                     </div>
@@ -99,14 +103,26 @@
                         title="Začiatok cesty"
                         :disabled="$tripState->isFinal() || (!$isAdmin && $tripState!=TripState::CONFIRMED)">
 
-                        <x-simple-input name="place_start" label="Miesto" :value="$trip->place_start"/>
-                        <x-simple-input name="datetime_start" type="datetime-local" label="Dátum a čas"
-                                        :value="$trip->datetime_start"/>
+                        <div class="form-row">
+                            <div class="col-md col-sm-12">
+                                <x-simple-input name="place_start" label="Miesto" :value="$trip->place_start"/>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="col-md col-sm-12">
+                                <x-simple-input name="datetime_start" type="datetime-local" label="Dátum a čas"
+                                                :value="$trip->datetime_start"/>
+                            </div>
+                        </div>
 
                         @if($tripType == TripType::FOREIGN)
-                            <x-simple-input name="datetime_border_crossing_start" type="datetime-local"
-                                            label="Dátum a čas prekročenia hraníc"
-                                            :value="$trip->datetime_border_crossing_start ?? ''"/>
+                            <div class="form-row">
+                                <div class="col-md col-sm-12">
+                                    <x-simple-input name="datetime_border_crossing_start" type="datetime-local"
+                                                    label="Dátum a čas prekročenia hraníc"
+                                                    :value="$trip->datetime_border_crossing_start ?? ''"/>
+                                </div>
+                            </div>
                         @endif
                     </x-content-section>
                 </div>
@@ -115,14 +131,26 @@
                         title="Koniec cesty"
                         :disabled="$tripState->isFinal() || (!$isAdmin && $tripState!=TripState::CONFIRMED)">
 
-                        <x-simple-input name="place_end" label="Miesto" :value="$trip->place_end"/>
-                        <x-simple-input name="datetime_end" type="datetime-local" label="Dátum a čas"
-                                        :value="$trip->datetime_end"/>
+                        <div class="form-row">
+                            <div class="col-md col-sm-12">
+                                <x-simple-input name="place_end" label="Miesto" :value="$trip->place_end"/>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="col-md col-sm-12">
+                                <x-simple-input name="datetime_end" type="datetime-local" label="Dátum a čas"
+                                                :value="$trip->datetime_end"/>
+                            </div>
+                        </div>
 
                         @if($tripType == TripType::FOREIGN)
-                            <x-simple-input name="datetime_border_crossing_end" type="datetime-local"
-                                            label="Dátum a čas prekročenia hraníc"
-                                            :value="$trip->datetime_border_crossing_end ?? ''"/>
+                            <div class="form-row">
+                                <div class="col-md col-sm-12">
+                                    <x-simple-input name="datetime_border_crossing_end" type="datetime-local"
+                                                    label="Dátum a čas prekročenia hraníc"
+                                                    :value="$trip->datetime_border_crossing_end ?? ''"/>
+                                </div>
+                            </div>
                         @endif
                     </x-content-section>
                 </div>
@@ -133,25 +161,25 @@
                 :disabled="!$isAdmin || $tripState == TripState::CLOSED">
 
                 <div class="form-row">
-                    <div class="col">
+                    <div class="col-md col-sm-12">
                         <x-simple-input name="place" label="Miesto" :value="$trip->place"/>
                     </div>
-                    <div class="col">
+                    <div class="col-md col-sm-12">
                         <x-dropdown-input name="country_id" label="Štát" :values="$countries" :selected="$trip->country_id"/>
                     </div>
                 </div>
                 <div class="form-row">
-                    <div class="col">
+                    <div class="col-md col-sm-12">
                         <x-dropdown-input name="trip_purpose_id" label="Účel cesty" :values="$purposes"
                                           :selected="$trip->trip_purpose_id"/>
                     </div>
-                    <div class="col">
+                    <div class="col-md col-sm-12">
                         <x-textarea name="purpose_details" label="Špecifikácia účelu"
                                     :value="$trip->purpose_details ?? ''"></x-textarea>
                     </div>
                 </div>
                 <div class="form-row">
-                    <div class="col">
+                    <div class="col-md col-sm-12">
                         <x-simple-input name="event_url" label="Link na udalosť" :value="$trip->event_url ?? ''"/>
                     </div>
                 </div>
@@ -160,8 +188,7 @@
                     $hasFile = $trip->upload_name != null;
                 @endphp
                 <div class="form-row">
-                    <div class="col-sm-6">
-
+                    <div class="col-md-6 col-sm-12">
                         <div class="card">
                             <div>
                                 <a {{ $hasFile ? 'href=/trips/' . $trip->id . '/attachment' : ''}} class="btn">
@@ -213,15 +240,15 @@
                 :disabled="$tripState->isFinal() || (!$isAdmin && $tripState!=TripState::CONFIRMED)">
 
                 <x-slot:description>
-                    V prípade refundácie, prosím, vyberte ako ŠPP prvok 2 ten prvok, z ktorého budú peniaze neskôr
-                    vrátené do ŠPP prvku 1. Ako dátum vrátenia peňazí uveďte iba orientačný, predpokladaný dátum.
+                    V prípade refundácie, prosím, vyberte ako <b>ŠPP prvok 2</b> ten prvok, z ktorého budú peniaze neskôr
+                    vrátené do <b>ŠPP prvku 1</b>. Ako <b>dátum vrátenia peňazí</b> uveďte iba orientačný, predpokladaný dátum.
                 </x-slot:description>
                 <div class="form-row align-items-center">
-                    <div class="col">
+                    <div class="col-md col-sm-12">
                         <x-dropdown-input name="spp_symbol_id" label="ŠPP prvok 1:" :values="$spp_symbols"
                                           :selected="$trip->spp_symbol_id"/>
                     </div>
-                    <div class="col">
+                    <div class="col-md col-sm-12">
                         <x-checkbox name="reimbursement" label="Refundovať" control="reimbursementShow"
                                     :checked="$isReimbursed"></x-checkbox>
                     </div>
@@ -229,11 +256,11 @@
 
                 <x-hideable-section control="reimbursementShow">
                     <div class="form-row">
-                        <div class="col">
+                        <div class="col-md col-sm-12">
                             <x-dropdown-input name="reimbursement_spp_symbol_id" label="ŠPP prvok 2" :values="$spp_symbols"
                                               :selected="$spp2"/>
                         </div>
-                        <div class="col">
+                        <div class="col-md col-sm-12">
                             <x-simple-input name="reimbursement_date" type="date" label="Dátum vrátenia peňazí"
                                             :value="$reimbursementDate"/>
                         </div>
@@ -256,7 +283,7 @@
                 :disabled="!$isAdmin || $tripState == TripState::CLOSED">
 
                 <div class="form-row">
-                    <div class="col">
+                    <div class="col-md col-sm-12">
                         <x-checkbox name="conference_fee"
                                     label="Mám záujem o úhradu konferenčného poplatku pred cestou priamo z pracoviska"
                                     control="conferenceFeeShow" :checked="$wantsConferenceFee"></x-checkbox>
@@ -264,23 +291,29 @@
                 </div>
                 <x-hideable-section control="conferenceFeeShow">
                     <div class="form-row">
-                        <div class="col">
+                        <div class="col-md col-sm-12">
                             <x-simple-input name="organiser_name" type="text" label="Názov organizácie"
                                             :value="$organiser"/>
                         </div>
-                        <div class="col">
+                        <div class="col-md col-sm-12">
                             <x-simple-input name="ico" type="text" label="IČO"
                                             :value="$ico ?? ''"/>
                         </div>
                     </div>
-                    <x-simple-input name="organiser_address" type="text" label="Adresa organizácie"
-                                    :value="$address"/>
+
                     <div class="form-row">
-                        <div class="col">
+                        <div class="col-md col-sm-12">
+                            <x-simple-input name="organiser_address" type="text" label="Adresa organizácie"
+                                            :value="$address"/>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="col-md col-sm-12">
                             <x-simple-input name="organiser_iban" type="text" label="Číslo účtu organizácie"
                                             :value="$iban"/>
                         </div>
-                        <div class="col">
+                        <div class="col-md col-sm-12">
                             <x-simple-input name="amount" type="text" label="Suma"
                                             :value="$amount"/>
                         </div>
