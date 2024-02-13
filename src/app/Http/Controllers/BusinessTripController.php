@@ -102,10 +102,22 @@ class BusinessTripController extends Controller
     /**
      * Returning view with the form for adding of the new trip
      */
-    public static function create()
+    public static function create(Request $request)
     {
-        return view('business-trips.create');
+        $selectedUser = null;
+        if ($request->has('user') && Auth::user()->hasRole('admin')) {
+            $selectedUser = User::find($request->query('user'));
+            if (!$selectedUser) {
+                return redirect()->route('homepage')->withErrors('Používateľ nebol nájdený.');
+            }
+        }
+
+        return view('business-trips.create', [
+            'selectedUser' => $selectedUser,
+        ]);
     }
+
+
 
     /**
      * Parsing data from the $request in form
@@ -118,10 +130,23 @@ class BusinessTripController extends Controller
     public static function store(Request $request): RedirectResponse
     {
         // Get the authenticated user's ID
-        $user = Auth::user();
+        $authUser = Auth::user();
 
-        if (!$user) {
+        if (!$authUser) {
             throw new Exception();
+        }
+        $targetUserId = $request->input('target_user');
+        $targetUser = $targetUserId ? User::find($targetUserId) : $authUser;
+
+        if (!$targetUser) {
+            Log::error("User not found for ID: " . $request->input('target_user'));
+            return redirect()->back()->withErrors("Používateľ nebol nájdený.");
+        }
+
+        $isForDifferentUser = $targetUser->id != $authUser->id && $authUser->hasRole('admin');
+
+        if ($isForDifferentUser && !$authUser->hasRole('admin')) {
+            return redirect()->back()->withErrors("Nemáte oprávnenie pridávať cesty za iných používateľov.");
         }
 
         // Validate all necessary data
@@ -138,7 +163,7 @@ class BusinessTripController extends Controller
         }
 
         // Add the authenticated user's ID to the validated data
-        $validatedTripData['user_id'] = $user->id;
+        $validatedTripData['user_id'] = $targetUser->id;
 
         //Logic to store the trip based on the validated data
         $trip = BusinessTrip::create($validatedTripData);
@@ -166,7 +191,7 @@ class BusinessTripController extends Controller
         }
 
         // Update user details
-        $user->update($validatedUserData);
+        $targetUser->update($validatedUserData);
 
         //Sending mails
         $message = 'ID pridanej cesty: ' . $trip->id . ' Meno a priezvisko cestujúceho: ' . $trip->user->first_name . ' ' . $trip->user->last_name;
