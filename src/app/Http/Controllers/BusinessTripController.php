@@ -27,6 +27,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 use mikehaertl\pdftk\Pdf;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -39,7 +40,7 @@ class BusinessTripController extends Controller
      * Returning view with details from all trips
      * @throws Exception
      */
-    public static function index()
+    public static function index(Request $request)
     {
         $user = Auth::user();
 
@@ -49,12 +50,43 @@ class BusinessTripController extends Controller
 
         // Check if the user is an admin
         if ($user->hasRole('admin')) {
-            // Retrieve all trips and users for admin
-            $trips = BusinessTrip::paginate(15);
+            // Get filter parameters
+            $filter = $request->query('filter');
+            $selectedUser = $request->query('user');
+
+            $validator = Validator::make(
+                ['filter' => $filter, 'user' => $selectedUser],
+                [
+                    'filter' => 'string|nullable',
+                    'user' => 'integer|nullable'
+                ]
+            );
+
+            $trips = new BusinessTrip();
+
+            // If the filter parameters are correct
+            if (!$validator->fails()) {
+                $selectedUser = User::find($selectedUser);
+
+                // Only a single parameter can be used
+                if ($filter) {
+                    $trips = match ($filter) {
+                        'newest' => BusinessTrip::newest(),
+                        'unconfirmed' => BusinessTrip::unconfirmed(),
+                        'unaccounted' => BusinessTrip::unaccounted(),
+                        default => new BusinessTrip(),
+                    };
+                } else if ($selectedUser) {
+                    $trips = $selectedUser->businessTrips();
+                }
+            }
+
+            // Retrieve filtered trips and all users for admin
+            $trips = $trips->paginate(10)->withQueryString();
             $users = User::all();
         } else {
             // Retrieve only user's trips for regular users
-            $trips = $user->businessTrips()->paginate(15);
+            $trips = $user->businessTrips()->paginate(10);
             // No need for a list of users
             $users = null;
         }
@@ -108,7 +140,7 @@ class BusinessTripController extends Controller
 
         //Logic to store the trip based on the validated data
         $trip = BusinessTrip::create($validatedTripData);
-        if ($isReimbursement){
+        if ($isReimbursement) {
             self::createOrUpdateReimbursement($validatedReimbursementData, $trip);
         }
 
@@ -151,7 +183,7 @@ class BusinessTripController extends Controller
         $currentDate = new DateTime();
         $startDate = new DateTime($trip->datetime_start);
         $days = $trip->type == TripType::DOMESTIC ? '4' : '11';
-        $newDate = $currentDate->modify("+ ".$days." weekday");
+        $newDate = $currentDate->modify("+ " . $days . " weekday");
         $days = $trip->type === TripType::DOMESTIC ? '4' : '11';
         if ($startDate < $newDate) {
             $warningMessage = 'Vaša pracovná cesta bude pridaná, ale nie je to v súlade s pravidlami.
@@ -193,7 +225,7 @@ class BusinessTripController extends Controller
     {
         $days = self::getTripDurationInDays($trip);
 
-        return view('business-trips.edit',  [
+        return view('business-trips.edit', [
             'trip' => $trip,
             'days' => $days,
         ]);
@@ -853,7 +885,7 @@ class BusinessTripController extends Controller
         $trip->update([
             'expense_estimation' => $validatedExpensesData['expense_estimation'],
             'meals_reimbursement' => !$validatedExpensesData['no_meals_reimbursed']
-            ]);
+        ]);
         unset($validatedExpensesData['expense_estimation']);
         unset($validatedExpensesData['no_meals_reimbursed']);
 
