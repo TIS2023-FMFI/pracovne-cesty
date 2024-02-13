@@ -366,7 +366,7 @@ class BusinessTripController extends Controller
      * Updating state to closed
      * @throws ValidationException
      */
-    public static function close(BusinessTrip $trip): RedirectResponsegi
+    public static function close(BusinessTrip $trip): RedirectResponse
     {
         // Check if the trip is in a valid state for closing
         if ($trip->state !== TripState::COMPLETED) {
@@ -377,7 +377,6 @@ class BusinessTripController extends Controller
         $trip->update(['state' => TripState::CLOSED]);
 
         return redirect()->route('trip.edit', $trip);
-
     }
 
     /**
