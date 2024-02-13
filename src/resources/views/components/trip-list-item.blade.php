@@ -25,9 +25,7 @@
                 {{ $trip->datetime_start->format('d.m.Y').' - '.$trip->datetime_end->format('d.m.Y') }}
             </div>
             <div class="col-1">
-                <div class="state-icon">
-                    <i class="fa-solid fa-{{ $trip->state->icon() }}"></i>
-                </div>
+                <x-state-icon :state="$trip->state"/>
             </div>
         </div>
     </div>

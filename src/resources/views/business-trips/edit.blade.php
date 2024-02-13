@@ -41,14 +41,15 @@
             Stav: {{ $trip->state->inSlovak()}}
             </span>
             <span class="badge badge-pill badge-danger">
-            Identifikátor: {{ $trip->sofia_id ?? '0000'}}
+            Identifikátor: {{ $trip->sofia_id}}
             </span>
         </div>
 
         <div>
-            <p class="alert alert-secondary">
+            <div class="alert alert-secondary">
+                <x-state-icon :state="$tripState"/>
                 {{ $tripState->description() }}
-            </p>
+            </div>
         </div>
 
         <form method="POST" action="/trips/{{ $trip->id }}" enctype="multipart/form-data">
