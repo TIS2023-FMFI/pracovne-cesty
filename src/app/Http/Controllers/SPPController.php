@@ -6,7 +6,6 @@ use App\Models\SppSymbol;
 use App\Enums\SppStatus;
 use Illuminate\Http\Request;
 use \Illuminate\Http\RedirectResponse;
-use App\Http\Requests\SppSymbolRequest;
 
 
 class SPPController extends Controller
