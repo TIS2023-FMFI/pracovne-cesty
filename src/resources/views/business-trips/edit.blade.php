@@ -388,7 +388,7 @@
                                 <tbody>
                                 @php
                                     $meals = $trip->not_reimbursed_meals;
-                                    $meals = $meals == null || $meals == '' ? str_repeat('0', $days*3) : $meals;
+                                    $meals = ($meals == null || $meals == '') ? str_repeat('0', $days*3) : $meals;
                                     $currentDate = clone $trip->datetime_start;
                                 @endphp
                                 @for ($i = 0; $i < $days; $i++)

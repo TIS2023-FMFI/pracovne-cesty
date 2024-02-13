@@ -107,10 +107,6 @@ class BusinessTripController extends Controller
         // Add the authenticated user's ID to the validated data
         $validatedTripData['user_id'] = $user->id;
 
-        // Set the type of trip based on the selected country
-        $selectedCountry = $request->input('country');
-        $validatedTripData['type'] = self::getTripType($selectedCountry);
-
         //Logic to store the trip based on the validated data
         $trip = BusinessTrip::create($validatedTripData);
         if ($isReimbursement){
@@ -262,6 +258,8 @@ class BusinessTripController extends Controller
 
             // Update the trip with the provided data
             $trip->update($validatedTripData);
+            self::correctNotReimbursedMeals($trip);
+
 
         } else { // Non-admin user updating the trip
 
@@ -678,10 +676,11 @@ class BusinessTripController extends Controller
     {
         $startDate = new DateTime($trip->datetime_start);
         $endDate = new DateTime($trip->datetime_end);
-        $interval = new DateInterval('P1D');
-        $dateRange = new DatePeriod($startDate, $interval, $endDate);
 
-        return iterator_count($dateRange) + 1;
+        $interval = $endDate->diff($startDate);
+        $daysDifference = $interval->days;
+
+        return $daysDifference + 1;
     }
 
     /**
@@ -739,7 +738,6 @@ class BusinessTripController extends Controller
             'datetime_border_crossing_end' => 'sometimes|required|date'
         ];
 
-        //Validate trip data
         return $request->validate($rules);
     }
 
@@ -756,6 +754,11 @@ class BusinessTripController extends Controller
             'trip_purpose_id' => 'required|integer|min:0',
             'purpose_details' => 'nullable|string|max:50'
         ]);
+
+        // Set the type of trip based on the selected country
+        $selectedCountry = $validatedData['country_id'];
+        $validatedData['type'] = self::getTripType($selectedCountry);
+
         return $validatedData;
     }
 
@@ -966,13 +969,36 @@ class BusinessTripController extends Controller
     }
 
     /**
-     * @param mixed $selectedCountry
+     * @param int $selectedCountry
      * @return TripType
      */
-    public static function getTripType(mixed $selectedCountry): TripType
+    public static function getTripType(int $selectedCountry): TripType
     {
+//        dd($selectedCountry, Country::getIdOf('Slovensko'));
         return $selectedCountry === Country::getIdOf('Slovensko')
             ? TripType::DOMESTIC : TripType::FOREIGN;
+    }
+
+    /**
+     * @param BusinessTrip $trip
+     * @return void
+     * @throws Exception
+     */
+    public static function correctNotReimbursedMeals(BusinessTrip $trip): void
+    {
+        $days = self::getTripDurationInDays($trip);
+        $notReimbursedMeals = $trip->not_reimbursed_meals;
+        if ($notReimbursedMeals) {
+            $mealsLen = strlen($notReimbursedMeals);
+            if ($mealsLen < $days*3) {
+                $notReimbursedMeals .= str_repeat('0', ($days*3 - $mealsLen));
+            } elseif ($mealsLen > $days*3) {
+                $notReimbursedMeals = substr($notReimbursedMeals, 0, $days*3);
+            }
+
+//
+            $trip->update(['not_reimbursed_meals' => $notReimbursedMeals]);
+        }
     }
 
 }
