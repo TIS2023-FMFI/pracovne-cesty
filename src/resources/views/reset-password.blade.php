@@ -12,6 +12,7 @@
                     </div>
                 </div>
                 <x-simple-input name="token" :value="$token" hidden/>
+                <x-simple-input name="email" :value="request()->get('email')" hidden/>
             </x-content-section>
             <div class="d-flex justify-content-end">
                 <x-button>Zmeniť heslo</x-button>

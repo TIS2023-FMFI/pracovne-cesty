@@ -96,56 +96,64 @@ Route::controller(BusinessTripController::class)
 // User management
 Route::controller(UserController::class)
     ->prefix('user')
-    ->name('user.')
     ->group(static function () {
-        // Invite a new user
-        // Intended for the invitation submit button
-        Route::post('/invite', 'invite')
-            ->middleware('role:admin')
-            ->name('invite');
-
-        // Log user out
-        Route::post('/logout', 'logout')
-            ->middleware('role:traveller|admin')
-            ->name('logout');
-
-        Route::middleware('guest')
+        // General user management routes
+        Route::name('user.')
             ->group(static function () {
-                // Log user in
-                // Intended for the login button
-                Route::post('/', 'authenticate')
-                    ->name('login');
+                // Invite a new user
+                // Intended for the invitation submit button
+                Route::post('/invite', 'invite')
+                    ->middleware('role:admin')
+                    ->name('invite');
 
-                // Show the registration form based on a given token
-                Route::get('/register', static function (Request $request) {
-                    $token = $request->query('token');
+                // Log user out
+                Route::post('/logout', 'logout')
+                    ->middleware('role:traveller|admin')
+                    ->name('logout');
 
-                    if (!InvitationLink::isValid($token)) {
-                        abort(403, 'Invalid token');
-                    }
+                Route::middleware('guest')
+                    ->group(static function () {
+                        // Log user in
+                        // Intended for the login button
+                        Route::post('/', 'authenticate')
+                            ->name('login');
 
-                    $link = InvitationLink::where('token', $token)->first();
-                    return UserController::create($link->email);
-                })
-                    ->name('register');
+                        // Show the registration form based on a given token
+                        Route::get('/register', static function (Request $request) {
+                            $token = $request->query('token');
 
-                // Submit the registration form
-                Route::post('/register/store', 'store')
-                    ->name('register-submit');
+                            if (!InvitationLink::isValid($token)) {
+                                abort(403, 'Invalid token');
+                            }
 
+                            $link = InvitationLink::where('token', $token)->first();
+                            return UserController::create($link->email);
+                        })
+                            ->name('register');
+
+                        // Submit the registration form
+                        Route::post('/register/store', 'store')
+                            ->name('register-submit');
+                    });
+            });
+
+        // Password reset routes
+        Route::name('password.')
+            ->middleware('guest')
+            ->group(static function () {
                 // Submit a password reset request
                 Route::post('/forgot-password', 'forgotPassword')
-                    ->name('forgot-password');
+                    ->name('email');
 
                 // Show the password reset
                 Route::get('/reset-password/{token}', static function ($token) {
                     return view('reset-password', ['token' => $token]);
                 })
-                    ->name('reset-password-form');
+                    ->name('reset');
 
                 // Submit new password
                 Route::post('/reset-password', 'resetPassword')
-                    ->name('reset-password');
+                    ->name('update');
             });
     });
 
