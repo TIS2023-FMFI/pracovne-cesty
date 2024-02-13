@@ -368,12 +368,11 @@ class BusinessTripController extends Controller
         Mail::to($recipient)->send($email);
 
         return redirect()->route('trip.edit', $trip);
-
     }
 
     /**
      * Updating state of the trip to confirmed
-     * @throws ValidationException
+     * @throws ValidationException|Exception
      */
     public static function confirm(Request $request, BusinessTrip $trip): RedirectResponse
     {
@@ -389,9 +388,9 @@ class BusinessTripController extends Controller
 
         // Confirm the trip and record sofia_id
         $trip->update(['state' => TripState::CONFIRMED, 'sofia_id' => $validatedData['sofia_id']]);
+        SynchronizationController::syncSingleBusinessTrip($trip->id);
 
         return redirect()->route('trip.edit', $trip);
-
     }
 
     /**
@@ -742,7 +741,6 @@ class BusinessTripController extends Controller
     {
         $user = Auth::user();
 
-        Date::setLocale('sk');
         if (!$user) {
             throw new Exception();
         }
