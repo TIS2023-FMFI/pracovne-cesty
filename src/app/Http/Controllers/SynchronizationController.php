@@ -10,6 +10,7 @@ use App\Models\PritomnostUser;
 use App\Models\User;
 use Carbon\CarbonPeriod;
 use Exception;
+use Illuminate\Support\Str;
 
 class SynchronizationController extends Controller
 {
@@ -110,7 +111,7 @@ class SynchronizationController extends Controller
                     'from_time' => $fromTime,
                     'to_time' => $toTime,
                     'type' => PritomnostAbsenceType::BUSINESS_TRIP,
-                    'description' => 'Pracovná cesta zo systému Cesty',
+                    'description' => Str::title($businessTrip->tripPurpose->name) . ' ' . $businessTrip->place,
                     // Other values are not defined
                 ]);
             }
