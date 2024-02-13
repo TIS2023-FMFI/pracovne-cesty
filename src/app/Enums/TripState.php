@@ -83,4 +83,12 @@ enum TripState: int
             self::CLOSED, self::CANCELLED => true,
         };
     }
+
+    public function hasTravellerReturned(): bool
+    {
+        return match ($this) {
+            self::NEW, self::CONFIRMED, self::CANCELLATION_REQUEST, self::CANCELLED => false,
+            self::UPDATED, self::COMPLETED, self::CLOSED => true,
+        };
+    }
 }

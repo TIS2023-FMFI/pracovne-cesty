@@ -65,14 +65,24 @@ class UserController extends Controller
             'password' => 'heslo',
             'username' => 'prihlasovacie meno',
         ];
+
         $validUserTypes = implode(',', [UserType::EXTERN->value, UserType::STUDENT->value]);
-        $validator = Validator::make($request->all(), [
-            'first_name' => 'required|string|max:50',
-            'last_name' => 'required|string|max:50',
-            'username' => 'required|string|max:255|unique:users',
-            'password' => 'required|string|max:255',
-            'user_types' => 'required|in:' . $validUserTypes
-        ], $customMessages, $customAttributes);
+        $validator = Validator::make(
+            data: $request->all(),
+            rules: [
+                'first_name' => 'required|string|max:50',
+                'last_name' => 'required|string|max:50',
+                'username' => [
+                    'required|string|max:255',
+                    'unique:users,username',
+                    'unique:\App\Models\PritomnostUser,username'
+                ],
+                'password' => 'required|string|max:255',
+                'user_types' => 'required|in:' . $validUserTypes
+            ],
+            messages: $customMessages,
+            attributes: $customAttributes
+        );
 
         if ($validator->fails()) {
             return redirect()->back()
@@ -118,16 +128,12 @@ class UserController extends Controller
     public function authenticate(Request $request): RedirectResponse
     {
         $credentials = $request->only('username', 'password');
+        $synced = SynchronizationController::syncSingleUser($credentials['username']);
         $user = User::where('username', $credentials['username'])->first();
 
-        if ($user) {
-            if (in_array($user->user_type, [UserType::EMPLOYEE, UserType::PHD_STUDENT], true)) {
-                SynchronizationController::syncSingleUser($user->id);
-            }
-            if (Auth::attempt($credentials)) {
-                $request->session()->regenerate();
-                return redirect()->route('homepage');
-            }
+        if ($user && Auth::attempt($credentials)) {
+            $request->session()->regenerate();
+            return redirect()->route('homepage');
         }
 
         return back()->withErrors([

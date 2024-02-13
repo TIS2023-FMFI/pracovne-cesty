@@ -156,13 +156,14 @@ class BusinessTripController extends Controller
         [$isReimbursement, $validatedReimbursementData] = self::validateReimbursementData($request);
         [$isConferenceFee, $validatedConferenceFeeData] = self::validateConferenceFeeData($request);
 
+        $areContributions = false;
+        if ($user->user_type->isExternal()) {
+            $validatedTripContributionsData = self::validateTripContributionsData($request);
+            $areContributions = true;
+        }
+
         // Add the authenticated user's ID to the validated data
         $validatedTripData['user_id'] = $targetUser->id;
-
-        // Set the type of trip based on the selected country
-        $selectedCountry = $request->input('country');
-        $validatedTripData['type'] = $selectedCountry === Country::getIdOf('Slovensko')
-            ? TripType::DOMESTIC : TripType::FOREIGN;
 
         //Logic to store the trip based on the validated data
         $trip = BusinessTrip::create($validatedTripData);
@@ -173,6 +174,7 @@ class BusinessTripController extends Controller
         if ($isConferenceFee) {
             self::createOrUpdateConferenceFee($validatedConferenceFeeData, $trip);
         }
+
         if ($areContributions) {
             self::createOrUpdateTripContributions($validatedTripContributionsData, $trip);
         }
@@ -283,12 +285,16 @@ class BusinessTripController extends Controller
 
             $validatedTripData = self::validateUpdatableTripData($request) + self::validateFixedTripData($request);
             $validatedTripContributionsData = self::validateTripContributionsData($request);
-            list($isReimbursement, $validatedReimbursementData) = self::validateReimbursementData($request);
-            list($isConferenceFee, $validatedConferenceFeeData) = self::validateConferenceFeeData($request);
+            [$isReimbursement, $validatedReimbursementData] = self::validateReimbursementData($request);
+            [$isConferenceFee, $validatedConferenceFeeData] = self::validateConferenceFeeData($request);
 
-            if (in_array($tripState, [TripState::UPDATED, TripState::COMPLETED], true)) {
+            if ($tripState->hasTravellerReturned()) {
                 $validatedExpensesData = self::validateExpensesData($trip, $request);
-                // meals table !!
+
+                $days = self::getTripDurationInDays($trip);
+                $validatedMealsData = self::validateMealsData($days, $request);
+                $validatedTripData['not_reimbursed_meals'] = $validatedMealsData;
+
                 array_merge($validatedTripData, $request->validate(
                     ['conclusion' => 'required|max:5000']));
 
@@ -310,6 +316,8 @@ class BusinessTripController extends Controller
 
             // Update the trip with the provided data
             $trip->update($validatedTripData);
+            self::correctNotReimbursedMeals($trip);
+
 
         } else { // Non-admin user updating the trip
 
@@ -326,9 +334,13 @@ class BusinessTripController extends Controller
                 case TripState::UPDATED:
                     // Validation rules for expense-related fields
                     $validatedExpensesData = self::validateExpensesData($trip, $request);
-                    // !! meals table
-                    $validatedTripData = $request->validate(
-                        ['conclusion' => 'required|max:5000']);
+
+                    $days = self::getTripDurationInDays($trip);
+                    $validatedMealsData = self::validateMealsData($days, $request);
+                    $validatedTripData['not_reimbursed_meals'] = $validatedMealsData;
+
+                    $validatedTripData = array_merge($validatedTripData, $request->validate(
+                        ['conclusion' => 'required|max:5000']));
 
                     self::createOrUpdateExpenses($validatedExpensesData, $trip);
 
@@ -391,12 +403,11 @@ class BusinessTripController extends Controller
         Mail::to($recipient)->send($email);
 
         return redirect()->route('trip.edit', $trip);
-
     }
 
     /**
      * Updating state of the trip to confirmed
-     * @throws ValidationException
+     * @throws ValidationException|Exception
      */
     public static function confirm(Request $request, BusinessTrip $trip): RedirectResponse
     {
@@ -412,9 +423,9 @@ class BusinessTripController extends Controller
 
         // Confirm the trip and record sofia_id
         $trip->update(['state' => TripState::CONFIRMED, 'sofia_id' => $validatedData['sofia_id']]);
+        SynchronizationController::syncSingleBusinessTrip($trip->id);
 
         return redirect()->route('trip.edit', $trip);
-
     }
 
     /**
@@ -720,10 +731,11 @@ class BusinessTripController extends Controller
     {
         $startDate = new DateTime($trip->datetime_start);
         $endDate = new DateTime($trip->datetime_end);
-        $interval = new DateInterval('P1D');
-        $dateRange = new DatePeriod($startDate, $interval, $endDate);
 
-        return iterator_count($dateRange) + 1;
+        $interval = $endDate->diff($startDate);
+        $daysDifference = $interval->days;
+
+        return $daysDifference + 1;
     }
 
     /**
@@ -769,31 +781,18 @@ class BusinessTripController extends Controller
             throw new Exception();
         }
 
-        $rule = 'nullable';
-        if ($user->user_type->isExternal()) {
-            $rule = 'required';
-        }
-
         $rules = [
-            'iban' => $rule . '|string|max:34',
+            'iban' => 'required' . '|string|max:34',
             'transport_id' => 'required|exists:transports,id',
             'spp_symbol_id' => 'required|exists:spp_symbols,id',
             'place_start' => 'required|string|max:200',
             'place_end' => 'required|string|max:200',
-            'datetime_start' => 'required|date|after:today',
+            'datetime_start' => 'required|date',
             'datetime_end' => 'required|date|after:datetime_start',
             'datetime_border_crossing_start' => 'sometimes|required|date',
             'datetime_border_crossing_end' => 'sometimes|required|date'
         ];
 
-//        // Border crossing validation rules for foreign trips
-//        if ($trip->type === TripType::FOREIGN && in_array($trip->state, [TripState::UPDATED, TripState::COMPLETED])) {
-//            $rules = array_merge($rules, [
-//                'datetime_border_crossing_start' =>  'required|date',
-//                'datetime_border_crossing_end' => 'required|date'
-//            ]);
-//        }
-        //Validate trip data
         return $request->validate($rules);
     }
 
@@ -810,6 +809,11 @@ class BusinessTripController extends Controller
             'trip_purpose_id' => 'required|integer|min:0',
             'purpose_details' => 'nullable|string|max:50'
         ]);
+
+        // Set the type of trip based on the selected country
+        $selectedCountry = $validatedData['country_id'];
+        $validatedData['type'] = self::getTripType($selectedCountry);
+
         return $validatedData;
     }
 
@@ -996,4 +1000,60 @@ class BusinessTripController extends Controller
             TripContribution::create($contribution);
         }
     }
+
+    /**
+     * @param Request $request
+     * @param int $days
+     * @return string
+     */
+    public static function validateMealsData(int $days, Request $request): string
+    {
+        $notReimbursedMeals = '';
+        $checkboxNames = ['b', 'l', 'd']; // Checkbox names prefix
+        for ($i = 0; $i < $days; $i++) {
+            foreach ($checkboxNames as $prefix){
+                $checkboxName = $prefix . $i;
+                if (!$request->has($checkboxName)) {
+                    $notReimbursedMeals .= '0'; // Checkbox not present, mark as reimbursed
+                } else {
+                    $notReimbursedMeals .= '1'; // Checkbox present, mark as not reimbursed
+                }
+            }
+        }
+        return $notReimbursedMeals;
+    }
+
+    /**
+     * @param int $selectedCountry
+     * @return TripType
+     */
+    public static function getTripType(int $selectedCountry): TripType
+    {
+//        dd($selectedCountry, Country::getIdOf('Slovensko'));
+        return $selectedCountry === Country::getIdOf('Slovensko')
+            ? TripType::DOMESTIC : TripType::FOREIGN;
+    }
+
+    /**
+     * @param BusinessTrip $trip
+     * @return void
+     * @throws Exception
+     */
+    public static function correctNotReimbursedMeals(BusinessTrip $trip): void
+    {
+        $days = self::getTripDurationInDays($trip);
+        $notReimbursedMeals = $trip->not_reimbursed_meals;
+        if ($notReimbursedMeals) {
+            $mealsLen = strlen($notReimbursedMeals);
+            if ($mealsLen < $days*3) {
+                $notReimbursedMeals .= str_repeat('0', ($days*3 - $mealsLen));
+            } elseif ($mealsLen > $days*3) {
+                $notReimbursedMeals = substr($notReimbursedMeals, 0, $days*3);
+            }
+
+//
+            $trip->update(['not_reimbursed_meals' => $notReimbursedMeals]);
+        }
+    }
+
 }

@@ -289,7 +289,7 @@
                 </x-hideable-section>
             </x-content-section>
 
-            @if(in_array($tripState, [TripState::UPDATED, TripState::COMPLETED, TripState::CLOSED]) )
+            @if($tripState->hasTravellerReturned())
                 @php
                     $expenses = ['travelling' => 'Cestovné', 'accommodation' => 'Ubytovanie', 'advance' => 'Vložné', 'other' => 'Iné'];
                     if($tripType == TripType::FOREIGN) {
@@ -387,21 +387,33 @@
 
                                 <tbody>
                                 @php
-    //                                 $meals = $trip->not_reimbursed_meals;
-                                    $meals = $meals ?? str_repeat('0', $days*3);
+                                    $meals = $trip->not_reimbursed_meals;
+                                    $meals = ($meals == null || $meals == '') ? str_repeat('0', $days*3) : $meals;
                                     $currentDate = clone $trip->datetime_start;
                                 @endphp
                                 @for ($i = 0; $i < $days; $i++)
                                     <tr>
                                         <td>{{ $currentDate->format('d.m.') }}</td>
                                         <td>
-                                            <input type="checkbox" name="{{ 'b'.$i }}" x-init="$el.checked = {{$meals[$i * 3 + 1] === 1 ? 'true' : 'false'}}" x-bind:checked="checkBreakfast">
+                                            <input
+                                                type="checkbox"
+                                                name="{{ 'b'.$i }}"
+                                                x-init="$el.checked = {{$meals[$i * 3 ] === '1' ? 'true' : 'false'}}"
+                                                x-bind:checked="checkBreakfast">
                                         </td>
                                         <td>
-                                            <input type="checkbox" name="{{ 'l'.$i }}" x-init="$el.checked = {{$meals[$i * 3 + 1] === 1 ? 'true' : 'false'}}" x-bind:checked="checkLunch">
+                                            <input
+                                                type="checkbox"
+                                                name="{{ 'l'.$i }}"
+                                                x-init="$el.checked = {{$meals[$i * 3 + 1] === '1' ? 'true' : 'false'}}"
+                                                x-bind:checked="checkLunch">
                                         </td>
                                         <td>
-                                            <input type="checkbox" name="{{ 'd'.$i }}" x-init="$el.checked = {{$meals[$i * 3 + 2] === 1 ? 'true' : 'false'}}" x-bind:checked="checkDinner" >
+                                            <input
+                                                type="checkbox"
+                                                name="{{ 'd'.$i }}"
+                                                x-init="$el.checked = {{$meals[$i * 3 + 2] === '1' ? 'true' : 'false'}}"
+                                                x-bind:checked="checkDinner" >
                                         </td>
                                     </tr>
 
