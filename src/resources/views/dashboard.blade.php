@@ -40,14 +40,7 @@
                         $sofiaId = $trip->sofia_id == null ? '0000' : $trip->sofia_id;
                         $dates = $trip->datetime_start->format('d.m.Y').' - '.$trip->datetime_end->format('d.m.Y');
                     @endphp
-                    <x-content-item
-                        :id="$trip->id"
-                        :sofia-id="$sofiaId"
-                        :state="$trip->state"
-                        :user="$fullName"
-                        :place="$trip->place"
-                        :purpose="$trip->tripPurpose->name"
-                        :date="$dates"/>
+                    <x-trip-list-item :trip="$trip"/>
                     @empty
                         <p>Zoznam ciest je momentálne prázdny.</p>
                 @endforelse

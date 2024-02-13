@@ -83,4 +83,17 @@ enum TripState: int
             self::CLOSED, self::CANCELLED => true,
         };
     }
+
+    public function icon() : string
+    {
+        return match ($this) {
+            TripState::NEW => 'sun',
+            TripState::CONFIRMED => 'file-circle-question',
+            TripState::UPDATED => 'file-circle-plus',
+            TripState::COMPLETED => 'file-circle-check',
+            TripState::CLOSED => 'circle-check',
+            TripState::CANCELLATION_REQUEST => 'file-circle-xmark',
+            TripState::CANCELLED => 'circle-xmark',
+        };
+    }
 }

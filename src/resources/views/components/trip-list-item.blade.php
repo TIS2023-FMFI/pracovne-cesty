@@ -1,31 +1,32 @@
+@props(['trip'])
+
 <a
-    href="trips/{{ $id }}/edit"
+    href="trips/{{ $trip->id }}/edit"
     class="text-decoration-none text-dark border-bottom">
     <div class="container my-2 py-2 border-bottom">
         <div class="row">
             <div class="col-7">
                 <div class="row">
                     <div class="col-12">
-                        <b>{{ $sofiaId }}</b>
+                        <b>{{ $trip->sofia_id }}</b>
                     </div>
                     <div class="col-12">
                         @if(Auth::user()->hasRole('admin'))
-                            {{ $user }}: {{ $place }}
-                        @else
-                            {{ $place }}
+                            {{ $trip->user->first_name.' '.$trip->user->last_name.': '}}
                         @endif
+                            {{ $trip->place }}
                     </div>
                     <div class="col-12">
-                        {{ $purpose }}
+                        {{ $trip->tripPurpose->name }}
                     </div>
                 </div>
             </div>
             <div class="col-4">
-                {{ $date }}
+                {{ $trip->datetime_start->format('d.m.Y').' - '.$trip->datetime_end->format('d.m.Y') }}
             </div>
             <div class="col-1">
                 <div class="state-icon">
-                    <i class="fa-solid fa-{{ $getIcon() }}"></i>
+                    <i class="fa-solid fa-{{ $trip->state->icon() }}"></i>
                 </div>
             </div>
         </div>
