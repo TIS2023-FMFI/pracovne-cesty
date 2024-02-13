@@ -95,16 +95,21 @@ class BusinessTripController extends Controller
         $validatedUserData = self::validateUserData($request);
         $validatedTripData = self::validateUpdatableTripData($request) + self::validateFixedTripData($request);
 
-        [$isReimbursement, $validatedReimbursementData] = self::validateReimbursementData($request);
-        [$isConferenceFee, $validatedConferenceFeeData] = self::validateConferenceFeeData($request);
+        list($isReimbursement, $validatedReimbursementData) = self::validateReimbursementData($request);
+        list($isConferenceFee, $validatedConferenceFeeData) = self::validateConferenceFeeData($request);
+
+        $areContributions = false;
+        if ($user->user_type->isExternal()) {
+            $validatedTripContributionsData = self::validateTripContributionsData($request);
+            $areContributions = true;
+        }
 
         // Add the authenticated user's ID to the validated data
         $validatedTripData['user_id'] = $user->id;
 
         // Set the type of trip based on the selected country
         $selectedCountry = $request->input('country');
-        $validatedTripData['type'] = $selectedCountry === Country::getIdOf('Slovensko')
-            ? TripType::DOMESTIC : TripType::FOREIGN;
+        $validatedTripData['type'] = self::getTripType($selectedCountry);
 
         //Logic to store the trip based on the validated data
         $trip = BusinessTrip::create($validatedTripData);
@@ -116,8 +121,7 @@ class BusinessTripController extends Controller
             self::createOrUpdateConferenceFee($validatedConferenceFeeData, $trip);
         }
 
-        if ($user->user_type->isExternal()) {
-            $validatedTripContributionsData = self::validateTripContributionsData($request);
+        if ($areContributions) {
             self::createOrUpdateTripContributions($validatedTripContributionsData, $trip);
         }
 
@@ -230,9 +234,13 @@ class BusinessTripController extends Controller
             list($isReimbursement, $validatedReimbursementData) = self::validateReimbursementData($request);
             list($isConferenceFee, $validatedConferenceFeeData) = self::validateConferenceFeeData($request);
 
-            if (in_array($tripState, [TripState::UPDATED, TripState::COMPLETED], true)) {
+            if ($tripState->hasTravellerReturned()) {
                 $validatedExpensesData = self::validateExpensesData($trip, $request);
-                // meals table !!
+
+                $days = self::getTripDurationInDays($trip);
+                $validatedMealsData = self::validateMealsData($days, $request);
+                $validatedTripData['not_reimbursed_meals'] = $validatedMealsData;
+
                 array_merge($validatedTripData, $request->validate(
                     ['conclusion' => 'required|max:5000']));
 
@@ -270,11 +278,13 @@ class BusinessTripController extends Controller
                 case TripState::UPDATED:
                     // Validation rules for expense-related fields
                     $validatedExpensesData = self::validateExpensesData($trip, $request);
+
                     $days = self::getTripDurationInDays($trip);
                     $validatedMealsData = self::validateMealsData($days, $request);
                     $validatedTripData['not_reimbursed_meals'] = $validatedMealsData;
-                    $validatedTripData = $request->validate(
-                        ['conclusion' => 'required|max:5000']);
+
+                    $validatedTripData = array_merge($validatedTripData, $request->validate(
+                        ['conclusion' => 'required|max:5000']));
 
                     self::createOrUpdateExpenses($validatedExpensesData, $trip);
 
@@ -717,30 +727,18 @@ class BusinessTripController extends Controller
             throw new Exception();
         }
 
-        $rule = 'nullable';
-        if ($user->user_type->isExternal()) {
-            $rule = 'required';
-        }
-
         $rules = [
-            'iban' => $rule . '|string|max:34',
+            'iban' => 'required' . '|string|max:34',
             'transport_id' => 'required|exists:transports,id',
             'spp_symbol_id' => 'required|exists:spp_symbols,id',
             'place_start' => 'required|string|max:200',
             'place_end' => 'required|string|max:200',
-            'datetime_start' => 'required|date|after:today',
+            'datetime_start' => 'required|date',
             'datetime_end' => 'required|date|after:datetime_start',
             'datetime_border_crossing_start' => 'sometimes|required|date',
             'datetime_border_crossing_end' => 'sometimes|required|date'
         ];
 
-//        // Border crossing validation rules for foreign trips
-//        if ($trip->type === TripType::FOREIGN && in_array($trip->state, [TripState::UPDATED, TripState::COMPLETED])) {
-//            $rules = array_merge($rules, [
-//                'datetime_border_crossing_start' =>  'required|date',
-//                'datetime_border_crossing_end' => 'required|date'
-//            ]);
-//        }
         //Validate trip data
         return $request->validate($rules);
     }
@@ -954,17 +952,27 @@ class BusinessTripController extends Controller
     {
         $notReimbursedMeals = '';
         $checkboxNames = ['b', 'l', 'd']; // Checkbox names prefix
-        foreach ($checkboxNames as $prefix) {
-            for ($i = 0; $i < $days; $i++) {
+        for ($i = 0; $i < $days; $i++) {
+            foreach ($checkboxNames as $prefix){
                 $checkboxName = $prefix . $i;
                 if (!$request->has($checkboxName)) {
-                    $notReimbursedMeals .= '0'; // Checkbox not present, mark as not reimbursed
+                    $notReimbursedMeals .= '0'; // Checkbox not present, mark as reimbursed
                 } else {
-                    $notReimbursedMeals .= '1'; // Checkbox present, mark as reimbursed
+                    $notReimbursedMeals .= '1'; // Checkbox present, mark as not reimbursed
                 }
             }
         }
         return $notReimbursedMeals;
+    }
+
+    /**
+     * @param mixed $selectedCountry
+     * @return TripType
+     */
+    public static function getTripType(mixed $selectedCountry): TripType
+    {
+        return $selectedCountry === Country::getIdOf('Slovensko')
+            ? TripType::DOMESTIC : TripType::FOREIGN;
     }
 
 }
