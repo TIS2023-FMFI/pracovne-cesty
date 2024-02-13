@@ -84,7 +84,20 @@ class SynchronizationController extends Controller
     public static function syncSingleBusinessTrip($businessTripId): void
     {
         // Fetch the specific business trip
-        $businessTrip = BusinessTrip::findOrFail($businessTripId);
+        $businessTrip = BusinessTrip::find($businessTripId);
+
+        if (!$businessTrip) {
+            throw new Exception();
+        }
+
+        // Get the Pritomnost user_id
+        $pritomnostUserId = $businessTrip->user()
+            ->first()->pritomnostUser()
+            ->first()->id;
+
+        if (!$pritomnostUserId) {
+            throw new Exception();
+        }
 
         // Calculate the number of days in the business trip
         $startDate = $businessTrip->datetime_start;
