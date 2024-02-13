@@ -8,9 +8,7 @@ use App\Models\BusinessTrip;
 use App\Models\PritomnostAbsence;
 use App\Models\PritomnostUser;
 use App\Models\User;
-use DateInterval;
-use DatePeriod;
-use DateTime;
+use Carbon\CarbonPeriod;
 use Exception;
 
 class SynchronizationController extends Controller
@@ -88,29 +86,19 @@ class SynchronizationController extends Controller
         $businessTrip = BusinessTrip::findOrFail($businessTripId);
 
         // Calculate the number of days in the business trip
-        $startDate = new DateTime($businessTrip->datetime_start);
-        $endDate = new DateTime($businessTrip->datetime_end);
-        $interval = new DateInterval('P1D');
-        $dateRange = new DatePeriod($startDate, $interval, $endDate);
+        $startDate = $businessTrip->datetime_start;
+        $endDate = $businessTrip->datetime_end;
+        $dateRange = new CarbonPeriod($startDate, '1 day', $endDate);
 
         foreach ($dateRange as $date) {
-            $formattedDate = $date->format('Y-m-d');
-
             // Calculate from_time and to_time for the current day in the loop
-            $fromTime = ($date == $startDate) ? $startDate->format('H:i:s') : '00:00:00';
-            $toTime = ($date == $endDate) ? $endDate->format('H:i:s') : '23:59:59';
-
-            // Get the Pritomnost user_id
-            $pritomnostUserId = $businessTrip->user()
-                ->first()
-                ->pritomnostUser()
-                ->first()
-                ->id;
+            $fromTime = $date->isSameDay($startDate) ? $startDate->format('H:i:s') : '00:00:00';
+            $toTime = $date->isSameDay($endDate) ? $endDate->format('H:i:s') : '23:59:59';
 
             // Check if the absence already exists in the Pritomnost database for this day
             $existingAbsence = PritomnostAbsence::where([
                 'user_id' => $pritomnostUserId,
-                'date_time' => $formattedDate,
+                'date_time' => $date->format('Y-m-d'),
                 'type' => PritomnostAbsenceType::BUSINESS_TRIP,
             ])->first();
 
@@ -118,7 +106,7 @@ class SynchronizationController extends Controller
                 // Create absence record in the Pritomnost database
                 PritomnostAbsence::create([
                     'user_id' => $pritomnostUserId,
-                    'date_time' => $formattedDate,
+                    'date_time' => $date->format('Y-m-d'),
                     'from_time' => $fromTime,
                     'to_time' => $toTime,
                     'type' => PritomnostAbsenceType::BUSINESS_TRIP,
