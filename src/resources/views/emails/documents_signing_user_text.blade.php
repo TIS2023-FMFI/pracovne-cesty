@@ -2,7 +2,7 @@ Podpísanie Dokumentov Pred Cestou
 
 Vážený používateľ,
 
-Prosím, nezabudnite podpísať potrebné dokumenty pred vašou cestou.
+Prosím, skontrolujte si vygenerované dokumenty pri vašej pracovnej cesty, podľa potreby si dokumenty vytlačte a doručte podpísané na sekretariát alebo sa dostavte podpísať dokumenty na sekretatriát.
 {{ $messageText }}
 
 S pozdravom,

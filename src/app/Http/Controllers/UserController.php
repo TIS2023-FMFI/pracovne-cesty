@@ -49,7 +49,22 @@ class UserController extends Controller
         if (!$link || !InvitationLink::isValid($link->token)) {
             return redirect()->back();
         }
-
+        $customMessages = [
+            'required' => 'Pole :attribute je povinné.',
+            'string' => 'Pole :attribute musí byť reťazec.',
+            'max' => 'Pole :attribute môže mať maximálne :max znakov.',
+            'email' => 'Pole :attribute musí byť platná e-mailová adresa.',
+            'unique' => 'Pole :attribute už bolo zaregistrované.',
+            'confirmed' => 'Potvrdenie :attribute sa nezhoduje.',
+            'min' => 'Pole :attribute musí obsahovať aspoň :min znakov.',
+        ];
+        $customAttributes = [
+            'first_name' => 'meno',
+            'last_name' => 'priezvisko',
+            'email' => 'e-mail',
+            'password' => 'heslo',
+            'username' => 'prihlasovacie meno',
+        ];
         $validUserTypes = implode(',', [UserType::EXTERN->value, UserType::STUDENT->value]);
         $validator = Validator::make($request->all(), [
             'first_name' => 'required|string|max:50',
@@ -57,7 +72,7 @@ class UserController extends Controller
             'username' => 'required|string|max:255|unique:users',
             'password' => 'required|string|max:255',
             'user_types' => 'required|in:' . $validUserTypes
-        ]);
+        ], $customMessages, $customAttributes);
 
         if ($validator->fails()) {
             return redirect()->back()

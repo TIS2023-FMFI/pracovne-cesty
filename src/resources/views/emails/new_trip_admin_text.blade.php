@@ -2,7 +2,7 @@ Nová Cesta Nahlásená
 
 Vážený admin,
 
-Bola nahlásená nová cesta. Prosím, skontrolujte detaily.
+Bola nahlásená nová pracovná cesta.
 {{ $messageText }}
 
 

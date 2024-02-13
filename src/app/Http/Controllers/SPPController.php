@@ -7,6 +7,7 @@ use App\Enums\SppStatus;
 use Illuminate\Http\Request;
 use \Illuminate\Http\RedirectResponse;
 
+
 class SPPController extends Controller
 {
 
@@ -27,6 +28,22 @@ class SPPController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
+        $customMessages = [
+            'required' => 'Pole :attribute je povinné.',
+            'string' => 'Pole :attribute musí byť reťazec.',
+            'max' => 'Pole :attribute môže mať maximálne :max znakov.',
+            'unique' => 'Pole :attribute už existuje.',
+            'exists' => 'Vybrané pole :attribute neexistuje.',
+        ];
+        $customAttributes = [
+            'fund' => 'fond',
+            'spp_symbol' => 'symbol ŠPP',
+            'functional_region' => 'funkčná oblasť',
+            'account' => 'účet',
+            'financial_centre' => 'finančné centrum',
+            'grantee' => 'príjemca',
+            'spp' => 'ŠPP prvok',
+        ];
         $validatedData = $request->validate([
             'fund' => 'required|string',
             'spp_symbol' => 'required|string|unique:spp_symbols,spp_symbol',
@@ -34,7 +51,7 @@ class SPPController extends Controller
             'account' => 'required|string',
             'financial_centre' => 'required|string',
             'grantee' => 'required|string|max:200',
-            ]);
+            ],$customMessages, $customAttributes);
 
         SppSymbol::create($validatedData);
 

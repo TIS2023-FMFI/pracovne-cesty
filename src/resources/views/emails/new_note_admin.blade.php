@@ -9,7 +9,7 @@
     <div class="header">Nová Poznámka k Ceste</div>
     <div class="content">
         Vážený admin, <br>
-        K jednej z ciest bola pridaná nová poznámka. Prosím, skontrolujte detaily.
+        K jednej z ciest bola pridaná nová poznámka.
         {{ $messageText }}
     </div>
     <div class="footer">

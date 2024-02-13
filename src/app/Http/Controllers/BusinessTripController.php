@@ -32,6 +32,7 @@ use mikehaertl\pdftk\Pdf;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
+
 class BusinessTripController extends Controller
 {
 
@@ -136,7 +137,7 @@ class BusinessTripController extends Controller
         $user->update($validatedUserData);
 
         //Sending mails
-        $message = '';
+        $message = 'ID pridanej cesty: ' . $trip->id . ' Meno a priezvisko cestujúceho: ' . $trip->user->first_name . ' ' . $trip->user->last_name;
         $recipient = 'admin@example.com';
         $viewTemplate = 'emails.new_trip_admin';
 
@@ -325,8 +326,7 @@ class BusinessTripController extends Controller
 
         // Retrieve user's email associated with the trip
         $recipient = $trip->user->email;
-
-        $message = '';
+        $message = 'ID Stornovanej cesty: ' . $trip->id;
         $viewTemplate = 'emails.cancellation_user';
 
         // Create an instance of the SimpleMail class
@@ -377,7 +377,6 @@ class BusinessTripController extends Controller
         $trip->update(['state' => TripState::CLOSED]);
 
         return redirect()->route('trip.edit', $trip);
-
     }
 
     /**
@@ -402,7 +401,7 @@ class BusinessTripController extends Controller
             $trip->update(['state' => TripState::CANCELLATION_REQUEST]);
 
             // Send email notification to the admin
-            $message = '';
+            $message = 'ID Cesty: ' . $trip->id . ' Meno a priezvisko cestujúceho: ' . $trip->user->first_name . ' ' . $trip->user->last_name;
             $recipient = 'admin@example.com';
             $viewTemplate = 'emails.cancellation_request_admin';
 
@@ -431,8 +430,8 @@ class BusinessTripController extends Controller
         // Update the trip's note with the new comment
         $trip->update(['note' => $request->input('comment')]);
 
-        // Send email notification to the admin
-        $message = '';
+        // Send email notification to the
+        $message = 'ID Cesty ku ktorej bola pridaná poznámka: ' . $trip->id . ' Meno a priezvisko cestujúceho: ' . $trip->user->first_name . ' ' . $trip->user->last_name;
         $recipient = 'admin@example.com';
         $viewTemplate = 'emails.new_note_admin';
 
@@ -711,6 +710,7 @@ class BusinessTripController extends Controller
     {
         $user = Auth::user();
 
+        Date::setLocale('sk');
         if (!$user) {
             throw new Exception();
         }

@@ -2,7 +2,7 @@ Informácia o Storne Cesty
 
 Vážený používateľ,
 
-Vaša cesta bola stornovaná.
+Vaša pracovná cesta bola stornovaná.
 {{ $messageText }}
 
 S pozdravom,
