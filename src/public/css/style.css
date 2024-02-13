@@ -10,6 +10,11 @@
 
 }
 
+.state-icon {
+    width: 30px;
+    height: 30px;
+}
+
 [x-cloak] {
     display: none !important;
 }
