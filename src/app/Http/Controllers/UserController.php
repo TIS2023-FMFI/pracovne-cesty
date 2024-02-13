@@ -88,7 +88,7 @@ class UserController extends Controller
     public function logout(): RedirectResponse
     {
         Auth::logout();
-        return redirect()->route('homepage');
+        return redirect()->route('homepage')->with('message', 'Boli ste úspešne odhlásený.');
     }
 
     /**
