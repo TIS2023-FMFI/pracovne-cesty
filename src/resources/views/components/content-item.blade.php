@@ -9,7 +9,11 @@
                         <b>{{ $sofiaId }}</b>
                     </div>
                     <div class="col-12">
-                        {{ $user }}: {{ $place }}
+                        @if(Auth::user()->hasRole('admin'))
+                            {{ $user }}: {{ $place }}
+                        @else
+                            {{ $place }}
+                        @endif
                     </div>
                     <div class="col-12">
                         {{ $purpose }}
@@ -20,7 +24,7 @@
                 {{ $date }}
             </div>
             <div class="col-1">
-                <div style="width: 30px; height: 30px;">
+                <div class="state-icon">
                     <i class="fa-solid fa-{{ $getIcon() }}"></i>
                 </div>
             </div>

@@ -17,7 +17,6 @@
     @endif
 
     <div class="row">
-
         @if($isAdmin)
             <div class="col-md-4">
                 <x-content-box title="Prehľad">
@@ -39,9 +38,16 @@
                         $user = $trip->user;
                         $fullName = $user->first_name.' '.$user->last_name;
                         $sofiaId = $trip->sofia_id == null ? '0000' : $trip->sofia_id;
-                        $dates = $trip->datetime_start->format('d.m.Y').'-'.$trip->datetime_end->format('d.m.Y');
+                        $dates = $trip->datetime_start->format('d.m.Y').' - '.$trip->datetime_end->format('d.m.Y');
                     @endphp
-                    <x-content-item :id="$trip->id" :sofia-id="$sofiaId" :state="$trip->state" :user="$fullName" :place="$trip->place" :purpose="$trip->tripPurpose->name" :date="$dates"/>
+                    <x-content-item
+                        :id="$trip->id"
+                        :sofia-id="$sofiaId"
+                        :state="$trip->state"
+                        :user="$fullName"
+                        :place="$trip->place"
+                        :purpose="$trip->tripPurpose->name"
+                        :date="$dates"/>
                     @empty
                         <p>Zoznam ciest je momentálne prázdny.</p>
                 @endforelse
