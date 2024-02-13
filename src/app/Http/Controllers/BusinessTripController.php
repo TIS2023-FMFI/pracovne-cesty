@@ -343,7 +343,6 @@ class BusinessTripController extends Controller
      * Updating state of the trip to confirmed
      * @throws ValidationException
      */
-    public static function confirm(Request $request, BusinessTrip $trip) {
     public static function confirm(Request $request, BusinessTrip $trip): RedirectResponse
     {
         // Check if the trip is in a valid state for confirmation

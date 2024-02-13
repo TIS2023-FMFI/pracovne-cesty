@@ -1,5 +1,5 @@
 <x-modal title="Zabudnuté heslo" name="forgot-password">
-    <form action="/forgot-password" method="POST">
+    <form action="/user/forgot-password" method="POST">
         @csrf
         <x-content-section>
             <x-slot:description>
