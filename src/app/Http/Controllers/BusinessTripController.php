@@ -95,8 +95,8 @@ class BusinessTripController extends Controller
         $validatedUserData = self::validateUserData($request);
         $validatedTripData = self::validateUpdatableTripData($request) + self::validateFixedTripData($request);
 
-        list($isReimbursement, $validatedReimbursementData) = self::validateReimbursementData($request);
-        list($isConferenceFee, $validatedConferenceFeeData) = self::validateConferenceFeeData($request);
+        [$isReimbursement, $validatedReimbursementData] = self::validateReimbursementData($request);
+        [$isConferenceFee, $validatedConferenceFeeData] = self::validateConferenceFeeData($request);
 
         $areContributions = false;
         if ($user->user_type->isExternal()) {
@@ -227,8 +227,8 @@ class BusinessTripController extends Controller
 
             $validatedTripData = self::validateUpdatableTripData($request) + self::validateFixedTripData($request);
             $validatedTripContributionsData = self::validateTripContributionsData($request);
-            list($isReimbursement, $validatedReimbursementData) = self::validateReimbursementData($request);
-            list($isConferenceFee, $validatedConferenceFeeData) = self::validateConferenceFeeData($request);
+            [$isReimbursement, $validatedReimbursementData] = self::validateReimbursementData($request);
+            [$isConferenceFee, $validatedConferenceFeeData] = self::validateConferenceFeeData($request);
 
             if ($tripState->hasTravellerReturned()) {
                 $validatedExpensesData = self::validateExpensesData($trip, $request);
