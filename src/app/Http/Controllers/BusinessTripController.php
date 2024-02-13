@@ -102,13 +102,13 @@ class BusinessTripController extends Controller
     /**
      * Returning view with the form for adding of the new trip
      */
-    public function create(Request $request)
+    public static function create(Request $request)
     {
         $selectedUser = null;
         if ($request->has('user') && Auth::user()->hasRole('admin')) {
             $selectedUser = User::find($request->query('user'));
             if (!$selectedUser) {
-                return redirect()->route('trip.index')->withErrors('Používateľ nebol nájdený.');
+                return redirect()->route('homepage')->withErrors('Používateľ nebol nájdený.');
             }
         }
 
@@ -173,9 +173,7 @@ class BusinessTripController extends Controller
         if ($isConferenceFee) {
             self::createOrUpdateConferenceFee($validatedConferenceFeeData, $trip);
         }
-
-        if ($authUser->user_type->isExternal() || ($isForDifferentUser && $targetUser->user_type->isExternal())) {
-            $validatedTripContributionsData = self::validateTripContributionsData($request);
+        if ($areContributions) {
             self::createOrUpdateTripContributions($validatedTripContributionsData, $trip);
         }
 
