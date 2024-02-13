@@ -8,7 +8,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
-    <title>Pracovné cesty</title>
+    <title>Pracovné cesty KAI</title>
     <link rel="icon" type="image/x-icon" href="{{asset('images/favicon.ico')}}">
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -31,29 +31,45 @@
                     <span class="text-white mx-2">Prihlásený ako: <b>{{Auth::user()->first_name.' '.Auth::user()->last_name}}</b></span>
                     <form method="POST" action="/user/logout">
                         @csrf
-                        <button class="btn btn-danger">Odhlásiť sa</button>
-                    </form>
-                @else
-                    <form method="POST" action="/user">
-                        @csrf
-                        <label for="username" class="text-white">Prihlasovacie meno: </label>
-                        <input name="username" id="username"/>
-                        <label for="password" class="text-white">Heslo: </label>
-                        <input name="password" id="password" type="password"/>
-                        <button>
-                            <i class="fa-solid fa-right-to-bracket"></i>
+                        <button class="btn btn-sm btn-danger">
+                            <i class="text-white fa-solid fa-right-to-bracket"></i>
                         </button>
                     </form>
+                @else
+                    <form class="form-inline" method="POST" action="/user">
+                        @csrf
+                        <div class="form-group mx-2">
+                            <input
+                                class="form-control form-control-sm"
+                                placeholder="Prihlasovacie meno"
+                                name="username"
+                                id="username"/>
+                        </div>
+
+                        <div class="form-group mx-2">
+                            <input
+                                class="form-control form-control-sm"
+                                placeholder="Heslo"
+                                type="password"
+                                name="password"
+                                id="password"/>
+                        </div>
+
+                        <div class="form-group ml-2 mr-3">
+                            <button class="btn btn-sm btn-danger">
+                                <i class="text-white fa-solid fa-right-to-bracket"></i>
+                            </button>
+                        </div>
+                    </form>
+                    <a
+                        class="text-white link"
+                        href=""
+                        data-toggle="modal"
+                        data-target="#forgot-password">Zabudnuté heslo?</a>
+                    <x-modals.forgot-password/>
                 @endauth
             </div>
         </div>
-
-        @guest
-            <div class="container d-flex justify-content-end py-2">
-                <x-button position-absolute color="danger" modal="forgot-password">Zabudnuté heslo?</x-button>
-                <x-modals.forgot-password/>
-            </div>
-        @endguest
 
         <div class="container py-3">
             <a href="\" class="text-decoration-none">
