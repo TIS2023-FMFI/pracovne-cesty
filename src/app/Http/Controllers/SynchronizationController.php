@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-
 use App\Enums\PritomnostAbsenceType;
 use App\Enums\UserType;
 use App\Models\BusinessTrip;
@@ -19,17 +18,18 @@ class SynchronizationController extends Controller
     /**
      * Synchronize a single user between Cesty and Pritomnost databases.
      *
-     * @param $userId
-     * @return void
+     * @param string $username
+     * @return bool Whether a user with the given username
+     *              has been synchronized from Pritomnost DB or not
      */
-    public static function syncSingleUser($userId): void
+    public static function syncSingleUser(string $username): bool
     {
         // Use LEFT JOIN to check if the user exists in the Cesty database
         $userToSync = PritomnostUser::leftJoin(
             'cesty.users',
             'cesty.users.personal_id', '=', 'pritomnost.users.personal_id'
         )
-            ->where('pritomnost.users.id', $userId)
+            ->where('pritomnost.users.username', $username)
             ->select('pritomnost.users.*', 'cesty.users.id as cesty_user_id')
             ->first();
 
@@ -67,7 +67,11 @@ class SynchronizationController extends Controller
 
                 $newUser->save();
             }
+
+            return true;
         }
+
+        return false;
     }
 
 
