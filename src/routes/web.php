@@ -132,6 +132,20 @@ Route::controller(UserController::class)
                 // Submit the registration form
                 Route::post('/register/store', 'store')
                     ->name('register-submit');
+
+                // Submit a password reset request
+                Route::post('/forgot-password', 'forgotPassword')
+                    ->name('forgot-password');
+
+                // Show the password reset
+                Route::get('/reset-password/{token}', static function ($token) {
+                    return view('reset-password', ['token' => $token]);
+                })
+                    ->name('reset-password-form');
+
+                // Submit new password
+                Route::post('/reset-password', 'resetPassword')
+                    ->name('reset-password');
             });
     });
 

@@ -1,6 +1,6 @@
 <x-layout>
     <x-content-box title="Zmena hesla">
-        <form action="/reset-password" method="POST">
+        <form action="/user/reset-password" method="POST">
             @csrf
             <x-content-section>
                 <div class="form-row">
