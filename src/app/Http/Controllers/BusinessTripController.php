@@ -102,10 +102,22 @@ class BusinessTripController extends Controller
     /**
      * Returning view with the form for adding of the new trip
      */
-    public static function create()
+    public function create(Request $request)
     {
-        return view('business-trips.create');
+        $selectedUser = null;
+        if ($request->has('user') && Auth::user()->hasRole('admin')) {
+            $selectedUser = User::find($request->query('user'));
+            if (!$selectedUser) {
+                return redirect()->route('trip.index')->withErrors('Používateľ nebol nájdený.');
+            }
+        }
+
+        return view('business-trips.create', [
+            'selectedUser' => $selectedUser,
+        ]);
     }
+
+
 
     /**
      * Parsing data from the $request in form
@@ -118,10 +130,31 @@ class BusinessTripController extends Controller
     public static function store(Request $request): RedirectResponse
     {
         // Get the authenticated user's ID
-        $user = Auth::user();
+        $authUser = Auth::user();
 
-        if (!$user) {
+        if (!$authUser) {
             throw new Exception();
+        }
+        $targetUserId = $request->query('user');
+        Log::info("Requested user ID from query: " . $targetUserId);
+
+        $targetUser = $targetUserId ? User::find($targetUserId) : $authUser;
+        Log::info("Found user ID: " . ($targetUser ? $targetUser->id : 'null'));
+
+
+
+        if (!$targetUser) {
+            Log::error("User not found for ID: " . $request->query('user'));
+            return redirect()->back()->withErrors("Používateľ nebol nájdený.");
+        }
+
+        Log::info("Authenticated user ID: " . $authUser->id);
+
+
+        $isForDifferentUser = $targetUser->id != $authUser->id && $authUser->hasRole('admin');
+
+        if ($isForDifferentUser && !$authUser->hasRole('admin')) {
+            return redirect()->back()->withErrors("Nemáte oprávnenie pridávať cesty za iných používateľov.");
         }
 
         // Validate all necessary data
@@ -132,7 +165,7 @@ class BusinessTripController extends Controller
         [$isConferenceFee, $validatedConferenceFeeData] = self::validateConferenceFeeData($request);
 
         // Add the authenticated user's ID to the validated data
-        $validatedTripData['user_id'] = $user->id;
+        $validatedTripData['user_id'] = $targetUser->id;
 
         // Set the type of trip based on the selected country
         $selectedCountry = $request->input('country');
@@ -149,7 +182,7 @@ class BusinessTripController extends Controller
             self::createOrUpdateConferenceFee($validatedConferenceFeeData, $trip);
         }
 
-        if ($user->user_type->isExternal()) {
+        if ($authUser->user_type->isExternal() || ($isForDifferentUser && $targetUser->user_type->isExternal())) {
             $validatedTripContributionsData = self::validateTripContributionsData($request);
             self::createOrUpdateTripContributions($validatedTripContributionsData, $trip);
         }
@@ -166,7 +199,7 @@ class BusinessTripController extends Controller
         }
 
         // Update user details
-        $user->update($validatedUserData);
+        $targetUser->update($validatedUserData);
 
         //Sending mails
         $message = 'ID pridanej cesty: ' . $trip->id . ' Meno a priezvisko cestujúceho: ' . $trip->user->first_name . ' ' . $trip->user->last_name;
@@ -742,7 +775,6 @@ class BusinessTripController extends Controller
     {
         $user = Auth::user();
 
-        Date::setLocale('sk');
         if (!$user) {
             throw new Exception();
         }

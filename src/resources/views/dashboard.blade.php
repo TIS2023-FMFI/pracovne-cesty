@@ -4,7 +4,10 @@
 
 <x-layout>
     <div class="mb-3">
-        <x-link-button href="/trips/create">Pridať pracovnú cestu</x-link-button>
+        @php
+            $userId = request()->query('user');
+        @endphp
+        <x-link-button href="{{ $userId ? route('trip.create', ['user' => $userId]) : route('trip.create') }}">Pridať pracovnú cestu</x-link-button>
 
         @if($isAdmin)
             <x-button color="danger" modal="add-users">Pridať používateľov</x-button>

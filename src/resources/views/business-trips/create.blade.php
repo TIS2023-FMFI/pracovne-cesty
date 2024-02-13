@@ -13,7 +13,7 @@
     $contributions = Contribution::all()->pluck('name', 'id');
     $spp_symbols = SppSymbol::where('status', SppStatus::ACTIVE)->pluck('spp_symbol', 'id');
 
-    $user = Auth::user();
+    $user = $selectedUser ?? Auth::user();
     $userType = $user->user_type;
 
 @endphp
