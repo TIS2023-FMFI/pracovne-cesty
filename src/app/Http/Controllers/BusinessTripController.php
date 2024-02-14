@@ -148,19 +148,24 @@ class BusinessTripController extends Controller
 
         // Check if it was too late to add trip and inform user
         $warningMessage = null;
+        $message = null;
         $currentDate = new DateTime();
         $startDate = new DateTime($trip->datetime_start);
         $days = $trip->type == TripType::DOMESTIC ? '4' : '11';
         $newDate = $currentDate->modify("+ ".$days." weekday");
-        $days = $trip->type === TripType::DOMESTIC ? '4' : '11';
         if ($startDate < $newDate) {
             $warningMessage = 'Vaša pracovná cesta bude pridaná, ale nie je to v súlade s pravidlami.
                                Cestu vždy pridávajte minimálne 4 pracovné dni pred jej začiatkom v prípade,
                                že ide o tuzemskú cestu, a 11 pracovných dní pred začiatkom v prípade zahraničnej cesty.';
         }
+        else {
+            $message = 'Pracovná cesta bola úspešne vytvorená.';
+        }
 
         //Redirecting to the homepage
-        return redirect()->route('homepage')->with('warning', $warningMessage);
+        return redirect()->route('homepage')
+            ->with('warning', $warningMessage)
+            ->with('message', $message);
     }
 
     /**
@@ -300,7 +305,7 @@ class BusinessTripController extends Controller
             Mail::to($recipient)->send($email);
         }
 
-        return redirect()->route('trip.edit', ['trip' => $trip]);
+        return redirect()->route('trip.edit', ['trip' => $trip])->with('message', 'Údaje o ceste boli úspešne aktualizované.');
     }
 
     /**
@@ -335,7 +340,7 @@ class BusinessTripController extends Controller
         // Send the email
         Mail::to($recipient)->send($email);
 
-        return redirect()->route('trip.edit', $trip);
+        return redirect()->route('trip.edit', $trip)->with('message', 'Cesta bola úspešne stornovaná.');
 
     }
 
@@ -358,7 +363,7 @@ class BusinessTripController extends Controller
         // Confirm the trip and record sofia_id
         $trip->update(['state' => TripState::CONFIRMED, 'sofia_id' => $validatedData['sofia_id']]);
 
-        return redirect()->route('trip.edit', $trip);
+        return redirect()->route('trip.edit', $trip)->with('message', 'Cesta bola potvrdená, identifikátor zo systému SOFIA bol priradený.');
 
     }
 
@@ -376,7 +381,8 @@ class BusinessTripController extends Controller
         //Close the trip
         $trip->update(['state' => TripState::CLOSED]);
 
-        return redirect()->route('trip.edit', $trip);
+        return redirect()->route('trip.edit', $trip)
+            ->with('message', 'Stav cesty bol zmenený na Spracovaná. Na ceste už nie je možné vykonať žiadne zmeny.');
 
     }
 
@@ -387,19 +393,15 @@ class BusinessTripController extends Controller
     public static function requestCancellation(Request $request, BusinessTrip $trip): RedirectResponse
     {
         // Validate the cancellation reason
-        $validator = Validator::make($request->all(), [
+        $validatedData = $request->validate([
             'cancellation_reason' => 'required|string|max:1000',
         ]);
-
-        // Check if the validation fails
-        if ($validator->fails()) {
-            throw ValidationException::withMessages(['cancellation_reason' => 'Cancellation reason is required.']);
-        }
 
         // Check if the current state of the trip allows cancellation request
         if (in_array($trip->state, [TripState::NEW, TripState::CONFIRMED], true)) {
             // Change the state to CANCELLATION_REQUEST
             $trip->update(['state' => TripState::CANCELLATION_REQUEST]);
+            $trip->update($validatedData);
 
             // Send email notification to the admin
             $message = '';
@@ -415,7 +417,8 @@ class BusinessTripController extends Controller
             throw ValidationException::withMessages(['state' => 'Invalid state for cancellation request.']);
         }
 
-        return redirect()->route('request-cancel', $trip->id)->with('success', 'Cancellation request submitted successfully.');
+        return redirect()->route('trip.edit', $trip->id)
+            ->with('message', 'Žiadosť o storno bola úspešne odoslaná.');
     }
 
     /**
@@ -424,12 +427,12 @@ class BusinessTripController extends Controller
     public static function addComment(Request $request, BusinessTrip $trip): RedirectResponse
     {
         // Validate the incoming request
-        $request->validate([
-            'comment' => 'required|string|max:5000',
+        $validatedData = $request->validate([
+            'note' => 'required|string|max:5000',
         ]);
 
         // Update the trip's note with the new comment
-        $trip->update(['note' => $request->input('comment')]);
+        $trip->update($validatedData);
 
         // Send email notification to the admin
         $message = '';
@@ -443,7 +446,8 @@ class BusinessTripController extends Controller
         Mail::to($recipient)->send($email);
 
         // Redirect or respond with a success message
-        return redirect()->route('trip.edit', $trip->id)->with('message', 'Comment added successfully.');
+        return redirect()->route('trip.edit', $trip->id)
+            ->with('message', 'Poznámka pre administrátora bola pridaná.');
     }
 
     /**

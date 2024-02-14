@@ -77,7 +77,7 @@ class UserController extends Controller
         $link->used = true;
         $link->save();
 
-        return redirect()->route('homepage');
+        return redirect()->route('homepage')->with('message', 'Vaša registrácia prebehla úspešne.');
     }
 
     /**
@@ -108,13 +108,11 @@ class UserController extends Controller
             }
             if (Auth::attempt($credentials)) {
                 $request->session()->regenerate();
-                return redirect()->route('homepage');
+                return redirect()->route('homepage')->with('message', 'Boli ste úspešne prihlásený.');
             }
         }
 
-        return back()->withErrors([
-            'username' => 'The provided credentials do not match our records.',
-        ]);
+        return back()->with('message', 'Zadané meno alebo heslo nie sú správne.');
     }
 
     /**
