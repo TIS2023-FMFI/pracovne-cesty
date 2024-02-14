@@ -1,14 +1,34 @@
 @php
+    use App\Models\User;
+
     $isAdmin = Auth::user()->hasRole('admin');
+
+    $selectedUserId = request()->query('user');
+    $selectedUser = $selectedUserId ? User::find($selectedUserId) : null;
+    $selectedUserName = $selectedUser ? $selectedUser->first_name.' '.$selectedUser->last_name : '';
 @endphp
 
 <x-layout>
-    <div class="mb-3">
-        <x-link-button href="/trips/create">Pridať pracovnú cestu</x-link-button>
+    <div class="mb-3 btn-toolbar" role="toolbar">
+        <div class="mr-2 btn-group">
+            <x-link-button href="/trips/create">Pridať pracovnú cestu
+                @if($isAdmin && $selectedUserName)
+                    <x-slot:detail>
+                        ako {{ $selectedUserName }}
+                    </x-slot:detail>
+                @endif
+            </x-link-button>
+        </div>
 
         @if($isAdmin)
-            <x-button color="danger" modal="add-users">Pridať používateľov</x-button>
+            <div class="mr-2 btn-group">
+                <x-button color="danger" modal="add-users">Pridať používateľov</x-button>
+            </div>
+
+        <div class="mr-2 btn-group">
             <x-link-button color="danger" href="/spp">ŠPP prvky</x-link-button>
+        </div>
+
         @endif
     </div>
 
@@ -20,12 +40,14 @@
         @if($isAdmin)
             <div class="col-md-4">
                 <x-content-box title="Prehľad">
-                    <x-overview-item content="Najnovšie" ref="/?filter=newest"/>
-                    <x-overview-item content="Nepotvrdené" ref="/?filter=unconfirmed"/>
-                    <x-overview-item content="Nevyúčtované" ref="/?filter=unaccounted"/>
+                    <x-overview-item ref="/?filter=newest"><b>Najnovšie</b></x-overview-item>
+                    <x-overview-item ref="/?filter=unconfirmed"><b>Nepotvrdené</b></x-overview-item>
+                    <x-overview-item ref="/?filter=unaccounted"><b>Nevyúčtované</b></x-overview-item>
+
+                    <div class="my-3"></div>
 
                     @foreach($users as $user)
-                        <x-overview-item :content="$user->first_name.' '.$user->last_name" :ref="'?user='.$user->id"/>
+                        <x-overview-item :ref="'?user='.$user->id">{{ $user->first_name.' '.$user->last_name }}</x-overview-item>
                     @endforeach
                 </x-content-box>
             </div>
