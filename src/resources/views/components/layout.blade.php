@@ -44,7 +44,8 @@
                                 class="form-control form-control-sm"
                                 placeholder="Prihlasovacie meno"
                                 name="username"
-                                id="username"/>
+                                id="username"
+                                required/>
                         </div>
 
                         <div class="form-group mx-2">
@@ -53,7 +54,8 @@
                                 placeholder="Heslo"
                                 type="password"
                                 name="password"
-                                id="password"/>
+                                id="password"
+                                required/>
                         </div>
 
                         <div class="form-group ml-2 mr-3">
