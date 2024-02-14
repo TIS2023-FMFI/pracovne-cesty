@@ -560,7 +560,7 @@
             </x-content-section>
         @endif
 
-        @if($isAdmin && !$tripState->isFinal())
+        @if($isAdmin && !$tripState->isFinal() && !$tripState->hasTravellerReturned())
             <x-content-section title="Stornovanie">
                 <x-slot:description>
                     <p>Ako administrátor môžete stornovať pracovnú cestu.</p>
