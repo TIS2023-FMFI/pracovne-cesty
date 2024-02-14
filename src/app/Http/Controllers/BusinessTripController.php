@@ -22,6 +22,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
@@ -116,7 +117,6 @@ class BusinessTripController extends Controller
     }
 
 
-
     /**
      * Parsing data from the $request in form
      * Also managing uploaded files from the form
@@ -163,38 +163,52 @@ class BusinessTripController extends Controller
         // Add the authenticated user's ID to the validated data
         $validatedTripData['user_id'] = $targetUser->id;
 
-        //Logic to store the trip based on the validated data
-        $trip = BusinessTrip::create($validatedTripData);
-        if ($isReimbursement) {
-            self::createOrUpdateReimbursement($validatedReimbursementData, $trip);
-        }
+        // Start DB transaction before writing
+        DB::beginTransaction();
 
-        if ($isConferenceFee) {
-            self::createOrUpdateConferenceFee($validatedConferenceFeeData, $trip);
-        }
+        try {
+            // Logic to store the trip based on the validated data
+            $trip = BusinessTrip::create($validatedTripData);
+            if ($isReimbursement) {
+                self::createOrUpdateReimbursement($validatedReimbursementData, $trip);
+            }
 
-        if ($areContributions) {
-            self::createOrUpdateTripContributions($validatedTripContributionsData, $trip);
-        }
+            if ($isConferenceFee) {
+                self::createOrUpdateConferenceFee($validatedConferenceFeeData, $trip);
+            }
 
-        //Handle file uploads
-        if ($request->hasFile('upload_name')) {
-            $file = $request->file('upload_name');
+            if ($areContributions) {
+                self::createOrUpdateTripContributions($validatedTripContributionsData, $trip);
+            }
 
-            //Store the file in the storage/app/trips directory
-            $upload_name = Storage::disk('uploads')->putFile('', $file);
+            // Handle file uploads
+            if ($request->hasFile('upload_name')) {
+                $file = $request->file('upload_name');
 
-            //Save the file path in the model
-            $trip->update(['upload_name' => $upload_name]);
-        }
+                // Store the file in the storage/app/trips directory
+                $upload_name = Storage::disk('uploads')->putFile('', $file);
 
-        // Update user details
-        $targetUser->update($validatedUserData);
+                // Save the file path in the model
+                $trip->update(['upload_name' => $upload_name]);
+            }
+
+            // Update user details
+            $targetUser->update($validatedUserData);
 
         //Sending mails
         $message = 'ID pridanej cesty: ' . $trip->id . ' Meno a priezvisko cestujúceho: ' . $trip->user->first_name . ' ' . $trip->user->last_name;
         $recipient = 'admin@example.com';
         $viewTemplate = 'emails.new_trip_admin';
+            // Save changes
+            DB::commit();
+
+        } catch (Exception $e) {
+            // Rollback in case something went wrong
+            DB::rollBack();
+            return redirect()->route('homepage')
+                ->with('message', 'Pracovná cesta nebola kvôli chybe vytvorená. Zopakujte to neskôr, prosím.');
+        }
+
 
         // Create an instance of the SimpleMail class
         $email = new SimpleMail($message, $recipient, $viewTemplate);
@@ -281,7 +295,6 @@ class BusinessTripController extends Controller
         }
 
         $isAdmin = $user->hasRole('admin');
-
         $tripState = $trip->state;
 
         // Admin updating the trip
@@ -293,73 +306,97 @@ class BusinessTripController extends Controller
             [$isReimbursement, $validatedReimbursementData] = self::validateReimbursementData($request);
             [$isConferenceFee, $validatedConferenceFeeData] = self::validateConferenceFeeData($request);
 
-            if ($tripState->hasTravellerReturned()) {
-                $validatedExpensesData = self::validateExpensesData($trip, $request);
+            // Start DB transaction before writing
+            DB::beginTransaction();
 
-                $days = self::getTripDurationInDays($trip);
-                $validatedMealsData = self::validateMealsData($days, $request);
-                $validatedTripData['not_reimbursed_meals'] = $validatedMealsData;
-
-                array_merge($validatedTripData, $request->validate(
-                    ['conclusion' => 'required|max:5000']));
-
-                // all validations complete
-                self::createOrUpdateExpenses($validatedExpensesData, $trip);
-            }
-
-            if ($isReimbursement) {
-                self::createOrUpdateReimbursement($validatedReimbursementData, $trip);
-            }
-
-            if ($isConferenceFee) {
-                self::createOrUpdateConferenceFee($validatedConferenceFeeData, $trip);
-            }
-
-            self::createOrUpdateTripContributions($validatedTripContributionsData, $trip);
-
-            $trip->user->update($validatedUserData);
-
-            // Update the trip with the provided data
-            $trip->update($validatedTripData);
-            self::correctNotReimbursedMeals($trip);
-
-
-        } else { // Non-admin user updating the trip
-
-            // Validate and update based on trip state
-            switch ($trip->state) {
-                case TripState::CONFIRMED:
-                    $validatedTripData = self::validateUpdatableTripData($request);
-
-                    // Change the state to UPDATED
-                    $trip->update(['state' => TripState::UPDATED]);
-                    break;
-
-                // Adding report to an UPDATED state trip
-                case TripState::UPDATED:
-                    // Validation rules for expense-related fields
+            try {
+                if ($tripState->hasTravellerReturned()) {
                     $validatedExpensesData = self::validateExpensesData($trip, $request);
 
                     $days = self::getTripDurationInDays($trip);
                     $validatedMealsData = self::validateMealsData($days, $request);
                     $validatedTripData['not_reimbursed_meals'] = $validatedMealsData;
 
-                    $validatedTripData = array_merge($validatedTripData, $request->validate(
+                    array_merge($validatedTripData, $request->validate(
                         ['conclusion' => 'required|max:5000']));
 
+                    // all validations complete
                     self::createOrUpdateExpenses($validatedExpensesData, $trip);
+                }
 
-                    // Change the state to COMPLETED
-                    $trip->update(['state' => TripState::COMPLETED]);
-                    break;
+                if ($isReimbursement) {
+                    self::createOrUpdateReimbursement($validatedReimbursementData, $trip);
+                }
 
-                // Updating a wrong state trip
-                default:
-                    throw ValidationException::withMessages(['state' => 'Invalid state for updating.']);
+                if ($isConferenceFee) {
+                    self::createOrUpdateConferenceFee($validatedConferenceFeeData, $trip);
+                }
+
+                self::createOrUpdateTripContributions($validatedTripContributionsData, $trip);
+
+                $trip->user->update($validatedUserData);
+
+                // Update the trip with the provided data
+                $trip->update($validatedTripData);
+                self::correctNotReimbursedMeals($trip);
+
+                DB::commit();
+
+            } catch (Exception $e) {
+                DB::rollBack();
+                return redirect()
+                    ->route('trip.edit', ['trip' => $trip])
+                    ->with('message', 'Údaje o ceste neboli kvôli chybe aktualizované. Skúste to neskôr, prosím.');
             }
 
-            // Update the trip with the provided data
-            $trip->update($validatedTripData);
+        } else { // Non-admin user updating the trip
+            // Start DB transaction before writing
+            DB::beginTransaction();
+
+            try {
+                // Validate and update based on trip state
+                switch ($trip->state) {
+                    case TripState::CONFIRMED:
+                        $validatedTripData = self::validateUpdatableTripData($request);
+
+                        // Change the state to UPDATED
+                        $trip->update(['state' => TripState::UPDATED]);
+                        break;
+
+                    // Adding report to an UPDATED state trip
+                    case TripState::UPDATED:
+                        // Validation rules for expense-related fields
+                        $validatedExpensesData = self::validateExpensesData($trip, $request);
+
+                        $days = self::getTripDurationInDays($trip);
+                        $validatedMealsData = self::validateMealsData($days, $request);
+                        $validatedTripData['not_reimbursed_meals'] = $validatedMealsData;
+
+                        $validatedTripData = array_merge($validatedTripData, $request->validate(
+                            ['conclusion' => 'required|max:5000']));
+
+                        self::createOrUpdateExpenses($validatedExpensesData, $trip);
+
+                        // Change the state to COMPLETED
+                        $trip->update(['state' => TripState::COMPLETED]);
+                        break;
+
+                    // Updating a wrong state trip
+                    default:
+                        throw ValidationException::withMessages(['state' => 'Invalid state for updating.']);
+                }
+
+                // Update the trip with the provided data
+                $trip->update($validatedTripData);
+
+                DB::commit();
+
+            } catch (Exception $e) {
+                DB::rollBack();
+                return redirect()
+                    ->route('trip.edit', ['trip' => $trip])
+                    ->with('message', 'Údaje o ceste neboli kvôli chybe aktualizované. Skúste to neskôr, prosím.');
+            }
 
             //Sending mails
             $message = '';
@@ -1023,7 +1060,7 @@ class BusinessTripController extends Controller
         $notReimbursedMeals = '';
         $checkboxNames = ['b', 'l', 'd']; // Checkbox names prefix
         for ($i = 0; $i < $days; $i++) {
-            foreach ($checkboxNames as $prefix){
+            foreach ($checkboxNames as $prefix) {
                 $checkboxName = $prefix . $i;
                 if (!$request->has($checkboxName)) {
                     $notReimbursedMeals .= '0'; // Checkbox not present, mark as reimbursed
@@ -1057,10 +1094,10 @@ class BusinessTripController extends Controller
         $notReimbursedMeals = $trip->not_reimbursed_meals;
         if ($notReimbursedMeals) {
             $mealsLen = strlen($notReimbursedMeals);
-            if ($mealsLen < $days*3) {
-                $notReimbursedMeals .= str_repeat('0', ($days*3 - $mealsLen));
-            } elseif ($mealsLen > $days*3) {
-                $notReimbursedMeals = substr($notReimbursedMeals, 0, $days*3);
+            if ($mealsLen < $days * 3) {
+                $notReimbursedMeals .= str_repeat('0', ($days * 3 - $mealsLen));
+            } elseif ($mealsLen > $days * 3) {
+                $notReimbursedMeals = substr($notReimbursedMeals, 0, $days * 3);
             }
 
 //
