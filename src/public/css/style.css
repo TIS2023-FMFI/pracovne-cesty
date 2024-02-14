@@ -7,7 +7,19 @@
 
 .header {
     background-image: url("/images/dai-header.jpg");
+}
 
+.hidden-image {
+    display: none;
+}
+
+.state-icon {
+    width: 30px;
+    height: 30px;
+}
+
+.link {
+    text-decoration: underline;
 }
 
 [x-cloak] {

@@ -25,13 +25,13 @@
             <x-simple-input name="target_user" :value="$user->id" hidden/>
             <x-content-section title="Osobné údaje">
                 <div class="form-row">
-                    <div class="col">
+                    <div class="col-md col-12">
                         <x-simple-input name="first_name" label="Meno" :value="$user->first_name"/>
                     </div>
-                    <div class="col">
+                    <div class="col-md col-12">
                         <x-simple-input name="last_name" label="Priezvisko" :value="$user->last_name"/>
                     </div>
-                    <div class="col">
+                    <div class="col-md col-12">
                         <x-simple-input name="academic_degrees" label="Tituly" :value="$user->academic_degrees ?? ''"/>
                     </div>
                 </div>
@@ -39,21 +39,21 @@
                 <x-simple-input name="address" label="Bydlisko" :value="$user->address ?? ''"/>
 
                 <div class="form-row">
-                    <div class="col">
+                    <div class="col-md col-12">
                         <x-simple-input name="personal_id" label="Osobné číslo" :readonly="true" :value="$user->personal_id ?? ''"/>
                     </div>
-                    <div class="col">
+                    <div class="col-md col-12">
                         <x-simple-input name="department" label="Pracovisko" :value="$user->department ?? ''"/>
                     </div>
                 </div>
             </x-content-section>
 
-            <x-content-section title="Neviem netuším">
+            <x-content-section title="Detaily">
                 <div class="form-row">
-                    <div class="col">
+                    <div class="col-md col-12">
                         <x-simple-input name="iban" label="Číslo účtu"/>
                     </div>
-                    <div class="col">
+                    <div class="col-md col-12">
                         <x-dropdown-input name="transport_id" label="Dopravný prostriedok" :values="$transports"/>
                     </div>
                 </div>
@@ -76,19 +76,19 @@
 
             <x-content-section title="Cieľ cesty">
                 <div class="form-row">
-                    <div class="col">
+                    <div class="col-md col-12">
                         <x-simple-input name="place" label="Miesto"/>
                     </div>
-                    <div class="col">
+                    <div class="col-md col-12">
                         <x-dropdown-input name="country_id" label="Štát" :values="$countries"/>
                     </div>
 
                 </div>
                 <div class="form-row">
-                    <div class="col">
+                    <div class="col-md col-12">
                         <x-dropdown-input name="trip_purpose_id" label="Účel cesty" :values="$purposes"/>
                     </div>
-                    <div class="col">
+                    <div class="col-md col-12">
                         <x-textarea name="purpose_details" label="Špecifikácia účelu"></x-textarea>
                     </div>
                 </div>
@@ -99,7 +99,7 @@
                     </div>
                 </div>
                 <div class="form-row">
-                    <div class="col-sm-6">
+                    <div class="col-md-6 col-12">
                         <x-simple-input name="upload_name" type="file" label="Vložte pozvánku, plagát alebo iný súbor..."/>
                     </div>
                 </div>
@@ -130,22 +130,23 @@
             @endphp
             <x-content-section title="Financovanie" x-data="{reimbursementShow: {{$reimbursementShow ? 'true' : 'false'}} }">
                 <x-slot:description>
-                    V prípade refundácie, prosím, vyberte ako ŠPP prvok 2 ten prvok, z ktorého budú peniaze neskôr vrátené do ŠPP prvku 1. Ako dátum vrátenia peňazí uveďte iba orientačný, predpokladaný dátum.
+                    V prípade refundácie, prosím, vyberte ako <b>ŠPP prvok 2</b> ten prvok, z ktorého budú peniaze neskôr
+                    vrátené do <b>ŠPP prvku 1</b>. Ako <b>dátum vrátenia peňazí</b> uveďte iba orientačný, predpokladaný dátum.
                 </x-slot:description>
                 <div class="form-row align-items-center">
-                    <div class="col">
+                    <div class="col-md col-12">
                         <x-dropdown-input name="spp_symbol_id" label="ŠPP prvok 1" :values="$spp_symbols"/>
                     </div>
-                    <div class="col">
+                    <div class="col-md col-12">
                         <x-checkbox name="reimbursement" label="Refundovať" control="reimbursementShow"></x-checkbox>
                     </div>
                 </div>
                 <x-hideable-section control="reimbursementShow">
                     <div class="form-row">
-                        <div class="col">
+                        <div class="col-md col-12">
                             <x-dropdown-input name="reimbursement_spp_symbol_id" label="ŠPP prvok 2" :values="$spp_symbols"/>
                         </div>
-                        <div class="col">
+                        <div class="col-md col-12">
                             <x-simple-input name="reimbursement_date" type="date" label="Dátum vrátenia peňazí"/>
                         </div>
                     </div>
@@ -160,19 +161,19 @@
                 <x-checkbox name="conference_fee" label="Mám záujem o úhradu konferenčného poplatku pred cestou priamo z pracoviska" control="conferenceFeeShow"/>
                 <x-hideable-section control="conferenceFeeShow">
                     <div class="form-row">
-                        <div class="col">
+                        <div class="col-md col-12">
                             <x-simple-input name="organiser_name" type="text" label="Názov organizácie"/>
                         </div>
-                        <div class="col">
+                        <div class="col-md col-12">
                             <x-simple-input name="ico" type="text" label="IČO"/>
                         </div>
                     </div>
                     <x-simple-input name="organiser_address" type="text" label="Adresa organizácie"/>
                     <div class="form-row">
-                        <div class="col">
+                        <div class="col-md col-12">
                             <x-simple-input name="organiser_iban" type="text" label="Číslo účtu organizácie"/>
                         </div>
-                        <div class="col">
+                        <div class="col-md col-12">
                             <x-simple-input name="amount" type="text" label="Suma"/>
                         </div>
                     </div>

@@ -54,8 +54,8 @@ enum TripState: int
 
             self::CONFIRMED => 'Cesta je v stave Potvrdená.
                                 Administrátor ju potvrdil a zaevidoval, ceste pridelil číselný identifikátor.
-                                Teraz je možné aktualizovať niektoré z dávnejšie uvedených údajov.
-                                Vykonajte tak až po absolvovaní cesty, keď si budete istý presnosťou nových údajov.',
+                                Teraz je možné aktualizovať niektoré z dávnejšie uvedených údajov. Ak nechcete vykonať žiadne zmeny, údaje iba potvrďte.
+                                Vykonajte tak až po absolvovaní cesty, keď si budete istý presnosťou týchto údajov.',
 
             self::UPDATED => 'Cesta je v stave Doplnená.
                               Údaje, ktoré bolo po jej absolvovaní možné zmeniť, boli aktualizované alebo potvrdené.
@@ -81,6 +81,20 @@ enum TripState: int
         return match ($this) {
             self::NEW, self::CONFIRMED, self::UPDATED, self::COMPLETED, self::CANCELLATION_REQUEST => false,
             self::CLOSED, self::CANCELLED => true,
+        };
+    }
+
+
+    public function icon() : string
+    {
+        return match ($this) {
+            TripState::NEW => 'sun',
+            TripState::CONFIRMED => 'file-circle-question',
+            TripState::UPDATED => 'file-circle-plus',
+            TripState::COMPLETED => 'file-circle-check',
+            TripState::CLOSED => 'circle-check',
+            TripState::CANCELLATION_REQUEST => 'file-circle-xmark',
+            TripState::CANCELLED => 'circle-xmark',
         };
     }
 
