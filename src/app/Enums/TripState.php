@@ -54,8 +54,8 @@ enum TripState: int
 
             self::CONFIRMED => 'Cesta je v stave Potvrdená.
                                 Administrátor ju potvrdil a zaevidoval, ceste pridelil číselný identifikátor.
-                                Teraz je možné aktualizovať niektoré z dávnejšie uvedených údajov.
-                                Vykonajte tak až po absolvovaní cesty, keď si budete istý presnosťou nových údajov.',
+                                Teraz je možné aktualizovať niektoré z dávnejšie uvedených údajov. Ak nechcete vykonať žiadne zmeny, údaje iba potvrďte.
+                                Vykonajte tak až po absolvovaní cesty, keď si budete istý presnosťou týchto údajov.',
 
             self::UPDATED => 'Cesta je v stave Doplnená.
                               Údaje, ktoré bolo po jej absolvovaní možné zmeniť, boli aktualizované alebo potvrdené.

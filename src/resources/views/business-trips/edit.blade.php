@@ -85,7 +85,7 @@
             </x-content-section>
 
             <x-content-section
-                title="Neviem netuším"
+                title="NDetaily"
                 :disabled="$tripState->isFinal() || (!$isAdmin && $tripState!=TripState::CONFIRMED)">
                 <div class="form-row">
                     <div class="col-md col-12">
@@ -458,18 +458,25 @@
             @endif
 
             <div class="d-flex justify-content-end">
-                <x-button>Uložiť úpravy</x-button>
+                <x-button>{{ $isAdmin ? 'Uložiť úpravy' : 'Potvrdiť údaje' }}</x-button>
             </div>
 
         </form>
     </x-content-box>
 
     <x-content-box title="Ďalšie možnosti">
-        <x-content-section title="Poznámka pre administrátora">
+        <x-content-section title="Poznámka k ceste">
+            @if($isAdmin)
+                <x-slot:description>
+                    @if($trip->note)
+                        Používateľ zadal poznámku k tejto pracovnej ceste: <b>{{$trip->note}}</b>
+                    @endif
+                </x-slot:description>
+            @else
             <x-slot:description>
                 Tu môžete k pracovnej ceste pridať poznámku pre administrátora, ktorý bude upozornený mailom, poznámka zostane viditeľná aj pre Vás.
             </x-slot:description>
-            <form method="POST" action="/trips/{{ $trip->id }}/note">
+            <form method="POST" action="/trips/{{ $trip->id }}/add-comment">
                 @csrf
                 @method('PUT')
                 <div class="form-row align-items-end">
@@ -481,6 +488,7 @@
                     </div>
                 </div>
             </form>
+            @endif
         </x-content-section>
 
         @if($isAdmin && $tripState == TripState::NEW)
@@ -520,12 +528,12 @@
             </x-content-section>
         @endif
 
-        @if(in_array($tripState, [TripState::NEW, TripState::CONFIRMED]))
+        @if(!$isAdmin && in_array($tripState, [TripState::NEW, TripState::CONFIRMED]))
             <x-content-section title="Žiadosť o storno">
                 <x-slot:description>
                     Môžete požiadať o storno pracovnej cesty, musíte však uviesť dôvod storna. Cesta bude stornovaná až po schválení administrátorom.
                 </x-slot:description>
-                <form method="POST" action="/trips/{{ $trip->id }}/request_cancellation">
+                <form method="POST" action="/trips/{{ $trip->id }}/request-cancel">
                     @csrf
                     @method('PUT')
                     <div class="form-row align-items-end">
@@ -543,7 +551,10 @@
         @if($isAdmin && !$tripState->isFinal())
             <x-content-section title="Stornovanie">
                 <x-slot:description>
-                    Ako administrátor môžete stornovať pracovnú cestu.
+                    <p>Ako administrátor môžete stornovať pracovnú cestu.</p>
+                    @if($tripState == TripState::CANCELLATION_REQUEST)
+                        <p>Zadaný dôvod storna od používateľa: <b>{{ $trip->cancellation_reason ?? 'prázdny' }}</b></p>
+                    @endif
                 </x-slot:description>
                 <form method="POST" action="/trips/{{ $trip->id }}/cancel">
                     @csrf

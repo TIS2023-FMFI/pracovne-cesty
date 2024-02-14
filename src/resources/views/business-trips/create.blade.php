@@ -47,7 +47,7 @@
                 </div>
             </x-content-section>
 
-            <x-content-section title="Neviem netuším">
+            <x-content-section title="Detaily">
                 <div class="form-row">
                     <div class="col-md col-12">
                         <x-simple-input name="iban" label="Číslo účtu"/>
