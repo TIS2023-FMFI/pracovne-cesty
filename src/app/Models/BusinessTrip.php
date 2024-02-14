@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Builder;
 
 class BusinessTrip extends Model
 {
@@ -178,11 +179,12 @@ class BusinessTrip extends Model
      *
      * @param array|string $columns
      * @param string $sortBy
-     * @return Collection<int, static>
+     * @return Builder
      */
-    public static function sortedAll(array|string $columns = ['*'], string $sortBy = 'created_at'): Collection
+    public static function sortedAll(array|string $columns = ['*'], string $sortBy = 'created_at'): Builder
     {
-        return self::all($columns)->sortByDesc($sortBy);
+        return self::orderBy($sortBy, 'DESC')
+            ->select($columns);
     }
 
     /**
@@ -190,9 +192,9 @@ class BusinessTrip extends Model
      * from the newest to the oldest
      *
      * @param array|string $columns
-     * @return Collection
+     * @return Builder
      */
-    public static function newest(array|string $columns = ['*']): Collection
+    public static function newest(array|string $columns = ['*']): Builder
     {
         return self::sortedAll($columns, 'created_at');
     }
@@ -202,22 +204,21 @@ class BusinessTrip extends Model
      *
      * @param TripState $state
      * @param array|string $columns
-     * @return Collection
+     * @return Builder
      */
-    protected static function getByState(TripState $state, array|string $columns = ['*']): Collection
+    protected static function getByState(TripState $state, array|string $columns = ['*']): Builder
     {
         return self::select($columns)
-            ->where('state', $state)
-            ->get();
+            ->where('state', $state);
     }
 
     /**
      * Get all the unconfirmed business trips from the database
      *
      * @param array|string $columns
-     * @return Collection
+     * @return Builder
      */
-    public static function unconfirmed(array|string $columns = ['*']): Collection
+    public static function unconfirmed(array|string $columns = ['*']): Builder
     {
         return self::getByState(TripState::NEW);
     }
@@ -227,9 +228,9 @@ class BusinessTrip extends Model
      * from the database
      *
      * @param array|string $columns
-     * @return Collection
+     * @return Builder
      */
-    public static function unaccounted(array|string $columns = ['*']): Collection
+    public static function unaccounted(array|string $columns = ['*']): Builder
     {
         return self::getByState(TripState::COMPLETED);
     }
@@ -239,22 +240,21 @@ class BusinessTrip extends Model
      *
      * @param TripType $type
      * @param array|string $columns
-     * @return Collection
+     * @return Builder
      */
-    protected static function getByType(TripType $type, array|string $columns = ['*']): Collection
+    protected static function getByType(TripType $type, array|string $columns = ['*']): Builder
     {
         return self::select($columns)
-            ->where('type', $type)
-            ->get();
+            ->where('type', $type);
     }
 
     /**
      * Get domestic business trips
      *
      * @param array|string $columns
-     * @return Collection
+     * @return Builder
      */
-    public static function domestic(array|string $columns = ['*']): Collection
+    public static function domestic(array|string $columns = ['*']): Builder
     {
         return self::getByType(TripType::DOMESTIC, $columns);
     }
@@ -263,9 +263,9 @@ class BusinessTrip extends Model
      * Get foreign business trips
      *
      * @param array|string $columns
-     * @return Collection
+     * @return Builder
      */
-    public static function foreign(array|string $columns = ['*']): Collection
+    public static function foreign(array|string $columns = ['*']): Builder
     {
         return self::getByType(TripType::FOREIGN, $columns);
     }

@@ -13,7 +13,7 @@
     $contributions = Contribution::all()->pluck('name', 'id');
     $spp_symbols = SppSymbol::where('status', SppStatus::ACTIVE)->pluck('spp_symbol', 'id');
 
-    $user = Auth::user();
+    $user = $selectedUser ?? Auth::user();
     $userType = $user->user_type;
 
 @endphp
@@ -22,6 +22,7 @@
     <x-content-box title="Nová pracovná cesta">
         <form method="POST" action="/trips" enctype="multipart/form-data">
             @csrf
+            <x-simple-input name="target_user" :value="$user->id" hidden/>
             <x-content-section title="Osobné údaje">
                 <div class="form-row">
                     <div class="col-md col-12">

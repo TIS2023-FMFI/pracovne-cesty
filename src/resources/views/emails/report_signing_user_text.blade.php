@@ -2,7 +2,7 @@ Podpísanie Správy
 
 Vážený používateľ,
 
-Prosím, nezabudnite podpísať správu po vašej ceste.
+Prosím, doručte podpísanú správu o pracovnej ceste na sekretariát alebo sa dostavte podpísať dokument o správe z pracovnej cesty na sekretariát.
 {{ $messageText }}
 
 S pozdravom,

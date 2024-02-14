@@ -8,13 +8,16 @@ use App\Models\InvitationLink;
 use App\Models\User;
 use Carbon\Carbon;
 use Exception;
+use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\View\View;
+use Str;
 
 
 class UserController extends Controller
@@ -46,15 +49,40 @@ class UserController extends Controller
         if (!$link || !InvitationLink::isValid($link->token)) {
             return redirect()->back();
         }
+        $customMessages = [
+            'required' => 'Pole :attribute je povinné.',
+            'string' => 'Pole :attribute musí byť reťazec.',
+            'max' => 'Pole :attribute môže mať maximálne :max znakov.',
+            'email' => 'Pole :attribute musí byť platná e-mailová adresa.',
+            'unique' => 'Pole :attribute už bolo zaregistrované.',
+            'confirmed' => 'Potvrdenie :attribute sa nezhoduje.',
+            'min' => 'Pole :attribute musí obsahovať aspoň :min znakov.',
+        ];
+        $customAttributes = [
+            'first_name' => 'meno',
+            'last_name' => 'priezvisko',
+            'email' => 'e-mail',
+            'password' => 'heslo',
+            'username' => 'prihlasovacie meno',
+        ];
 
         $validUserTypes = implode(',', [UserType::EXTERN->value, UserType::STUDENT->value]);
-        $validator = Validator::make($request->all(), [
-            'first_name' => 'required|string|max:50',
-            'last_name' => 'required|string|max:50',
-            'username' => 'required|string|max:255|unique:users',
-            'password' => 'required|string|max:255',
-            'user_types' => 'required|in:' . $validUserTypes
-        ]);
+        $validator = Validator::make(
+            data: $request->all(),
+            rules: [
+                'first_name' => 'required|string|max:50',
+                'last_name' => 'required|string|max:50',
+                'username' => [
+                    'required|string|max:255',
+                    'unique:users,username',
+                    'unique:\App\Models\PritomnostUser,username'
+                ],
+                'password' => 'required|string|max:255',
+                'user_types' => 'required|in:' . $validUserTypes
+            ],
+            messages: $customMessages,
+            attributes: $customAttributes
+        );
 
         if ($validator->fails()) {
             return redirect()->back()
@@ -100,16 +128,12 @@ class UserController extends Controller
     public function authenticate(Request $request): RedirectResponse
     {
         $credentials = $request->only('username', 'password');
+        $synced = SynchronizationController::syncSingleUser($credentials['username']);
         $user = User::where('username', $credentials['username'])->first();
 
-        if ($user) {
-            if (in_array($user->user_type, [UserType::EMPLOYEE, UserType::PHD_STUDENT], true)) {
-                SynchronizationController::syncSingleUser($user->id);
-            }
-            if (Auth::attempt($credentials)) {
-                $request->session()->regenerate();
-                return redirect()->route('homepage')->with('message', 'Boli ste úspešne prihlásený.');
-            }
+        if ($user && Auth::attempt($credentials)) {
+            $request->session()->regenerate();
+            return redirect()->route('homepage')->with('message', 'Boli ste úspešne prihlásený.');
         }
 
         return back()->with('message', 'Zadané meno alebo heslo nie sú správne.');
@@ -187,5 +211,56 @@ class UserController extends Controller
         }
 
         return back()->with('message', $message);
+    }
+
+    /**
+     * Process password reset request and send reset link
+     *
+     * @param Request $request
+     * @return RedirectResponse
+     */
+    public function forgotPassword(Request $request): RedirectResponse
+    {
+        $request->validate(['email' => 'required|string|email|max:127']);
+
+        $status = Password::sendResetLink(
+            $request->only('email')
+        );
+
+        return $status === Password::RESET_LINK_SENT
+            ? back()->with(['status' => __($status)])
+            : back()->withErrors(['email' => __($status)]);
+    }
+
+    /**
+     * Reset password for the given user
+     *
+     * @param Request $request
+     * @return RedirectResponse
+     */
+    public function resetPassword(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'token' => 'required|string',
+            'email' => 'required|string|email|max:127',
+            'password' => 'required|string|min:8|confirmed',
+        ]);
+
+        $status = Password::reset(
+            $request->only('email', 'password', 'password_confirmation', 'token'),
+            static function (User $user, string $password) {
+                $user->forceFill([
+                    'password' => Hash::make($password)
+                ])->setRememberToken(Str::random(60));
+
+                $user->save();
+
+                event(new PasswordReset($user));
+            }
+        );
+
+        return $status === Password::PASSWORD_RESET
+            ? redirect()->route('homepage')->with('status', __($status))
+            : back()->withErrors(['email' => [__($status)]]);
     }
 }

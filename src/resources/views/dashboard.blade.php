@@ -11,7 +11,8 @@
 <x-layout>
     <div class="mb-3 btn-toolbar" role="toolbar">
         <div class="mr-2 btn-group">
-            <x-link-button href="/trips/create">Pridať pracovnú cestu
+            <x-link-button
+              href="{{ $selectedUserId ? route('trip.create', ['user' => $selectedUserId]) : route('trip.create') }}">Pridať pracovnú cestu
                 @if($isAdmin && $selectedUserName)
                     <x-slot:detail>
                         ako {{ $selectedUserName }}

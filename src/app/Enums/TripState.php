@@ -84,6 +84,7 @@ enum TripState: int
         };
     }
 
+
     public function icon() : string
     {
         return match ($this) {
@@ -94,6 +95,14 @@ enum TripState: int
             TripState::CLOSED => 'circle-check',
             TripState::CANCELLATION_REQUEST => 'file-circle-xmark',
             TripState::CANCELLED => 'circle-xmark',
+        };
+    }
+
+    public function hasTravellerReturned(): bool
+    {
+        return match ($this) {
+            self::NEW, self::CONFIRMED, self::CANCELLATION_REQUEST, self::CANCELLED => false,
+            self::UPDATED, self::COMPLETED, self::CLOSED => true,
         };
     }
 }
