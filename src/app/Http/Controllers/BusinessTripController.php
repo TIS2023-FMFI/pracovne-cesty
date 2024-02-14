@@ -623,7 +623,7 @@ class BusinessTripController extends Controller
                 $data = [
                     'advance_amount' => $trip->advance_amount,
                     'grantee' => $trip->sppSymbol->grantee,
-                    'address' => $trip->conference_fee->organiser_address,
+                    'address' => $trip->conferenceFee->organiser_address,
                     'source' => $trip->sppSymbol->fund,
                     'functional_region' => $trip->sppSymbol->functional_region,
                     'spp_symbol' => $trip->sppSymbol->spp_symbol,

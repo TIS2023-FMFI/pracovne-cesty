@@ -68,20 +68,16 @@ class UserController extends Controller
 
         $validUserTypes = implode(',', [UserType::EXTERN->value, UserType::STUDENT->value]);
         $validator = Validator::make(
-            data: $request->all(),
-            rules: [
+            $request->all(),
+            [
                 'first_name' => 'required|string|max:50',
                 'last_name' => 'required|string|max:50',
-                'username' => [
-                    'required|string|max:255',
-                    'unique:users,username',
-                    'unique:\App\Models\PritomnostUser,username'
-                ],
+                'username' => 'required|string|max:255|unique:users,username|unique:\App\Models\PritomnostUser,username',
                 'password' => 'required|string|max:255',
                 'user_types' => 'required|in:' . $validUserTypes
             ],
-            messages: $customMessages,
-            attributes: $customAttributes
+            $customMessages,
+            $customAttributes
         );
 
         if ($validator->fails()) {
@@ -93,12 +89,15 @@ class UserController extends Controller
         $user = User::create([
             'first_name' => $request->first_name,
             'last_name' => $request->last_name,
+            'personal_id' => $request->user_types == UserType::STUDENT->value ? '10790002' : '10790004',
             'email' => $link->email,
             'username' => $request->username,
             'password' => Hash::make($request->password)
         ]);
 
         $user->user_type = UserType::from($request->user_types);
+        $user->assignRole('traveller');
+
         $user->save();
 
         // Invalidate the token used for this registration
