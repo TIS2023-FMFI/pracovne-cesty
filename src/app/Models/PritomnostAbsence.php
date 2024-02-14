@@ -23,12 +23,8 @@ class PritomnostAbsence extends Model
 
     // Mass assignable attributes
     protected $fillable = [
-        'user_id',
-        'date_time',
-        'from_time',
-        'to_time',
-        'description',
-        'type'
+        'user_id', 'date_time', 'from_time', 'to_time',
+        'description', 'type', 'public', 'confirmation'
     ];
 
     /**

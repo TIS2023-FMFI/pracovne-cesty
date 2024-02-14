@@ -16,8 +16,6 @@ use App\Models\Reimbursement;
 use App\Models\Staff;
 use App\Models\TripContribution;
 use App\Models\User;
-use DateInterval;
-use DatePeriod;
 use DateTime;
 use Exception;
 use Illuminate\Http\JsonResponse;
@@ -143,7 +141,7 @@ class BusinessTripController extends Controller
             return redirect()->back()->withErrors("Používateľ nebol nájdený.");
         }
 
-        $isForDifferentUser = $targetUser->id != $authUser->id && $authUser->hasRole('admin');
+        $isForDifferentUser = $targetUser->id !== $authUser->id && $authUser->hasRole('admin');
 
         if ($isForDifferentUser && !$authUser->hasRole('admin')) {
             return redirect()->back()->withErrors("Nemáte oprávnenie pridávať cesty za iných používateľov.");
@@ -157,7 +155,7 @@ class BusinessTripController extends Controller
         [$isConferenceFee, $validatedConferenceFeeData] = self::validateConferenceFeeData($request);
 
         $areContributions = false;
-        if ($user->user_type->isExternal()) {
+        if ($targetUser->user_type->isExternal()) {
             $validatedTripContributionsData = self::validateTripContributionsData($request);
             $areContributions = true;
         }
@@ -429,10 +427,18 @@ class BusinessTripController extends Controller
         ]);
 
         // Confirm the trip and record sofia_id
-        $trip->update(['state' => TripState::CONFIRMED, 'sofia_id' => $validatedData['sofia_id']]);
-        SynchronizationController::syncSingleBusinessTrip($trip->id);
+        $trip->update([
+            'state' => TripState::CONFIRMED,
+            'sofia_id' => $validatedData['sofia_id']
+        ]);
 
-        return redirect()->route('trip.edit', $trip)->with('message', 'Cesta bola potvrdená, identifikátor zo systému SOFIA bol priradený.');
+        if ($trip->user->pritomnostUser()->first()) {
+            SynchronizationController::syncSingleBusinessTrip($trip->id);
+        }
+
+        return redirect()
+            ->route('trip.edit', $trip)
+            ->with('message', 'Cesta bola potvrdená, identifikátor zo systému SOFIA bol priradený.');
     }
 
     /**

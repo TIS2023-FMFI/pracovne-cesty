@@ -91,13 +91,13 @@ class SynchronizationController extends Controller
         }
 
         // Get the Pritomnost user_id
-        $pritomnostUserId = $businessTrip->user()
-            ->first()->pritomnostUser()
-            ->first()->id;
+        $pritomnostUser = $businessTrip->user->pritomnostUser()->first();
 
-        if (!$pritomnostUserId) {
+        if (!$pritomnostUser) {
             throw new Exception();
         }
+
+        $pritomnostUserId = $pritomnostUser->id;
 
         // Calculate the number of days in the business trip
         $startDate = $businessTrip->datetime_start;
@@ -112,8 +112,7 @@ class SynchronizationController extends Controller
             // Check if the absence already exists in the Pritomnost database for this day
             $existingAbsence = PritomnostAbsence::where([
                 'user_id' => $pritomnostUserId,
-                'date_time' => $date->format('Y-m-d'),
-                'type' => PritomnostAbsenceType::BUSINESS_TRIP,
+                'date_time' => $date->format('Y-m-d')
             ])->first();
 
             if (!$existingAbsence) {
@@ -124,7 +123,8 @@ class SynchronizationController extends Controller
                     'from_time' => $fromTime,
                     'to_time' => $toTime,
                     'type' => PritomnostAbsenceType::BUSINESS_TRIP,
-                    'description' => Str::title($businessTrip->tripPurpose->name) . ' ' . $businessTrip->place,
+                    'description' => $businessTrip->type->inSlovak()  . ' pracovná cesta',
+                    'confirmation' => false
                     // Other values are not defined
                 ]);
             }
