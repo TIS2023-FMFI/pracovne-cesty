@@ -5,7 +5,6 @@
     use App\Models\Contribution;
     use App\Models\SppSymbol;
     use App\Enums\SppStatus;
-    use App\Enums\UserType;
 
     $countries = Country::all()->pluck('name', 'id');
     $transports = Transport::where('user_visible', 1)->pluck('name', 'id');

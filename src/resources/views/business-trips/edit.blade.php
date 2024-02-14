@@ -63,7 +63,7 @@
             @method('PUT')
             <x-content-section
                 title="Osobné údaje"
-                :disabled="!$isAdmin || $tripState->isFinal()">
+                :disabled="!$isAdmin || $tripState == TripState::CANCELLED">
 
                 <div class="form-row">
                     <div class="col-md col-12">
@@ -100,12 +100,12 @@
                 </div>
             </x-content-section>
 
-            <x-content-section>
+            <x-content-section
+                :disabled="$tripState == TripState::CANCELLED || (!$isAdmin && $tripState != TripState::CONFIRMED)">
                 <div class="form-row">
                     <x-content-section
                         class="col-md col-12"
-                        title="Začiatok cesty"
-                        :disabled="$tripState->isFinal() || (!$isAdmin && $tripState!=TripState::CONFIRMED)">
+                        title="Začiatok cesty">
 
                         <div class="form-row">
                             <div class="col-md col-12">
@@ -132,8 +132,7 @@
 
                     <x-content-section
                         class="col-md col-12"
-                        title="Koniec cesty"
-                        :disabled="$tripState->isFinal() || (!$isAdmin && $tripState!=TripState::CONFIRMED)">
+                        title="Koniec cesty">
 
                         <div class="form-row">
                             <div class="col-md col-12">
@@ -169,7 +168,7 @@
 
             <x-content-section
                 title="Cieľ cesty"
-                :disabled="!$isAdmin || $tripState == TripState::CLOSED">
+                :disabled="!$isAdmin || $tripState == TripState::CANCELLED">
 
                 <div class="form-row">
                     <div class="col-md col-12">
@@ -217,7 +216,7 @@
             @if($tripUserType->isExternal())
                 <x-content-section
                     title="Prínos pre fakultu"
-                    :disabled="!$isAdmin || $tripState == TripState::CLOSED">
+                    :disabled="!$isAdmin || $tripState == TripState::CANCELLED">
 
                     @foreach($contributions as $id => $name)
                         @php
@@ -253,7 +252,7 @@
             <x-content-section
                 title="Financovanie"
                 x-data="{reimbursementShow: {{ old('reimbursement', $isReimbursed) ? 'true' : 'false' }} }"
-                :disabled="$tripState->isFinal() || (!$isAdmin && $tripState!=TripState::CONFIRMED)">
+                :disabled="!$isAdmin || $tripState == TripState::CANCELLED">
 
                 <x-slot:description>
                     V prípade refundácie, prosím, vyberte ako <b>ŠPP prvok 2</b> ten prvok, z ktorého budú peniaze
@@ -299,7 +298,7 @@
             <x-content-section
                 title="Úhrada konferenčného poplatku"
                 x-data="{conferenceFeeShow: {{ $wantsConferenceFee ? 'true' : 'false' }} }"
-                :disabled="!$isAdmin || $tripState == TripState::CLOSED">
+                :disabled="!$isAdmin || $tripState == TripState::CANCELLED">
 
                 <div class="form-row">
                     <div class="col-md col-12">
@@ -354,7 +353,7 @@
                 <x-content-section
                     title="Náklady"
                     x-data="{mealsTableHide: {{ $doesNotWantMeals ? 'true' : 'false'}} }"
-                    :disabled="$tripState->isFinal() || (!$isAdmin && $tripState!=TripState::UPDATED)">
+                    :disabled="$tripState == TripState::CANCELLED || (!$isAdmin && $tripState != TripState::UPDATED)">
 
                     <x-slot:description>
                         Pre každý druh nákladov môžete použiť aj oba stĺpce naraz. Ak si preplatenie nejakého druhu
@@ -491,10 +490,9 @@
                     </x-content-section>
                 </x-content-section>
 
-
                 <x-content-section
                     title="Správa"
-                    :disabled="$tripState->isFinal() || (!$isAdmin && $tripState!=TripState::UPDATED)">
+                    :disabled="$tripState == TripState::CANCELLED || (!$isAdmin && $tripState != TripState::UPDATED)">
 
                     <x-textarea name="conclusion" label="Výsledky cesty" :value="$trip->conclusion ?? ''"
                                 rows="10"></x-textarea>
@@ -595,7 +593,7 @@
             </x-content-section>
         @endif
 
-        @if($isAdmin && !$tripState->isFinal() && !$tripState->hasTravellerReturned())
+        @if($isAdmin && $tripState != TripState::CANCELLED && !$tripState->hasTravellerReturned())
             <x-content-section title="Stornovanie">
                 <x-slot:description>
                     <p>Ako administrátor môžete stornovať pracovnú cestu.</p>
@@ -617,6 +615,11 @@
 
         @if($tripState != TripState::NEW)
             <x-content-section title="Dokumenty na stiahnutie">
+                <x-slot:description>
+                    Tu sa nachádzajú všetky relevantné dokumenty k ceste podľa jej stavu a typu používateľa. Ak v ceste
+                    urobíte nejaké zmeny, nezabudnite ich uložiť, aby ste v dokumentoch vždy mali aktuálne údaje.
+                </x-slot:description>
+
                 <div>
                     @if($tripUserType->isExternal())
                         <x-document-export-icon :id="$trip->id" :docType="DocumentType::COMPENSATION_AGREEMENT"/>
