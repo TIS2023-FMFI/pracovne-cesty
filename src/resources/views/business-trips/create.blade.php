@@ -5,7 +5,6 @@
     use App\Models\Contribution;
     use App\Models\SppSymbol;
     use App\Enums\SppStatus;
-    use App\Enums\UserType;
 
     $countries = Country::all()->pluck('name', 'id');
     $transports = Transport::where('user_visible', 1)->pluck('name', 'id');
@@ -46,33 +45,38 @@
                         <x-simple-input name="department" label="Pracovisko" :value="$user->department ?? ''"/>
                     </div>
                 </div>
-            </x-content-section>
 
-            <x-content-section title="Detaily">
                 <div class="form-row">
-                    <div class="col-md col-12">
+                    <div class="col-md-6 col-12">
                         <x-simple-input name="iban" label="Číslo účtu"/>
-                    </div>
-                    <div class="col-md col-12">
-                        <x-dropdown-input name="transport_id" label="Dopravný prostriedok" :values="$transports"/>
                     </div>
                 </div>
             </x-content-section>
 
-            <div class="form-row">
-                <div class="col">
-                    <x-content-section title="Začiatok cesty">
+            <x-content-section>
+                <div class="form-row">
+                    <x-content-section
+                        title="Začiatok cesty"
+                        class="col-md col-12">
                         <x-simple-input name="place_start" label="Miesto"/>
                         <x-simple-input name="datetime_start" type="datetime-local" label="Dátum a čas"/>
                     </x-content-section>
-                </div>
-                <div class="col">
-                    <x-content-section title="Koniec cesty">
+
+                    <x-content-section
+                        title="Koniec cesty"
+                        class="col-md col-12">
                         <x-simple-input name="place_end" label="Miesto"/>
                         <x-simple-input name="datetime_end" type="datetime-local" label="Dátum a čas"/>
                     </x-content-section>
                 </div>
-            </div>
+
+                <div class="form-row">
+                    <div class="col-md-6 col-12">
+                        <x-dropdown-input name="transport_id" label="Dopravný prostriedok" :values="$transports"/>
+                    </div>
+                </div>
+
+            </x-content-section>
 
             <x-content-section title="Cieľ cesty">
                 <div class="form-row">

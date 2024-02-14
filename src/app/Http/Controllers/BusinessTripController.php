@@ -272,12 +272,11 @@ class BusinessTripController extends Controller
      */
     public static function update(Request $request, BusinessTrip $trip): RedirectResponse
     {
-        if ($trip->state->isFinal()) {
+        if ($trip->state == TripState::CANCELLED) {
             throw ValidationException::withMessages(['state' => 'Invalid state for updating.']);
         }
         // Check if the authenticated user is an admin
         $user = Auth::user();
-
         if (!$user) {
             throw new Exception();
         }
@@ -325,11 +324,10 @@ class BusinessTripController extends Controller
             $trip->update($validatedTripData);
             self::correctNotReimbursedMeals($trip);
 
-
         } else { // Non-admin user updating the trip
 
             // Validate and update based on trip state
-            switch ($trip->state) {
+            switch ($tripState) {
                 case TripState::CONFIRMED:
                     $validatedTripData = self::validateUpdatableTripData($request);
 
@@ -788,7 +786,6 @@ class BusinessTripController extends Controller
         }
 
         $rules = [
-            'iban' => 'required' . '|string|max:34',
             'transport_id' => 'required|exists:transports,id',
             'spp_symbol_id' => 'required|exists:spp_symbols,id',
             'place_start' => 'required|string|max:200',
@@ -809,6 +806,7 @@ class BusinessTripController extends Controller
     public static function validateFixedTripData(Request $request): array
     {
         $validatedData = $request->validate([
+            'iban' => 'required|string|max:34',
             'country_id' => 'required|exists:countries,id',
             'transport_id' => 'required|exists:transports,id',
             'place' => 'required|string|max:200',
@@ -877,7 +875,6 @@ class BusinessTripController extends Controller
      */
     public static function validateExpensesData(BusinessTrip $trip, Request $request): array
     {
-//        dd($request);
         $expenses = ['travelling', 'accommodation', 'advance', 'other'];
         if ($trip->type === TripType::FOREIGN) {
             $expenses[] = 'allowance';
@@ -894,7 +891,6 @@ class BusinessTripController extends Controller
                     $expenseName . '_expense_foreign' => 'nullable|string:max:20']));
             }
 
-//            $validatedExpenseData[$expenseName . '_expense_reimburse'] = $request->has($expenseName . '_expense_reimburse');
             $validatedExpensesData[$expenseName] = $validatedExpenseData;
         }
 
@@ -903,7 +899,6 @@ class BusinessTripController extends Controller
         ]));
 
         $validatedExpensesData['no_meals_reimbursed'] = $request->has('no_meals_reimbursed');
-//        dd($validatedExpensesData);
         return $validatedExpensesData;
     }
 
@@ -930,12 +925,10 @@ class BusinessTripController extends Controller
             ];
             $expense = $trip->{$name . 'Expense'};
             if ($expense == null) {
-//                dd($validatedExpensesData, $name, $data);
                 $expense = Expense::create($data);
 
                 $trip->update([$name . '_expense_id' => $expense->id]);
                 $trip->save();
-//                dd($name . '_expense_id', $trip, $expense);
             } else {
                 $expense->update($data);
             }
