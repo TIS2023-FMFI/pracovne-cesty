@@ -195,10 +195,6 @@ class BusinessTripController extends Controller
             // Update user details
             $targetUser->update($validatedUserData);
 
-        //Sending mails
-        $message = 'ID pridanej cesty: ' . $trip->id . ' Meno a priezvisko cestujúceho: ' . $trip->user->first_name . ' ' . $trip->user->last_name;
-        $recipient = 'admin@example.com';
-        $viewTemplate = 'emails.new_trip_admin';
             // Save changes
             DB::commit();
 
@@ -209,12 +205,17 @@ class BusinessTripController extends Controller
                 ->with('message', 'Pracovná cesta nebola kvôli chybe vytvorená. Zopakujte to neskôr, prosím.');
         }
 
+        // Sending mails
+        $message = 'ID pridanej cesty: ' . $trip->id
+            . ' Meno a priezvisko cestujúceho: ' . $trip->user->fullName();
 
-        // Create an instance of the SimpleMail class
-        $email = new SimpleMail($message, $recipient, $viewTemplate);
+        foreach (User::getAdminEmails() as $recipient) {
+            // Create an instance of the SimpleMail class
+            $email = new SimpleMail($message, $recipient, 'emails.new_trip_admin');
 
-        // Send the email
-        Mail::to($recipient)->send($email);
+            // Send the email
+            Mail::to($recipient)->send($email);
+        }
 
         // Check if it was too late to add trip and inform user
         $warningMessage = null;
@@ -223,14 +224,13 @@ class BusinessTripController extends Controller
         $startDate = new DateTime($trip->datetime_start);
         $days = $trip->type == TripType::DOMESTIC ? '4' : '11';
 
-        $newDate = $currentDate->modify("+ ".$days." weekday");
+        $newDate = $currentDate->modify("+ " . $days . " weekday");
 
         if ($startDate < $newDate) {
             $warningMessage = 'Vaša pracovná cesta bude pridaná, ale nie je to v súlade s pravidlami.
                                Cestu vždy pridávajte minimálne 4 pracovné dni pred jej začiatkom v prípade,
                                že ide o tuzemskú cestu, a 11 pracovných dní pred začiatkom v prípade zahraničnej cesty.';
-        }
-        else {
+        } else {
             $message = 'Pracovná cesta bola úspešne vytvorená.';
         }
 
@@ -399,18 +399,18 @@ class BusinessTripController extends Controller
             }
 
             //Sending mails
-            $message = '';
-            $recipient = 'admin@example.com';
-            $viewTemplate = 'emails.new_trip_admin';
+            foreach (User::getAdminEmails() as $recipient) {
+                // Create an instance of the SimpleMail class
+                $email = new SimpleMail('', $recipient, 'emails.new_trip_admin');
 
-            // Create an instance of the SimpleMail class
-            $email = new SimpleMail($message, $recipient, $viewTemplate);
-
-            // Send the email
-            Mail::to($recipient)->send($email);
+                // Send the email
+                Mail::to($recipient)->send($email);
+            }
         }
 
-        return redirect()->route('trip.edit', ['trip' => $trip])->with('message', 'Údaje o ceste boli úspešne aktualizované.');
+        return redirect()
+            ->route('trip.edit', ['trip' => $trip])
+            ->with('message', 'Údaje o ceste boli úspešne aktualizované.');
     }
 
     /**
@@ -514,15 +514,16 @@ class BusinessTripController extends Controller
             $trip->update($validatedData);
 
             // Send email notification to the admin
-            $message = 'ID Cesty: ' . $trip->id . ' Meno a priezvisko cestujúceho: ' . $trip->user->first_name . ' ' . $trip->user->last_name;
-            $recipient = 'admin@example.com';
-            $viewTemplate = 'emails.cancellation_request_admin';
+            $message = 'ID Cesty: ' . $trip->id
+                . ' Meno a priezvisko cestujúceho: ' . $trip->user->fullName();
 
-            // Create an instance of the SimpleMail class
-            $email = new SimpleMail($message, $recipient, $viewTemplate);
+            foreach (User::getAdminEmails() as $recipient) {
+                // Create an instance of the SimpleMail class
+                $email = new SimpleMail($message, $recipient, 'emails.cancellation_request_admin');
 
-            // Send the email
-            Mail::to($recipient)->send($email);
+                // Send the email
+                Mail::to($recipient)->send($email);
+            }
         } else {
             throw ValidationException::withMessages(['state' => 'Invalid state for cancellation request.']);
         }
@@ -545,15 +546,16 @@ class BusinessTripController extends Controller
         $trip->update($validatedData);
 
         // Send email notification to the
-        $message = 'ID Cesty ku ktorej bola pridaná poznámka: ' . $trip->id . ' Meno a priezvisko cestujúceho: ' . $trip->user->first_name . ' ' . $trip->user->last_name;
-        $recipient = 'admin@example.com';
-        $viewTemplate = 'emails.new_note_admin';
+        $message = 'ID Cesty ku ktorej bola pridaná poznámka: ' . $trip->id
+            . ' Meno a priezvisko cestujúceho: ' . $trip->user->fullName();
 
-        // Create an instance of the SimpleMail class
-        $email = new SimpleMail($message, $recipient, $viewTemplate);
+        foreach (User::getAdminEmails() as $recipient) {
+            // Create an instance of the SimpleMail class
+            $email = new SimpleMail($message, $recipient, 'emails.new_note_admin');
 
-        // Send the email
-        Mail::to($recipient)->send($email);
+            // Send the email
+            Mail::to($recipient)->send($email);
+        }
 
         // Redirect or respond with a success message
         return redirect()->route('trip.edit', $trip->id)
