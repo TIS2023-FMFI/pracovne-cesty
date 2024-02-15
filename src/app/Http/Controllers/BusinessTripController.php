@@ -35,7 +35,6 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class BusinessTripController extends Controller
 {
-
     /**
      * Returning view with details from all trips
      * @throws Exception
@@ -116,7 +115,6 @@ class BusinessTripController extends Controller
         ]);
     }
 
-
     /**
      * Parsing data from the $request in form
      * Also managing uploaded files from the form
@@ -129,10 +127,6 @@ class BusinessTripController extends Controller
     {
         // Get the authenticated user's ID
         $authUser = Auth::user();
-
-        if (!$authUser) {
-            throw new Exception();
-        }
         $targetUserId = $request->input('target_user');
         $targetUser = $targetUserId ? User::find($targetUserId) : $authUser;
 
@@ -284,7 +278,7 @@ class BusinessTripController extends Controller
      */
     public static function update(Request $request, BusinessTrip $trip): RedirectResponse
     {
-        if ($trip->state == TripState::CANCELLED) {
+        if ($trip->state === TripState::CANCELLED) {
             throw ValidationException::withMessages(['state' => 'Invalid state for updating.']);
         }
         // Check if the authenticated user is an admin
@@ -305,21 +299,22 @@ class BusinessTripController extends Controller
             [$isReimbursement, $validatedReimbursementData] = self::validateReimbursementData($request);
             [$isConferenceFee, $validatedConferenceFeeData] = self::validateConferenceFeeData($request);
 
+            if ($tripState->hasTravellerReturned()) {
+                $validatedExpensesData = self::validateExpensesData($trip, $request);
+
+                $days = self::getTripDurationInDays($trip);
+                $validatedMealsData = self::validateMealsData($days, $request);
+                $validatedTripData['not_reimbursed_meals'] = $validatedMealsData;
+
+                array_merge($validatedTripData, $request->validate(
+                    ['conclusion' => 'required|max:5000']));
+            }
+
             // Start DB transaction before writing
             DB::beginTransaction();
 
             try {
                 if ($tripState->hasTravellerReturned()) {
-                    $validatedExpensesData = self::validateExpensesData($trip, $request);
-
-                    $days = self::getTripDurationInDays($trip);
-                    $validatedMealsData = self::validateMealsData($days, $request);
-                    $validatedTripData['not_reimbursed_meals'] = $validatedMealsData;
-
-                    array_merge($validatedTripData, $request->validate(
-                        ['conclusion' => 'required|max:5000']));
-
-                    // all validations complete
                     self::createOrUpdateExpenses($validatedExpensesData, $trip);
                 }
 
@@ -349,40 +344,45 @@ class BusinessTripController extends Controller
             }
 
         } else { // Non-admin user updating the trip
+            // Validate based on trip state
+            switch ($tripState) {
+                case TripState::CONFIRMED:
+                    $validatedTripData = self::validateUpdatableTripData($request);
+                    break;
+
+                // Adding report to an UPDATED state trip
+                case TripState::UPDATED:
+                    // Validation rules for expense-related fields
+                    $validatedExpensesData = self::validateExpensesData($trip, $request);
+
+                    $days = self::getTripDurationInDays($trip);
+                    $validatedMealsData = self::validateMealsData($days, $request);
+                    $validatedTripData['not_reimbursed_meals'] = $validatedMealsData;
+
+                    $validatedTripData = array_merge($validatedTripData, $request->validate(
+                        ['conclusion' => 'required|max:5000']));
+
+                    break;
+
+                // Updating a wrong state trip
+                default:
+                    throw ValidationException::withMessages(['state' => 'Invalid state for updating.']);
+            }
+
             // Start DB transaction before writing
             DB::beginTransaction();
 
             try {
-                // Validate and update based on trip state
-                switch ($tripState) {
-                    case TripState::CONFIRMED:
-                        $validatedTripData = self::validateUpdatableTripData($request);
-
-                        // Change the state to UPDATED
-                        $trip->update(['state' => TripState::UPDATED]);
-                        break;
-
+                // VUpdate based on trip state
+                if ($tripState === TripState::CONFIRMED) {
+                    // Change the state to UPDATED
+                    $trip->update(['state' => TripState::UPDATED]);
+                } else {
                     // Adding report to an UPDATED state trip
-                    case TripState::UPDATED:
-                        // Validation rules for expense-related fields
-                        $validatedExpensesData = self::validateExpensesData($trip, $request);
+                    self::createOrUpdateExpenses($validatedExpensesData, $trip);
 
-                        $days = self::getTripDurationInDays($trip);
-                        $validatedMealsData = self::validateMealsData($days, $request);
-                        $validatedTripData['not_reimbursed_meals'] = $validatedMealsData;
-
-                        $validatedTripData = array_merge($validatedTripData, $request->validate(
-                            ['conclusion' => 'required|max:5000']));
-
-                        self::createOrUpdateExpenses($validatedExpensesData, $trip);
-
-                        // Change the state to COMPLETED
-                        $trip->update(['state' => TripState::COMPLETED]);
-                        break;
-
-                    // Updating a wrong state trip
-                    default:
-                        throw ValidationException::withMessages(['state' => 'Invalid state for updating.']);
+                    // Change the state to COMPLETED
+                    $trip->update(['state' => TripState::COMPLETED]);
                 }
 
                 // Update the trip with the provided data
@@ -397,7 +397,7 @@ class BusinessTripController extends Controller
                     ->with('message', 'Údaje o ceste neboli kvôli chybe aktualizované. Skúste to neskôr, prosím.');
             }
 
-            //Sending mails
+            // Sending mails
             foreach (User::getAdminEmails() as $recipient) {
                 // Create an instance of the SimpleMail class
                 $email = new SimpleMail('', $recipient, 'emails.new_trip_admin');
@@ -793,7 +793,7 @@ class BusinessTripController extends Controller
      * @return array
      * @throws Exception
      */
-    public static function validateUserData(Request $request): array
+    private static function validateUserData(Request $request): array
     {
         $user = Auth::user();
 
@@ -823,7 +823,7 @@ class BusinessTripController extends Controller
      * @return array
      * @throws Exception
      */
-    public static function validateUpdatableTripData(Request $request): array
+    private static function validateUpdatableTripData(Request $request): array
     {
         $user = Auth::user();
 
@@ -849,7 +849,7 @@ class BusinessTripController extends Controller
      * @param Request $request
      * @return array
      */
-    public static function validateFixedTripData(Request $request): array
+    private static function validateFixedTripData(Request $request): array
     {
         $validatedData = $request->validate([
             'iban' => 'required|string|max:34',
@@ -871,7 +871,7 @@ class BusinessTripController extends Controller
      * @param Request $request
      * @return array
      */
-    public static function validateReimbursementData(Request $request): array
+    private static function validateReimbursementData(Request $request): array
     {
         if ($request->has('reimbursement')) {
             $validatedReimbursementData = $request->validate([
@@ -893,7 +893,7 @@ class BusinessTripController extends Controller
      * @param Request $request
      * @return array
      */
-    public static function validateConferenceFeeData(Request $request): array
+    private static function validateConferenceFeeData(Request $request): array
     {
         if ($request->has('conference_fee')) {
             $validatedConferenceFee = $request->validate([
@@ -919,7 +919,7 @@ class BusinessTripController extends Controller
      * @param Request $request
      * @return array
      */
-    public static function validateExpensesData(BusinessTrip $trip, Request $request): array
+    private static function validateExpensesData(BusinessTrip $trip, Request $request): array
     {
         $expenses = ['travelling', 'accommodation', 'advance', 'other'];
         if ($trip->type === TripType::FOREIGN) {
@@ -953,14 +953,13 @@ class BusinessTripController extends Controller
      * @param BusinessTrip $trip
      * @return void
      */
-    public static function createOrUpdateExpenses(array $validatedExpensesData, BusinessTrip $trip): void
+    private static function createOrUpdateExpenses(array $validatedExpensesData, BusinessTrip $trip): void
     {
         $trip->update([
             'expense_estimation' => $validatedExpensesData['expense_estimation'],
             'meals_reimbursement' => !$validatedExpensesData['no_meals_reimbursed']
         ]);
-        unset($validatedExpensesData['expense_estimation']);
-        unset($validatedExpensesData['no_meals_reimbursed']);
+        unset($validatedExpensesData['expense_estimation'], $validatedExpensesData['no_meals_reimbursed']);
 
 
         foreach ($validatedExpensesData as $name => $expenseData) {
@@ -987,7 +986,7 @@ class BusinessTripController extends Controller
      * @param Request $request
      * @return array
      */
-    public static function validateTripContributionsData(Request $request): array
+    private static function validateTripContributionsData(Request $request): array
     {
         // Contributions validation
         $checkedContributions = [];
@@ -1016,7 +1015,7 @@ class BusinessTripController extends Controller
      * @param $trip
      * @return void
      */
-    public static function createOrUpdateReimbursement(mixed $validatedReimbursementData, $trip): void
+    private static function createOrUpdateReimbursement(mixed $validatedReimbursementData, $trip): void
     {
         $reimbursement = Reimbursement::create($validatedReimbursementData);
         $trip->update(['reimbursement_id' => $reimbursement->id]);
@@ -1027,7 +1026,7 @@ class BusinessTripController extends Controller
      * @param $trip
      * @return void
      */
-    public static function createOrUpdateConferenceFee(mixed $validatedConferenceFeeData, $trip): void
+    private static function createOrUpdateConferenceFee(mixed $validatedConferenceFeeData, $trip): void
     {
         $ConferenceFee = ConferenceFee::create($validatedConferenceFeeData);
         $trip->update(['conference_fee_id' => $ConferenceFee->id]);
@@ -1038,7 +1037,7 @@ class BusinessTripController extends Controller
      * @param $trip
      * @return void
      */
-    public static function createOrUpdateTripContributions(array $validatedTripContributionsData, $trip): void
+    private static function createOrUpdateTripContributions(array $validatedTripContributionsData, $trip): void
     {
         foreach ($validatedTripContributionsData as $contribution) {
             $contribution['business_trip_id'] = $trip->id;
@@ -1051,7 +1050,7 @@ class BusinessTripController extends Controller
      * @param int $days
      * @return string
      */
-    public static function validateMealsData(int $days, Request $request): string
+    private static function validateMealsData(int $days, Request $request): string
     {
         $notReimbursedMeals = '';
         $checkboxNames = ['b', 'l', 'd']; // Checkbox names prefix
@@ -1072,9 +1071,8 @@ class BusinessTripController extends Controller
      * @param int $selectedCountry
      * @return TripType
      */
-    public static function getTripType(int $selectedCountry): TripType
+    private static function getTripType(int $selectedCountry): TripType
     {
-//        dd($selectedCountry, Country::getIdOf('Slovensko'));
         return $selectedCountry === Country::getIdOf('Slovensko')
             ? TripType::DOMESTIC : TripType::FOREIGN;
     }
@@ -1096,7 +1094,6 @@ class BusinessTripController extends Controller
                 $notReimbursedMeals = substr($notReimbursedMeals, 0, $days * 3);
             }
 
-//
             $trip->update(['not_reimbursed_meals' => $notReimbursedMeals]);
         }
     }

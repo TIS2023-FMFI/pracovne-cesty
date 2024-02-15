@@ -45,6 +45,7 @@ Route::controller(BusinessTripController::class)
 
                 // Show the edit form
                 Route::get('/{trip}/edit', 'edit')
+                    ->can('view', 'trip')
                     ->name('edit');
 
                 // Save a newly created business trip
@@ -55,26 +56,31 @@ Route::controller(BusinessTripController::class)
                 // Update an existing business trip
                 // Intended for the submit button in the edit form
                 Route::put('/{trip}', 'update')
+                    ->can('view', 'trip')
                     ->name('update');
 
                 // Add report for the trip
                 Route::put('/{trip}/add-comment', 'addComment')
+                    ->can('view', 'trip')
                     ->name('add-comment');
 
                 // Export the trip details as the selected document
                 Route::get('/{trip}/export', static function (BusinessTrip $trip, Request $request) {
                     return BusinessTripController::exportPdf($trip->id, $request->query('fileType'));
                 })
+                    ->can('view', 'trip')
                     ->name('export');
 
                 // Download attachment in the trip
                 Route::get('/{trip}/attachment', 'getAttachment')
+                    ->can('view', 'trip')
                     ->name('attachment');
             });
 
         Route::middleware('role:traveller')
             ->group(static function () {
                 Route::put('/{trip}/request-cancel', 'requestCancellation')
+                    ->can('view', 'trip')
                     ->name('request-cancel');
             });
 
