@@ -31,17 +31,21 @@ class SimpleMail extends Mailable
      */
     public $viewTemplate;
 
+    public $subjectLine;
+
     /**
      * Creates a new instance of SimpleMail.
      * @param string $messageText Message text.
      * @param string $recipient Email address of the recipient.
      * @param string $viewTemplate The name of the template.
      */
-    public function __construct(string $messageText, string $recipient, string $viewTemplate)
+    public function __construct(string $messageText, string $recipient, string $viewTemplate, string $subjectLine)
     {
         $this->messageText = $messageText;
         $this->recipient = $recipient;
         $this->viewTemplate = $viewTemplate;
+        $this->subjectLine = $subjectLine;
+
     }
 
     /**
@@ -54,7 +58,7 @@ class SimpleMail extends Mailable
 
         return $this->view($this->viewTemplate)
             ->text($textTemplate)
-            ->subject('Pracovné cesty')
+            ->subject($this->subjectLine)
             ->with([
                 'messageText' => $this->messageText,
             ])

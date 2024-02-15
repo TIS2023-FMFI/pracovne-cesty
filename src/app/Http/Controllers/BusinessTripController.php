@@ -205,7 +205,7 @@ class BusinessTripController extends Controller
 
         foreach (User::getAdminEmails() as $recipient) {
             // Create an instance of the SimpleMail class
-            $email = new SimpleMail($message, $recipient, 'emails.new_trip_admin');
+            $email = new SimpleMail($message, $recipient, 'emails.new_trip_admin', 'Pracovné cesty - pridaná nová cesta');
 
             // Send the email
             Mail::to($recipient)->send($email);
@@ -400,7 +400,7 @@ class BusinessTripController extends Controller
             // Sending mails
             foreach (User::getAdminEmails() as $recipient) {
                 // Create an instance of the SimpleMail class
-                $email = new SimpleMail('', $recipient, 'emails.new_trip_admin');
+                $email = new SimpleMail('', $recipient, 'emails.new_trip_admin', 'Pracovné cesty - pridaná nová cesta');
 
                 // Send the email
                 Mail::to($recipient)->send($email);
@@ -440,7 +440,7 @@ class BusinessTripController extends Controller
         $viewTemplate = 'emails.cancellation_user';
 
         // Create an instance of the SimpleMail class
-        $email = new SimpleMail($message, $recipient, $viewTemplate);
+        $email = new SimpleMail($message, $recipient, $viewTemplate, 'Pracovné cesty - stornovaná cesta');
 
         // Send the email
         Mail::to($recipient)->send($email);
@@ -520,7 +520,7 @@ class BusinessTripController extends Controller
 
             foreach (User::getAdminEmails() as $recipient) {
                 // Create an instance of the SimpleMail class
-                $email = new SimpleMail($message, $recipient, 'emails.cancellation_request_admin');
+                $email = new SimpleMail($message, $recipient, 'emails.cancellation_request_admin', 'Pracovné cesty - žiadosť o storno cesty');
 
                 // Send the email
                 Mail::to($recipient)->send($email);
@@ -552,7 +552,7 @@ class BusinessTripController extends Controller
 
         foreach (User::getAdminEmails() as $recipient) {
             // Create an instance of the SimpleMail class
-            $email = new SimpleMail($message, $recipient, 'emails.new_note_admin');
+            $email = new SimpleMail($message, $recipient, 'emails.new_note_admin','Pracovné cesty - pridaná nová poznámka');
 
             // Send the email
             Mail::to($recipient)->send($email);
