@@ -30,14 +30,14 @@
             <div class="container d-flex justify-content-end py-2 align-items-end">
                 @auth
                     <span class="text-white mx-2">Prihlásený ako: <b>{{Auth::user()->first_name.' '.Auth::user()->last_name}}</b></span>
-                    <form method="POST" action="/user/logout">
+                    <form method="POST" action="{{ route('user.logout') }}">
                         @csrf
                         <button class="btn btn-sm btn-danger">
                             <i class="text-white fa-solid fa-right-to-bracket"></i>
                         </button>
                     </form>
                 @else
-                    <form class="form-inline" method="POST" action="/user">
+                    <form class="form-inline" method="POST" action="{{ route('user.login') }}">
                         @csrf
                         <div class="form-group mx-2">
                             <input
@@ -75,7 +75,7 @@
         </div>
 
         <div class="container py-3">
-            <a href="\" class="text-decoration-none">
+            <a href="{{ route('homepage') }}" class="text-decoration-none">
                 <h1 class="text-white text-uppercase header-h1 d-inline-flex">Pracovné cesty</h1>
                 @if(Auth::check() && Auth::user()->hasRole('admin'))
                     <span class="badge badge-pill badge-danger">Administrátor</span>

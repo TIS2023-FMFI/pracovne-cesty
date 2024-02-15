@@ -1,5 +1,5 @@
 <x-modal title="Zabudnuté heslo" name="forgot-password">
-    <form action="/user/forgot-password" method="POST">
+    <form action="{{ route('password.email') }}" method="POST">
         @csrf
         <x-content-section>
             <x-slot:description>

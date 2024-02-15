@@ -60,7 +60,7 @@
             </div>
         </div>
 
-        <form method="POST" action="/trips/{{ $trip->id }}" enctype="multipart/form-data">
+        <form method="POST" action="{{ route('trip.update', ['trip' => $trip->id]) }}" enctype="multipart/form-data">
             @csrf
             @method('PUT')
             <x-content-section
@@ -204,7 +204,7 @@
                     <div class="col-md-6 col-12">
                         <div class="card">
                             <div>
-                                <a {{ $hasFile ? 'href=/trips/' . $trip->id . '/attachment' : ''}} class="btn">
+                                <a {{ $hasFile ? 'href=' . route('trip.attachment', ['trip' => $trip->id]) : ''}} class="btn">
                                     <i class="fa fa-download mr-2"></i>
                                     {{ $hasFile ? 'Stiahnuť nahratý súbor' : 'Žiadny súbor nebol nahraný' }}
                                 </a>
@@ -524,7 +524,7 @@
                     Tu môžete k pracovnej ceste pridať poznámku pre administrátora, ktorý bude upozornený mailom,
                     poznámka zostane viditeľná aj pre Vás.
                 </x-slot:description>
-                <form method="POST" action="/trips/{{ $trip->id }}/add-comment">
+                <form method="POST" action="{{ route('trip.add-comment', ['trip' => $trip->id]) }}">
                     @csrf
                     @method('PUT')
                     <div class="form-row align-items-end">
@@ -544,7 +544,7 @@
                 <x-slot:description>
                     Po zaevidovaní v systéme SOFIA sem vložte identifikátor cesty a potvrdťe ju. Zmeníte tak jej stav.
                 </x-slot:description>
-                <form method="POST" action="/trips/{{ $trip->id }}/confirm">
+                <form method="POST" action="{{ route('trip.confirm', ['trip' => $trip->id]) }}">
                     @csrf
                     @method('PUT')
                     <div class="form-row align-items-end">
@@ -565,7 +565,7 @@
                     Tu si môžete označiť, že ste zaevidovali správu a náklady v systéme SOFIA. Zmeníte tak stav cesty na
                     uzavretú.
                 </x-slot:description>
-                <form method="POST" action="/trips/{{ $trip->id }}/close">
+                <form method="POST" action="{{ route('trip.close', ['trip' => $trip->id]) }}">
                     @csrf
                     @method('PUT')
                     <div class="form-row align-items-end">
@@ -583,7 +583,7 @@
                     Môžete požiadať o storno pracovnej cesty, musíte však uviesť dôvod storna. Cesta bude stornovaná až
                     po schválení administrátorom.
                 </x-slot:description>
-                <form method="POST" action="/trips/{{ $trip->id }}/request-cancel">
+                <form method="POST" action="{{ route('trip.request-cancel', ['trip' => $trip->id]) }}">
                     @csrf
                     @method('PUT')
                     <div class="form-row align-items-end">
@@ -606,7 +606,7 @@
                         <p>Zadaný dôvod storna od používateľa: <b>{{ $trip->cancellation_reason ?? 'prázdny' }}</b></p>
                     @endif
                 </x-slot:description>
-                <form method="POST" action="/trips/{{ $trip->id }}/cancel">
+                <form method="POST" action="{{ route('trip.cancel', ['trip' => $trip->id]) }}">
                     @csrf
                     @method('PUT')
                     <div class="form-row align-items-end">

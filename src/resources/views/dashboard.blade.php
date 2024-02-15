@@ -27,7 +27,7 @@
             </div>
 
         <div class="mr-2 btn-group">
-            <x-link-button color="danger" href="/spp">ŠPP prvky</x-link-button>
+            <x-link-button color="danger" href="{{ route('spp.manage') }}">ŠPP prvky</x-link-button>
         </div>
 
         @endif

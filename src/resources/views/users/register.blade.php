@@ -2,11 +2,9 @@
 use App\Enums\UserType;
 @endphp
 
-
-
 <x-layout>
     <x-content-box title="Registrácia">
-        <form action="/user/register/store" method="POST">
+        <form action="{{ route('user.register-submit') }}" method="POST">
             @csrf
             <x-content-section>
                 <div class="form-row">
