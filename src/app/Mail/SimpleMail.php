@@ -31,6 +31,10 @@ class SimpleMail extends Mailable
      */
     public $viewTemplate;
 
+    /**
+     * The subject line of the email.
+     * @var string
+     */
     public $subjectLine;
 
     /**
@@ -38,6 +42,7 @@ class SimpleMail extends Mailable
      * @param string $messageText Message text.
      * @param string $recipient Email address of the recipient.
      * @param string $viewTemplate The name of the template.
+     * @param string $subjectLine The subject line for the email.
      */
     public function __construct(string $messageText, string $recipient, string $viewTemplate, string $subjectLine)
     {
@@ -49,7 +54,7 @@ class SimpleMail extends Mailable
     }
 
     /**
-     * Creates an email with the appropriate template and text version.
+     * Creates an email with the appropriate template, text version and subject line.
      * @return $this
      */
     public function build(): self
