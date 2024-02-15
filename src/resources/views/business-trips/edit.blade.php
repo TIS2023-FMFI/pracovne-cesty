@@ -24,10 +24,12 @@
 
     $contributions = Contribution::all()->pluck('name', 'id');
 
-    $sppSymbolsQuery = SppSymbol::where('status', SppStatus::ACTIVE)
-        ->orWhere('id', $trip->sppSymbol->id);
+    $sppSymbolsQuery = SppSymbol::where('status', SppStatus::ACTIVE);
+    if ($trip->sppSymbol) {
+        $sppSymbolsQuery = $sppSymbolsQuery->orWhere('id', $trip->sppSymbol->id);
+    }
     if ($trip->reimbursement) {
-        $sppSymbolsQuery->orWhere('id', $trip->reimbursement->sppSymbol->id);
+        $sppSymbolsQuery = $sppSymbolsQuery->orWhere('id', $trip->reimbursement->sppSymbol->id);
     }
 
     $spp_symbols = $sppSymbolsQuery
@@ -268,7 +270,7 @@
                 <div class="form-row align-items-center">
                     <div class="col-md col-12">
                         <x-dropdown-input name="spp_symbol_id" label="ŠPP prvok 1:" :values="$spp_symbols"
-                                          :selected="$trip->spp_symbol_id"/>
+                                          :selected="$trip->spp_symbol_id ?? ''"/>
                     </div>
                     <div class="col-md col-12">
                         <x-checkbox name="reimbursement" label="Refundovať" control="reimbursementShow"

@@ -200,7 +200,7 @@ class BusinessTripController extends Controller
         }
 
         // Sending mails
-        $message = 'ID pridanej cesty: ' . $trip->id
+        $message ='ID pridanej cesty: ' . $trip->sofia_id
             . ' Meno a priezvisko cestujúceho: ' . $trip->user->fullName();
 
         foreach (User::getAdminEmails() as $recipient) {
@@ -320,10 +320,16 @@ class BusinessTripController extends Controller
 
                 if ($isReimbursement) {
                     self::createOrUpdateReimbursement($validatedReimbursementData, $trip);
+                } else {
+                    $trip->reimbursement()->delete();
+                    $trip->update(['reimbursement_id' => null]);
                 }
 
                 if ($isConferenceFee) {
                     self::createOrUpdateConferenceFee($validatedConferenceFeeData, $trip);
+                } else {
+                    $trip->conferenceFee()->delete();
+                    $trip->update(['conference_fee_id' => null]);
                 }
 
                 self::createOrUpdateTripContributions($validatedTripContributionsData, $trip);
@@ -373,7 +379,7 @@ class BusinessTripController extends Controller
             DB::beginTransaction();
 
             try {
-                // VUpdate based on trip state
+                // Update based on trip state
                 if ($tripState === TripState::CONFIRMED) {
                     // Change the state to UPDATED
                     $trip->update(['state' => TripState::UPDATED]);
@@ -434,7 +440,9 @@ class BusinessTripController extends Controller
 
         // Retrieve user's email associated with the trip
         $recipient = $trip->user->email;
-        $message = 'ID Stornovanej cesty: ' . $trip->id;
+        $message = 'Chceme vás informovať, že vaša pracovná cesta s ID ' .  $trip->sofia_id
+            . ' naplánovaná na ' . $trip->datetime_start
+            . ' s miestom konania ' . $trip->place . ' bola stornovaná.';
         $viewTemplate = 'emails.cancellation_user';
 
         // Create an instance of the SimpleMail class
@@ -513,7 +521,7 @@ class BusinessTripController extends Controller
             $trip->update($validatedData);
 
             // Send email notification to the admin
-            $message = 'ID Cesty: ' . $trip->id
+            $message = 'ID pracovnej cesty: ' . $trip->sofia_id
                 . ' Meno a priezvisko cestujúceho: ' . $trip->user->fullName();
 
             foreach (User::getAdminEmails() as $recipient) {
@@ -545,7 +553,7 @@ class BusinessTripController extends Controller
         $trip->update($validatedData);
 
         // Send email notification to the
-        $message = 'ID Cesty ku ktorej bola pridaná poznámka: ' . $trip->id
+        $message = 'ID Cesty ku ktorej bola pridaná poznámka: ' . $trip->sofia_id
             . ' Meno a priezvisko cestujúceho: ' . $trip->user->fullName();
 
         foreach (User::getAdminEmails() as $recipient) {
@@ -623,9 +631,9 @@ class BusinessTripController extends Controller
                     'last_name' => $trip->user->last_name,
                     'academic_degree' => $trip->user->academic_degrees,
                     'address' => $trip->user->address,
-                    'contribution1' => $contributions->get(0) ? 'yes1' : null,
-                    'contribution2' => $contributions->get(1) ? 'yes2' : null,
-                    'contribution3' => $contributions->get(2) ? 'yes3' : null,
+                    'contribution1' => $contributions->contains('id', 1) ? 'yes1' : null,
+                    'contribution2' => $contributions->contains('id', 2) ? 'yes2' : null,
+                    'contribution3' => $contributions->contains('id', 3) ? 'yes3' : null,
                     'department' => $trip->user->department,
                     'place' => $trip->country->name . ', ' . $trip->place,
                     'datetime_start' => $trip->datetime_start->format('d.m.Y'),
@@ -645,9 +653,9 @@ class BusinessTripController extends Controller
                     'incumbent_name2' => $secretary->incumbent_name ?? null,
                     'position_name1' => $dean->position_name ?? null,
                     'position_name2' => $secretary->position_name ?? null,
-                    'contribution1_text' => $contributions->get(0)->pivot->detail ?? null,
-                    'contribution2_text' => $contributions->get(1)->pivot->detail ?? null,
-                    'contribution3_text' => $contributions->get(2)->pivot->detail ?? null,
+                    'contribution1_text' => $contributions->where('id', 1)->first()?->pivot->detail ?? null,
+                    'contribution2_text' => $contributions->where('id', 2)->first()?->pivot->detail ?? null,
+                    'contribution3_text' => $contributions->where('id', 3)->first()?->pivot->detail ?? null,
                 ];
                 break;
 
@@ -691,8 +699,8 @@ class BusinessTripController extends Controller
                     'date_start' => $trip->datetime_start->format('d.m.Y'),
                     'date_end' => $trip->datetime_end->format('d.m.Y'),
                     'spp_symbol' => $trip->sppSymbol->spp_symbol,
-                    'time_start' => $trip->datetime_start->format('H:i'),
-                    'time_end' => $trip->datetime_end->format('H:i'),
+                    'time_start' => $trip->datetime_start->format('H.i'),
+                    'time_end' => $trip->datetime_end->format('H.i'),
                     'transport' => $trip->transport->name,
                     'travelling_expense' => $trip->travellingExpense->amount_eur ?? null,
                     'accommodation_expense' => $trip->accommodationExpense->amount_eur ?? null,
@@ -714,10 +722,10 @@ class BusinessTripController extends Controller
                     'name' => $trip->user->first_name . ' ' . $trip->user->last_name,
                     'department' => $trip->user->department,
                     'country' => $trip->country->name,
-                    'datetime_end' => $trip->datetime_end->format('d-m-Y H:i'),
-                    'datetime_start' => $trip->datetime_start->format('d-m-Y H:i'),
-                    'datetime_border_crossing_start' => $trip->datetime_border_crossing_start->format('d-m-Y H:i'),
-                    'datetime_border_crossing_end' => $trip->datetime_border_crossing_end->format('d-m-Y H:i'),
+                    'datetime_end' => $trip->datetime_end->format('d.m.Y H.i'),
+                    'datetime_start' => $trip->datetime_start->format('d.m.Y H.i'),
+                    'datetime_border_crossing_start' => $trip->datetime_border_crossing_start->format('d.m.Y H.i'),
+                    'datetime_border_crossing_end' => $trip->datetime_border_crossing_end->format('d.m.Y H.i'),
                     'place' => $trip->place,
                     'spp_symbol' => $trip->sppSymbol->spp_symbol,
                     'transport' => $trip->transport->name,
@@ -978,8 +986,6 @@ class BusinessTripController extends Controller
                 $expense->update($data);
             }
         }
-
-
     }
 
     /**
@@ -990,10 +996,10 @@ class BusinessTripController extends Controller
     {
         // Contributions validation
         $checkedContributions = [];
-        $contributions = Contribution::all()->pluck('name', 'id');
+        $contributionIds = Contribution::all()->pluck( 'id');
 
         // Check for checked contributions checkboxes
-        foreach ($contributions as $id => $name) {
+        foreach ($contributionIds as $id) {
             if ($request->has('contribution_' . $id)) {
                 $validatedContributionData = $request->validate([
                     'contribution_' . $id . '_detail' => 'nullable|string|max:200',
@@ -1004,32 +1010,46 @@ class BusinessTripController extends Controller
                     $validatedContributionData
                 );
                 $updContributionData['contribution_id'] = $id;
-                $checkedContributions[] = $updContributionData;
+                $checkedContributions[$id] = $updContributionData;
             }
         }
         return $checkedContributions;
     }
 
     /**
-     * @param mixed $validatedReimbursementData
+     * @param array $validatedReimbursementData
      * @param $trip
      * @return void
      */
-    private static function createOrUpdateReimbursement(mixed $validatedReimbursementData, $trip): void
+    private static function createOrUpdateReimbursement(array $validatedReimbursementData, $trip): void
     {
-        $reimbursement = Reimbursement::create($validatedReimbursementData);
-        $trip->update(['reimbursement_id' => $reimbursement->id]);
+        $reimbursement = $trip->reimbursement;
+        if ($reimbursement == null) {
+            $reimbursement = Reimbursement::create($validatedReimbursementData);
+
+            $trip->update(['reimbursement_id' => $reimbursement->id]);
+
+        } else {
+            $reimbursement->update($validatedReimbursementData);
+        }
     }
 
     /**
-     * @param mixed $validatedConferenceFeeData
+     * @param array $validatedConferenceFeeData
      * @param $trip
      * @return void
      */
-    private static function createOrUpdateConferenceFee(mixed $validatedConferenceFeeData, $trip): void
+    private static function createOrUpdateConferenceFee(array $validatedConferenceFeeData, $trip): void
     {
-        $ConferenceFee = ConferenceFee::create($validatedConferenceFeeData);
-        $trip->update(['conference_fee_id' => $ConferenceFee->id]);
+        $conferenceFee = $trip->conferenceFee;
+        if ($conferenceFee == null) {
+            $conferenceFee = ConferenceFee::create($validatedConferenceFeeData);
+
+            $trip->update(['conference_fee_id' => $conferenceFee->id]);
+
+        } else {
+            $conferenceFee->update($validatedConferenceFeeData);
+        }
     }
 
     /**
@@ -1039,9 +1059,27 @@ class BusinessTripController extends Controller
      */
     private static function createOrUpdateTripContributions(array $validatedTripContributionsData, $trip): void
     {
-        foreach ($validatedTripContributionsData as $contribution) {
-            $contribution['business_trip_id'] = $trip->id;
-            TripContribution::create($contribution);
+        $contributionIds = Contribution::all()->pluck( 'id');
+
+        foreach ($contributionIds as $id) {
+            if (array_key_exists($id, $validatedTripContributionsData)) {
+                $tripContributionData = $validatedTripContributionsData[$id];
+                $tripContributionData['business_trip_id'] = $trip->id;
+
+                $foundContribution = $trip->contributions
+                    ->where('id', $id)
+                    ->first();
+
+                if ($foundContribution == null) {
+                    TripContribution::create($tripContributionData);
+
+                } else {
+                    $trip->contributions()
+                        ->updateExistingPivot($tripContributionData['contribution_id'], $tripContributionData);
+                }
+            } else {
+                $trip->contributions()->detach($id);
+            }
         }
     }
 

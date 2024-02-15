@@ -9,7 +9,7 @@
     <div class="header">Vitajte v Pracovných Cestách</div>
     <div class="content">
         Vážený externista, <br>
-        Vaša žiadosť o registráciu bola úspešne zaregistrovaná.
+        Vaša žiadosť o registráciu bola úspešne zaznamenaná.
         {{ $messageText }}
     </div>
     <div class="footer">
