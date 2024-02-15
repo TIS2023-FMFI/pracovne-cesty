@@ -23,7 +23,6 @@ class SppSymbolFactory extends Factory
             'fund' => fake()->randomElement(['35', '46', '111']),
             'functional_region' => fake()->numerify('0####'),
             'financial_centre' => '107240',
-            'account' => 'BÚ',
             'grantee' => fake('sk_SK')->name(),
             'status' => fake()->randomElement(SppStatus::cases())
         ];
