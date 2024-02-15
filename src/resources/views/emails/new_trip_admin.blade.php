@@ -1,15 +1,14 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Nová Cesta</title>
+    <title>Nová cesta</title>
     @include('emails.partials.email_styles')
 </head>
 <body>
 <div class="email-container">
-    <div class="header">Nová Cesta Nahlásená</div>
     <div class="content">
         Vážený admin, <br>
-        Bola nahlásená nová pracovná cesta.
+        bola pridaná nová pracovná cesta.
         {{ $messageText }}
     </div>
     <div class="footer">

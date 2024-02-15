@@ -1,15 +1,14 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Podpísanie Dokumentov Pred Cestou</title>
+    <title>Podpísanie dokumentov pred cestou</title>
     @include('emails.partials.email_styles')
 </head>
 <body>
 <div class="email-container">
-    <div class="header">Podpísanie Dokumentov</div>
     <div class="content">
         Vážený používateľ, <br>
-        Prosím, skontrolujte si vygenerované dokumenty pri vašej pracovnej cesty, podľa potreby si dokumenty vytlačte a doručte podpísané na sekretariát alebo sa dostavte podpísať dokumenty na sekretariát osobne.
+        ak Vám boli pri pracovnej ceste vygenerované dokumenty, zastavte sa na sekretariáte podpísať ich, alebo si ich vytlačte a doručte už podpísané.
         {{ $messageText }}
     </div>
     <div class="footer">

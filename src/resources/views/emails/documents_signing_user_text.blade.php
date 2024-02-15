@@ -1,8 +1,6 @@
-Podpísanie Dokumentov Pred Cestou
-
 Vážený používateľ,
 
-Prosím, skontrolujte si vygenerované dokumenty pri vašej pracovnej cesty, podľa potreby si dokumenty vytlačte a doručte podpísané na sekretariát alebo sa dostavte podpísať dokumenty na sekretariát osobne.
+ak Vám boli pri pracovnej ceste vygenerované dokumenty, zastavte sa na sekretariáte podpísať ich, alebo si ich vytlačte a doručte už podpísané.
 {{ $messageText }}
 
 S pozdravom,

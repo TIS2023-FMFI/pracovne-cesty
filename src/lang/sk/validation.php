@@ -269,5 +269,7 @@ return [
         'other_expense_foreign' => 'ostatné náklady v cudzej mene',
         'reimburse' => 'náhrada',
         'conclusion' => 'výsledky cesty',
+        'cancellation_reason' => 'dôvod storna',
+        'note' => 'poznámka'
     ],
 ];

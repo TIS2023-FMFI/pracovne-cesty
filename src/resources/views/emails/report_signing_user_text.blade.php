@@ -1,8 +1,6 @@
-Podpísanie Správy
-
 Vážený používateľ,
 
-Prosím, doručte podpísanú správu o pracovnej ceste na sekretariát alebo sa dostavte podpísať dokument o správe z pracovnej cesty na sekretariát osobne.
+zastavte sa na sekretariáte podpísať správu o pracovnej ceste alebo si ju vygenerujte v Pracovných cestách a doručte už podpísanú.
 {{ $messageText }}
 
 S pozdravom,
