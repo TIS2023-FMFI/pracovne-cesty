@@ -1,8 +1,6 @@
-Nová Cesta Nahlásená
-
 Vážený admin,
 
-Bola nahlásená nová pracovná cesta.
+bola pridaná nová pracovná cesta.
 {{ $messageText }}
 
 

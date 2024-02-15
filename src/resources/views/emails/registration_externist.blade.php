@@ -1,15 +1,14 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Registrácia Externistu</title>
+    <title>Registrácia externistu</title>
     @include('emails.partials.email_styles')
 </head>
 <body>
 <div class="email-container">
-    <div class="header">Vitajte v Pracovných Cestách</div>
     <div class="content">
-        Vážený externista, <br>
-        Vaša žiadosť o registráciu bola úspešne zaznamenaná.
+        Dobrý deň, <br>
+        boli ste pridaný do systému Pracovné cesty Katedry aplikovanej informatiky FMFI.
         {{ $messageText }}
     </div>
     <div class="footer">

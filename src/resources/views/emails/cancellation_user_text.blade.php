@@ -1,5 +1,3 @@
-Informácia o Storne Cesty
-
 Vážený používateľ,
 
 {{ $messageText }}

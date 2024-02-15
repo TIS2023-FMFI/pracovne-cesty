@@ -1,8 +1,6 @@
-Vitajte v Pracovných Cestách
-
 Vážený externista,
 
-Vaša žiadosť o registráciu bola úspešne zaznamenaná.
+boli ste pridaný do systému Pracovné cesty Katedry aplikovanej informatiky FMFI.
 {{ $messageText }}
 S pozdravom,
 Tím Pracovné Cesty

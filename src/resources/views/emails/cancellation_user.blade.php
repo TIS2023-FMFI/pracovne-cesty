@@ -1,12 +1,11 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Storno Cesty</title>
+    <title>Storno cesty</title>
     @include('emails.partials.email_styles')
 </head>
 <body>
 <div class="email-container">
-    <div class="header">Informácia o Storne Cesty</div>
     <div class="content">
         Vážený používateľ, <br>
         {{ $messageText }}
