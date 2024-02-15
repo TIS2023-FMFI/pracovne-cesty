@@ -9,7 +9,7 @@
     <div class="header">Podpísanie Dokumentov</div>
     <div class="content">
         Vážený používateľ, <br>
-        Prosím, skontrolujte si vygenerované dokumenty pri vašej pracovnej cesty, podľa potreby si dokumenty vytlačte a doručte podpísané na sekretariát alebo sa dostavte podpísať dokumenty na sekretatriát.
+        Prosím, skontrolujte si vygenerované dokumenty pri vašej pracovnej cesty, podľa potreby si dokumenty vytlačte a doručte podpísané na sekretariát alebo sa dostavte podpísať dokumenty na sekretariát osobne.
         {{ $messageText }}
     </div>
     <div class="footer">

@@ -194,7 +194,7 @@ class BusinessTripController extends Controller
         $targetUser->update($validatedUserData);
 
         //Sending mails
-        $message = 'ID pridanej cesty: ' . $trip->id . ' Meno a priezvisko cestujúceho: ' . $trip->user->first_name . ' ' . $trip->user->last_name;
+        $message = 'ID pridanej cesty: ' . $trip->sofia_id . ' Meno a priezvisko cestujúceho: ' . $trip->user->first_name . ' ' . $trip->user->last_name;
         $recipient = 'admin@example.com';
         $viewTemplate = 'emails.new_trip_admin';
 
@@ -398,7 +398,7 @@ class BusinessTripController extends Controller
 
         // Retrieve user's email associated with the trip
         $recipient = $trip->user->email;
-        $message = 'ID Stornovanej cesty: ' . $trip->id;
+        $message = 'Chceme vás informovať, že vaša pracovná cesta s ID ' .  $trip->sofia_id . ' naplánovaná na ' . $trip->datetime_start . ' s miestom konania ' . $trip->place . ' bola stornovaná.';
         $viewTemplate = 'emails.cancellation_user';
 
         // Create an instance of the SimpleMail class
@@ -469,7 +469,7 @@ class BusinessTripController extends Controller
             $trip->update($validatedData);
 
             // Send email notification to the admin
-            $message = 'ID Cesty: ' . $trip->id . ' Meno a priezvisko cestujúceho: ' . $trip->user->first_name . ' ' . $trip->user->last_name;
+            $message = 'ID pracovnej cesty: ' . $trip->sofia_id . ' Meno a priezvisko cestujúceho: ' . $trip->user->first_name . ' ' . $trip->user->last_name;
             $recipient = 'admin@example.com';
             $viewTemplate = 'emails.cancellation_request_admin';
 
@@ -500,7 +500,7 @@ class BusinessTripController extends Controller
         $trip->update($validatedData);
 
         // Send email notification to the
-        $message = 'ID Cesty ku ktorej bola pridaná poznámka: ' . $trip->id . ' Meno a priezvisko cestujúceho: ' . $trip->user->first_name . ' ' . $trip->user->last_name;
+        $message = 'ID Cesty ku ktorej bola pridaná poznámka: ' . $trip->sofia_id . ' Meno a priezvisko cestujúceho: ' . $trip->user->first_name . ' ' . $trip->user->last_name;
         $recipient = 'admin@example.com';
         $viewTemplate = 'emails.new_note_admin';
 
@@ -577,9 +577,9 @@ class BusinessTripController extends Controller
                     'last_name' => $trip->user->last_name,
                     'academic_degree' => $trip->user->academic_degrees,
                     'address' => $trip->user->address,
-                    'contribution1' => $contributions->get(0) ? 'yes1' : null,
-                    'contribution2' => $contributions->get(1) ? 'yes2' : null,
-                    'contribution3' => $contributions->get(2) ? 'yes3' : null,
+                    'contribution1' => $contributions->contains('id', 1) ? $contributions->where('id', 1)->first()->pivot->detail : null,
+                    'contribution2' => $contributions->contains('id', 2) ? $contributions->where('id', 2)->first()->pivot->detail : null,
+                    'contribution3' => $contributions->contains('id', 3) ? $contributions->where('id', 3)->first()->pivot->detail : null,
                     'department' => $trip->user->department,
                     'place' => $trip->country->name . ', ' . $trip->place,
                     'datetime_start' => $trip->datetime_start->format('d.m.Y'),
@@ -599,9 +599,9 @@ class BusinessTripController extends Controller
                     'incumbent_name2' => $secretary->incumbent_name ?? null,
                     'position_name1' => $dean->position_name ?? null,
                     'position_name2' => $secretary->position_name ?? null,
-                    'contribution1_text' => $contributions->get(0)->pivot->detail ?? null,
-                    'contribution2_text' => $contributions->get(1)->pivot->detail ?? null,
-                    'contribution3_text' => $contributions->get(2)->pivot->detail ?? null,
+                    'contribution1_text' => $contributions->where('id', 1)->first()?->pivot->detail ?? null,
+                    'contribution2_text' => $contributions->where('id', 2)->first()?->pivot->detail ?? null,
+                    'contribution3_text' => $contributions->where('id', 3)->first()?->pivot->detail ?? null,
                 ];
                 break;
 
