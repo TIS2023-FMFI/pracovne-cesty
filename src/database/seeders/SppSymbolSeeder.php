@@ -12,8 +12,25 @@ class SppSymbolSeeder extends Seeder
      */
     public function run(): void
     {
-        SppSymbol::factory()
-            ->count(10)
-            ->create();
+        SppSymbol::insert([
+            [
+                'spp_symbol' => '0771100',
+                'fund' => '111',
+                'functional_region' => '09413',
+                'grantee' => 'doc. RNDr. Tatiana Jajcayová, PhD.'
+            ],
+            [
+                'spp_symbol' => 'O-06-107/0008-00',
+                'fund' => '46',
+                'functional_region' => '09413',
+                'grantee' => 'doc. RNDr. Tatiana Jajcayová, PhD.'
+            ],
+            [
+                'spp_symbol' => 'Z-22-107/0001-04',
+                'fund' => '13GR',
+                'functional_region' => '09413',
+                'grantee' => 'prof. Ing. Igor Farkaš, Dr.'
+            ]
+        ]);
     }
 }
