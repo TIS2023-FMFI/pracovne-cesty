@@ -192,7 +192,7 @@ class UserController extends Controller
             $url = route('user.register', ['token' => $token]);
             $messageText = "Pre registráciu kliknite na tento odkaz: " . $url;
 
-            Mail::to($email)->send(new SimpleMail($messageText, $email, 'emails.registration_externist'));
+            Mail::to($email)->send(new SimpleMail($messageText, $email, 'emails.registration_externist', 'Pracovné cesty - registrácia'));
             $invitedEmails[] = $email;
         }
 
