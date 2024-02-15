@@ -9,7 +9,7 @@
     <div class="header">Podpísanie Správy</div>
     <div class="content">
         Vážený používateľ, <br>
-        Prosím, doručte podpísanú správu o pracovnej ceste na sekretariát alebo sa dostavte podpísať dokument o správe z pracovnej cesty na sekretariát.
+        Prosím, doručte podpísanú správu o pracovnej ceste na sekretariát alebo sa dostavte podpísať dokument o správe z pracovnej cesty na sekretariát osobne.
         {{ $messageText }}
     </div>
     <div class="footer">

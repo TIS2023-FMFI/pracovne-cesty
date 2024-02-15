@@ -9,7 +9,6 @@
     <div class="header">Informácia o Storne Cesty</div>
     <div class="content">
         Vážený používateľ, <br>
-        Vaša pracovná cesta bola stornovaná.
         {{ $messageText }}
     </div>
     <div class="footer">
