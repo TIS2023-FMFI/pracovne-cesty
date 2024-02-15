@@ -45,12 +45,11 @@ class SPPController extends Controller
             'spp' => 'ŠPP prvok',
         ];
         $validatedData = $request->validate([
-            'fund' => 'required|string',
-            'spp_symbol' => 'required|string|unique:spp_symbols,spp_symbol',
-            'functional_region' => 'required|string',
-            'account' => 'required|string',
-            'financial_centre' => 'required|string',
-            'grantee' => 'required|string|max:200',
+            'fund' => 'required|string|max:10',
+            'spp_symbol' => 'required|string|max:30|unique:spp_symbols,spp_symbol',
+            'functional_region' => 'required|string|max:10',
+            'financial_centre' => 'required|string|max:10',
+            'grantee' => 'required|string|max:100',
             ],$customMessages, $customAttributes);
 
         SppSymbol::create($validatedData);
