@@ -20,7 +20,11 @@ use Illuminate\Support\Facades\Route;
 */
 
 // Home
-Route::get('/', static function (Request $request) {
+Route::get('/', static function () {
+    return redirect()->route('homepage');
+});
+
+Route::get('/home', static function (Request $request) {
     if (Auth::check()) {
         // Show trip index for logged-in user
         return BusinessTripController::index($request);
