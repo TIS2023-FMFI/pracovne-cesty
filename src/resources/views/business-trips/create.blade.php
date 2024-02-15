@@ -10,7 +10,9 @@
     $transports = Transport::where('user_visible', 1)->pluck('name', 'id');
     $purposes = TripPurpose::all()->pluck('name', 'id');
     $contributions = Contribution::all()->pluck('name', 'id');
-    $spp_symbols = SppSymbol::where('status', SppStatus::ACTIVE)->pluck('spp_symbol', 'id');
+    $spp_symbols = SppSymbol::where('status', SppStatus::ACTIVE)
+        ->pluck('spp_symbol', 'id')
+        ->prepend('žiadny', '');
 
     $user = $selectedUser ?? Auth::user();
     $userType = $user->user_type;

@@ -582,18 +582,18 @@ class BusinessTripController extends Controller
                     'contribution3' => $contributions->get(2) ? 'yes3' : null,
                     'department' => $trip->user->department,
                     'place' => $trip->country->name . ', ' . $trip->place,
-                    'datetime_start' => $trip->datetime_start->format('d-m-Y'),
-                    'datetime_end' => $trip->datetime_end->format('d-m-Y'),
+                    'datetime_start' => $trip->datetime_start->format('d.m.Y'),
+                    'datetime_end' => $trip->datetime_end->format('d.m.Y'),
                     'transport' => $trip->transport->name,
                     'trip_purpose' => $trip
                             ->tripPurpose
                             ->name . (isset($trip->purpose_details) ? ' - ' . $trip->purpose_details : ''),
                     'fund' => $trip->sppSymbol->fund,
-                    'functional_region' => $trip->sppSymbol->functional_region,
-                    'financial_centre' => $trip->sppSymbol->financial_centre,
-                    'spp_symbol' => $trip->sppSymbol->spp_symbol,
-                    'account' => $trip->sppSymbol->account,
-                    'grantee' => $trip->sppSymbol->grantee,
+                    'functional_region' => $trip->sppSymbol->functional_region ?? null,
+                    'financial_centre' => $trip->sppSymbol->financial_centre ?? null,
+                    'spp_symbol' => $trip->sppSymbol->spp_symbol ?? null,
+                    'account' => $trip->type == TripType::DOMESTIC ? '631001' : '631002',
+                    'grantee' => $trip->sppSymbol->grantee ?? null,
                     'iban' => $trip->iban,
                     'incumbent_name1' => $dean->incumbent_name ?? null,
                     'incumbent_name2' => $secretary->incumbent_name ?? null,
@@ -607,26 +607,26 @@ class BusinessTripController extends Controller
 
             case DocumentType::CONTROL_SHEET:
                 $data = [
-                    'spp_symbol' => $trip->sppSymbol->spp_symbol,
-                    'expense_estimation' => $trip->expense_estimation,
-                    'source1' => $trip->sppSymbol->fund,
-                    'functional_region1' => $trip->sppSymbol->functional_region,
-                    'spp_symbol1' => $trip->sppSymbol->spp_symbol,
-                    'financial_centre1' => $trip->sppSymbol->financial_centre,
+                    'spp_symbol' => $trip->sppSymbol->spp_symbol ?? null,
+                    'expense_estimation' => $trip->conferenceFee->amount ?? null,
+                    'source1' => $trip->sppSymbol->fund ?? null,
+                    'functional_region1' => $trip->sppSymbol->functional_region ?? null,
+                    'spp_symbol1' => $trip->sppSymbol->spp_symbol ?? null,
+                    'financial_centre1' => $trip->sppSymbol->financial_centre ?? null,
                     'purpose_details' => 'Úhrada vložného',
                 ];
                 break;
 
             case DocumentType::PAYMENT_ORDER:
                 $data = [
-                    'advance_amount' => $trip->advance_amount,
-                    'grantee' => $trip->sppSymbol->grantee,
-                    'address' => $trip->conferenceFee->organiser_address,
-                    'source' => $trip->sppSymbol->fund,
-                    'functional_region' => $trip->sppSymbol->functional_region,
-                    'spp_symbol' => $trip->sppSymbol->spp_symbol,
-                    'financial_centre' => $trip->sppSymbol->financial_centre,
-                    'iban' => $trip->iban,
+                    'advance_amount' => $trip->conferenceFee->amount ?? null,
+                    'grantee' => $trip->conferenceFee->organiser_name ?? null,
+                    'address' => $trip->conferenceFee->organiser_address ?? null,
+                    'source' => $trip->sppSymbol->fund ?? null,
+                    'functional_region' => $trip->sppSymbol->functional_region ?? null,
+                    'spp_symbol' => $trip->sppSymbol->spp_symbol ?? null,
+                    'financial_centre' => $trip->sppSymbol->financial_centre ?? null,
+                    'iban' => $trip->conferenceFee->iban ?? null,
                 ];
                 break;
 
@@ -787,7 +787,6 @@ class BusinessTripController extends Controller
 
         $rules = [
             'transport_id' => 'required|exists:transports,id',
-            'spp_symbol_id' => 'required|exists:spp_symbols,id',
             'place_start' => 'required|string|max:200',
             'place_end' => 'required|string|max:200',
             'datetime_start' => 'required|date',
@@ -811,7 +810,8 @@ class BusinessTripController extends Controller
             'transport_id' => 'required|exists:transports,id',
             'place' => 'required|string|max:200',
             'trip_purpose_id' => 'required|integer|min:0',
-            'purpose_details' => 'nullable|string|max:50'
+            'purpose_details' => 'nullable|string|max:50',
+            'spp_symbol_id' => 'nullable|exists:spp_symbols,id',
         ]);
 
         // Set the type of trip based on the selected country

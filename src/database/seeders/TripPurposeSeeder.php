@@ -13,7 +13,9 @@ class TripPurposeSeeder extends Seeder
     public function run(): void
     {
         TripPurpose::insert([
-            ['name' => 'konferencia']
+            ['name' => 'konferencia'],
+            ['name' => 'pracovné stretnutie'],
+            ['name' => 'študijný pobyt']
         ]);
     }
 }
