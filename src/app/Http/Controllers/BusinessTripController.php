@@ -320,10 +320,16 @@ class BusinessTripController extends Controller
 
                 if ($isReimbursement) {
                     self::createOrUpdateReimbursement($validatedReimbursementData, $trip);
+                } else {
+                    $trip->reimbursement()->delete();
+                    $trip->update(['reimbursement_id' => null]);
                 }
 
                 if ($isConferenceFee) {
                     self::createOrUpdateConferenceFee($validatedConferenceFeeData, $trip);
+                } else {
+                    $trip->conferenceFee()->delete();
+                    $trip->update(['conference_fee_id' => null]);
                 }
 
                 self::createOrUpdateTripContributions($validatedTripContributionsData, $trip);
@@ -980,8 +986,6 @@ class BusinessTripController extends Controller
                 $expense->update($data);
             }
         }
-
-
     }
 
     /**
@@ -992,10 +996,10 @@ class BusinessTripController extends Controller
     {
         // Contributions validation
         $checkedContributions = [];
-        $contributions = Contribution::all()->pluck('name', 'id');
+        $contributionIds = Contribution::all()->pluck( 'id');
 
         // Check for checked contributions checkboxes
-        foreach ($contributions as $id => $name) {
+        foreach ($contributionIds as $id) {
             if ($request->has('contribution_' . $id)) {
                 $validatedContributionData = $request->validate([
                     'contribution_' . $id . '_detail' => 'nullable|string|max:200',
@@ -1006,32 +1010,46 @@ class BusinessTripController extends Controller
                     $validatedContributionData
                 );
                 $updContributionData['contribution_id'] = $id;
-                $checkedContributions[] = $updContributionData;
+                $checkedContributions[$id] = $updContributionData;
             }
         }
         return $checkedContributions;
     }
 
     /**
-     * @param mixed $validatedReimbursementData
+     * @param array $validatedReimbursementData
      * @param $trip
      * @return void
      */
-    private static function createOrUpdateReimbursement(mixed $validatedReimbursementData, $trip): void
+    private static function createOrUpdateReimbursement(array $validatedReimbursementData, $trip): void
     {
-        $reimbursement = Reimbursement::create($validatedReimbursementData);
-        $trip->update(['reimbursement_id' => $reimbursement->id]);
+        $reimbursement = $trip->reimbursement;
+        if ($reimbursement == null) {
+            $reimbursement = Reimbursement::create($validatedReimbursementData);
+
+            $trip->update(['reimbursement_id' => $reimbursement->id]);
+
+        } else {
+            $reimbursement->update($validatedReimbursementData);
+        }
     }
 
     /**
-     * @param mixed $validatedConferenceFeeData
+     * @param array $validatedConferenceFeeData
      * @param $trip
      * @return void
      */
-    private static function createOrUpdateConferenceFee(mixed $validatedConferenceFeeData, $trip): void
+    private static function createOrUpdateConferenceFee(array $validatedConferenceFeeData, $trip): void
     {
-        $ConferenceFee = ConferenceFee::create($validatedConferenceFeeData);
-        $trip->update(['conference_fee_id' => $ConferenceFee->id]);
+        $conferenceFee = $trip->conferenceFee;
+        if ($conferenceFee == null) {
+            $conferenceFee = ConferenceFee::create($validatedConferenceFeeData);
+
+            $trip->update(['conference_fee_id' => $conferenceFee->id]);
+
+        } else {
+            $conferenceFee->update($validatedConferenceFeeData);
+        }
     }
 
     /**
@@ -1041,9 +1059,27 @@ class BusinessTripController extends Controller
      */
     private static function createOrUpdateTripContributions(array $validatedTripContributionsData, $trip): void
     {
-        foreach ($validatedTripContributionsData as $contribution) {
-            $contribution['business_trip_id'] = $trip->id;
-            TripContribution::create($contribution);
+        $contributionIds = Contribution::all()->pluck( 'id');
+
+        foreach ($contributionIds as $id) {
+            if (array_key_exists($id, $validatedTripContributionsData)) {
+                $tripContributionData = $validatedTripContributionsData[$id];
+                $tripContributionData['business_trip_id'] = $trip->id;
+
+                $foundContribution = $trip->contributions
+                    ->where('id', $id)
+                    ->first();
+
+                if ($foundContribution == null) {
+                    TripContribution::create($tripContributionData);
+
+                } else {
+                    $trip->contributions()
+                        ->updateExistingPivot($tripContributionData['contribution_id'], $tripContributionData);
+                }
+            } else {
+                $trip->contributions()->detach($id);
+            }
         }
     }
 
