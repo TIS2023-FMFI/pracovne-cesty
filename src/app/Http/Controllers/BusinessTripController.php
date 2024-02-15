@@ -581,6 +581,8 @@ class BusinessTripController extends Controller
     public static function exportPdf(int $tripId, int $documentType): JsonResponse|BinaryFileResponse
     {
         $trip = BusinessTrip::find($tripId);
+        $tripUserType = $trip->user->user_type;
+        $tripState = $trip->state;
         if (!$trip) {
             return response()->json(['error' => 'Business trip not found'], 404);
         }
@@ -599,6 +601,9 @@ class BusinessTripController extends Controller
         $data = [];
         switch ($docType) {
             case DocumentType::FOREIGN_TRIP_AFFIDAVIT:
+                if ($trip->type != TripType::FOREIGN) {
+                    return response()->json(['error' => 'Document not applicable for domestic trips.'], 403);
+                }
                 $tripDurationFormatted = $trip->datetime_start->format('d.m.Y')
                     . ' - '
                     . $trip->datetime_end->format('d.m.Y');
@@ -616,6 +621,9 @@ class BusinessTripController extends Controller
                 break;
 
             case DocumentType::COMPENSATION_AGREEMENT:
+                if (!$tripUserType->isExternal()) {
+                    return response()->json(['error' => 'Unauthorized document type for user.'], 403);
+                }
                 $contributions = $trip->contributions;
                 $dean = Staff::where('position', PositionTitle::DEAN)->first();
                 $secretary = Staff::where('position', PositionTitle::SECRETARY)->first();
@@ -654,6 +662,9 @@ class BusinessTripController extends Controller
                 break;
 
             case DocumentType::CONTROL_SHEET:
+                if ($trip->conference_fee_id == null) {
+                    return response()->json(['error' => 'Conference fee not requested.'], 403);
+                }
                 $data = [
                     'spp_symbol' => $trip->sppSymbol->spp_symbol ?? null,
                     'expense_estimation' => $trip->conferenceFee->amount ?? null,
@@ -666,6 +677,9 @@ class BusinessTripController extends Controller
                 break;
 
             case DocumentType::PAYMENT_ORDER:
+                if ($trip->conference_fee_id == null) {
+                    return response()->json(['error' => 'Conference fee not requested.'], 403);
+                }
                 $data = [
                     'advance_amount' => $trip->conferenceFee->amount ?? null,
                     'grantee' => $trip->conferenceFee->organiser_name ?? null,
@@ -679,6 +693,12 @@ class BusinessTripController extends Controller
                 break;
 
             case DocumentType::DOMESTIC_REPORT:
+                if (!in_array($tripState, [TripState::COMPLETED, TripState::CLOSED])) {
+                    return response()->json(['error' => 'Report not available for current trip state.'], 403);
+                }
+                if ($trip->type != TripType::DOMESTIC) {
+                    return response()->json(['error' => 'FOREIGN_REPORT not applicable for domestic trips.'], 403);
+                }
                 $name = ($trip->user->academic_degrees ?? '')
                     . ' ' . $trip->user->first_name
                     . ' ' . $trip->user->last_name;
@@ -708,6 +728,12 @@ class BusinessTripController extends Controller
                 break;
 
             case DocumentType::FOREIGN_REPORT:
+                if (!in_array($tripState, [TripState::COMPLETED, TripState::CLOSED])) {
+                    return response()->json(['error' => 'Report not available for current trip state.'], 403);
+                }
+                if ($trip->type != TripType::FOREIGN) {
+                    return response()->json(['error' => 'DOMESTIC_REPORT not applicable for foreign trips.'], 403);
+                }
                 $mealsReimbursementText = $trip->meals_reimbursement
                     ? 'mám záujem o preplatenie'
                     : 'nemám záujem o preplatenie';
