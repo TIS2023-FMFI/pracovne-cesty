@@ -30,7 +30,9 @@
         $sppSymbolsQuery->orWhere('id', $trip->reimbursement->sppSymbol->id);
     }
 
-    $spp_symbols = $sppSymbolsQuery->pluck('spp_symbol', 'id');
+    $spp_symbols = $sppSymbolsQuery
+        ->pluck('spp_symbol', 'id')
+        ->prepend('žiadny', '');
 
     $tripType = $trip->type;
     $tripState = $trip->state;

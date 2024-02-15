@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Collection;
 use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
@@ -57,5 +58,19 @@ class User extends Authenticatable
     public function isAdmin(): bool
     {
         return UserType::from($this->user_type) === UserType::ADMIN;
+    }
+
+    /**
+     * Get email addresses of registered admins
+     *
+     * @return Collection
+     */
+    public static function getAdminEmails(): Collection
+    {
+        return self::where('user_type',  UserType::ADMIN->value)->pluck('email');
+    }
+
+    public function fullName(): string {
+        return $this->first_name . ' ' . $this->last_name;
     }
 }
