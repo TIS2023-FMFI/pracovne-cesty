@@ -222,6 +222,12 @@ class UserController extends Controller
     {
         $request->validate(['email' => 'required|string|email|max:127']);
 
+        $user = User::where('email', $request->input('email'))->first();
+        if ($user && !$user->user_type->isExternal()) {
+            return redirect()->route('homepage')
+                ->with('warning', 'Vaše heslo nemôže byť zmenené v Pracovných cestách kvôli vášmu existujúcemu účtu v Prítomnosti.');
+        }
+
         $status = Password::sendResetLink(
             $request->only('email')
         );
