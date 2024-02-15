@@ -21,7 +21,7 @@
 
 <x-layout>
     <x-content-box title="Nová pracovná cesta">
-        <form method="POST" action="/trips" enctype="multipart/form-data">
+        <form method="POST" action="{{ route('trip.store') }}" enctype="multipart/form-data">
             @csrf
             <x-simple-input name="target_user" :value="$user->id" hidden/>
             <x-content-section title="Osobné údaje">

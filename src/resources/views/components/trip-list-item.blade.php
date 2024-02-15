@@ -1,7 +1,7 @@
 @props(['trip'])
 
 <a
-    href="trips/{{ $trip->id }}/edit"
+    href="{{ route('trip.edit', ['trip' => $trip->id]) }}"
     class="text-decoration-none text-dark border-bottom">
     <div class="container my-2 py-2 border-bottom">
         <div class="row">

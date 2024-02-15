@@ -1,7 +1,7 @@
 <x-layout>
     <x-content-box title="ŠPP prvky">
         <div>
-            <form action="/spp/deactivate" method="POST">
+            <form action="{{ route('spp.deactivate') }}" method="POST">
                 @csrf
                 @method('PUT')
                 <x-content-section title="Deaktivácia">
@@ -22,7 +22,7 @@
             </form>
         </div>
 
-        <form action="/spp/" method="POST">
+        <form action="{{ route('spp.store') }}" method="POST">
             @csrf
             <x-content-section title="Nový ŠPP prvok">
                 <div class="form-row">

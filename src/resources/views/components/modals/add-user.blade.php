@@ -1,5 +1,5 @@
 <x-modal title="Pridať použivateľov" name="add-users">
-    <form action="/user/invite" method="POST">
+    <form action="{{ route('user.invite') }}" method="POST">
         @csrf
         <x-content-section>
             <p>Môžete zadať ľubovoľný počet emailových adries <b>oddelených bodkočiarkami</b>.</p>

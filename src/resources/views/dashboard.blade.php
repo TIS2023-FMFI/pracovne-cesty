@@ -27,7 +27,7 @@
             </div>
 
         <div class="mr-2 btn-group">
-            <x-link-button color="danger" href="/spp">ŠPP prvky</x-link-button>
+            <x-link-button color="danger" href="{{ route('spp.manage') }}">ŠPP prvky</x-link-button>
         </div>
 
         @endif
@@ -41,14 +41,14 @@
         @if($isAdmin)
             <div class="col-md-4">
                 <x-content-box title="Prehľad">
-                    <x-overview-item ref="/?filter=newest"><b>Najnovšie</b></x-overview-item>
-                    <x-overview-item ref="/?filter=unconfirmed"><b>Nepotvrdené</b></x-overview-item>
-                    <x-overview-item ref="/?filter=unaccounted"><b>Nevyúčtované</b></x-overview-item>
+                    <x-overview-item :ref="route('homepage', ['filter' => 'newest'])"><b>Najnovšie</b></x-overview-item>
+                    <x-overview-item :ref="route('homepage', ['filter' => 'unconfirmed'])"><b>Nepotvrdené</b></x-overview-item>
+                    <x-overview-item :ref="route('homepage', ['filter' => 'unaccounted'])"><b>Nevyúčtované</b></x-overview-item>
 
                     <div class="my-3"></div>
 
                     @foreach($users as $user)
-                        <x-overview-item :ref="'?user='.$user->id">{{ $user->first_name.' '.$user->last_name }}</x-overview-item>
+                        <x-overview-item :ref="route('homepage', ['user' => $user->id])">{{ $user->first_name.' '.$user->last_name }}</x-overview-item>
                     @endforeach
                 </x-content-box>
             </div>
