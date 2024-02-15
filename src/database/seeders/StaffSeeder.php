@@ -23,7 +23,7 @@ class StaffSeeder extends Seeder
         Staff::create([
             'position' => PositionTitle::SECRETARY,
             'position_name' => 'tajomníčka fakulty',
-            'incumbent_name' => 'PaedDr. Martina Sandanusová, PhD.'
+            'incumbent_name' => 'PaedDr. Martina Chovancová, PhD.'
         ]);
     }
 }
