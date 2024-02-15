@@ -373,7 +373,7 @@ class BusinessTripController extends Controller
             DB::beginTransaction();
 
             try {
-                // VUpdate based on trip state
+                // Update based on trip state
                 if ($tripState === TripState::CONFIRMED) {
                     // Change the state to UPDATED
                     $trip->update(['state' => TripState::UPDATED]);
