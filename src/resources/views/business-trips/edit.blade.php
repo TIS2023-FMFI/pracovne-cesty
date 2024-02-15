@@ -232,8 +232,11 @@
                             class="input-group mb-3">
                             <div class="input-group-prepend">
                                 <div class="input-group-text">
-                                    <input type="checkbox" x-model="tripContribution.checked"
-                                           x-on:change="if (!tripContribution.checked) { tripContribution.value = '' }">
+                                    <input
+                                        type="checkbox"
+                                        x-model="tripContribution.checked"
+                                        x-on:change="if (!tripContribution.checked) { tripContribution.value = '' }"
+                                        name="contribution_{{ $id }}">
                                 </div>
                                 <span class="input-group-text">{{ $name }}</span>
                             </div>
