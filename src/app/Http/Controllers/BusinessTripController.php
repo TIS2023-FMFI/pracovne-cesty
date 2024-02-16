@@ -205,7 +205,12 @@ class BusinessTripController extends Controller
 
         foreach (User::getAdminEmails() as $recipient) {
             // Create an instance of the SimpleMail class
-            $email = new SimpleMail($message, $recipient, 'emails.new_trip_admin', 'Pracovné cesty - pridaná nová cesta');
+            $email = new SimpleMail(
+                $message,
+                $recipient,
+                'emails.new_trip_admin',
+                'Pracovné cesty - pridaná nová cesta'
+            );
 
             // Send the email
             Mail::to($recipient)->send($email);
@@ -406,7 +411,12 @@ class BusinessTripController extends Controller
             // Sending mails
             foreach (User::getAdminEmails() as $recipient) {
                 // Create an instance of the SimpleMail class
-                $email = new SimpleMail('', $recipient, 'emails.new_trip_admin', 'Pracovné cesty - pridaná nová cesta');
+                $email = new SimpleMail(
+                    '',
+                    $recipient,
+                    'emails.new_trip_admin',
+                    'Pracovné cesty - pridaná nová cesta'
+                );
 
                 // Send the email
                 Mail::to($recipient)->send($email);
@@ -477,7 +487,13 @@ class BusinessTripController extends Controller
         ]);
 
         if ($trip->user->pritomnostUser()->first()) {
-            SynchronizationController::syncSingleBusinessTrip($trip->id);
+            $status = SynchronizationController::syncSingleBusinessTrip($trip->id);
+
+            if (!$status) {
+                return redirect()
+                    ->route('trip.edit', ['trip' => $trip])
+                    ->with('message', 'Cestu sa nepodarilo zosynchronizovať s dochádzkovým systémom.');
+            }
         }
 
         return redirect()
@@ -526,7 +542,12 @@ class BusinessTripController extends Controller
 
             foreach (User::getAdminEmails() as $recipient) {
                 // Create an instance of the SimpleMail class
-                $email = new SimpleMail($message, $recipient, 'emails.cancellation_request_admin', 'Pracovné cesty - žiadosť o storno cesty');
+                $email = new SimpleMail(
+                    $message,
+                    $recipient,
+                    'emails.cancellation_request_admin',
+                    'Pracovné cesty - žiadosť o storno cesty'
+                );
 
                 // Send the email
                 Mail::to($recipient)->send($email);
@@ -558,7 +579,12 @@ class BusinessTripController extends Controller
 
         foreach (User::getAdminEmails() as $recipient) {
             // Create an instance of the SimpleMail class
-            $email = new SimpleMail($message, $recipient, 'emails.new_note_admin','Pracovné cesty - pridaná nová poznámka');
+            $email = new SimpleMail(
+                $message,
+                $recipient,
+                'emails.new_note_admin',
+                'Pracovné cesty - pridaná nová poznámka'
+            );
 
             // Send the email
             Mail::to($recipient)->send($email);
@@ -703,7 +729,10 @@ class BusinessTripController extends Controller
                     return response()->json(['error' => 'Report not available for current trip state.'], 403);
                 }
                 if ($trip->type != TripType::DOMESTIC) {
-                    return response()->json(['error' => 'FOREIGN_REPORT not applicable for domestic trips.'], 403);
+                    return response()->json(
+                        ['error' => 'FOREIGN_REPORT not applicable for domestic trips.'],
+                        403
+                    );
                 }
                 $name = ($trip->user->academic_degrees ?? '')
                     . ' ' . $trip->user->first_name
@@ -738,7 +767,10 @@ class BusinessTripController extends Controller
                     return response()->json(['error' => 'Report not available for current trip state.'], 403);
                 }
                 if ($trip->type != TripType::FOREIGN) {
-                    return response()->json(['error' => 'DOMESTIC_REPORT not applicable for foreign trips.'], 403);
+                    return response()->json(
+                        ['error' => 'DOMESTIC_REPORT not applicable for foreign trips.'],
+                        403
+                    );
                 }
                 $mealsReimbursementText = $trip->meals_reimbursement
                     ? 'mám záujem o preplatenie'
@@ -966,17 +998,21 @@ class BusinessTripController extends Controller
                 $expenseName . '_expense_eur' => 'nullable|string|max:20',
                 $expenseName . '_expense_not_reimburse' => 'nullable'
             ]);
+
             if ($trip->type === TripType::FOREIGN) {
-                $validatedExpenseData = array_merge($validatedExpenseData, $request->validate([
-                    $expenseName . '_expense_foreign' => 'nullable|string:max:20']));
+                $validatedExpenseData = array_merge(
+                    $validatedExpenseData,
+                    $request->validate([$expenseName . '_expense_foreign' => 'nullable|string:max:20'])
+                );
             }
 
             $validatedExpensesData[$expenseName] = $validatedExpenseData;
         }
 
-        $validatedExpensesData = array_merge($validatedExpensesData, $request->validate([
-            'expense_estimation' => 'nullable|string|max:20'
-        ]));
+        $validatedExpensesData = array_merge(
+            $validatedExpensesData,
+            $request->validate(['expense_estimation' => 'nullable|string|max:20'])
+        );
 
         $validatedExpensesData['no_meals_reimbursed'] = $request->has('no_meals_reimbursed');
         return $validatedExpensesData;
