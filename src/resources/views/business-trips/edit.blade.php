@@ -123,7 +123,7 @@
                             </div>
                         </div>
 
-                        @if($tripType == TripType::FOREIGN)
+                        @if($tripType == TripType::FOREIGN && $tripState != TripState::NEW)
                             <div class="form-row">
                                 <div class="col-md col-12">
                                     <x-simple-input name="datetime_border_crossing_start" type="datetime-local"
@@ -150,7 +150,7 @@
                             </div>
                         </div>
 
-                        @if($tripType == TripType::FOREIGN)
+                        @if($tripType == TripType::FOREIGN && $tripState != TripState::NEW)
                             <div class="form-row">
                                 <div class="col-md col-12">
                                     <x-simple-input name="datetime_border_crossing_end" type="datetime-local"
