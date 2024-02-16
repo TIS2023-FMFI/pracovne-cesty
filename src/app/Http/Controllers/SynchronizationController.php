@@ -27,10 +27,10 @@ class SynchronizationController extends Controller
         // Use LEFT JOIN to check if the user exists in the Cesty database
         $userToSync = PritomnostUser::leftJoin(
             'cesty.users',
-            'cesty.users.personal_id', '=', 'pritomnost.users.personal_id'
+            'cesty.users.personal_id', '=', 'dochadzka.users.personal_id'
         )
-            ->where('pritomnost.users.username', $username)
-            ->select('pritomnost.users.*', 'cesty.users.id as cesty_user_id')
+            ->where('dochadzka.users.username', $username)
+            ->select('dochadzka.users.*', 'cesty.users.id as cesty_user_id')
             ->first();
 
         // Update user details in the Cesty database based on the Pritomnost database
