@@ -20,11 +20,11 @@ class DatabaseSeeder extends Seeder
             TripPurposeSeeder::class,
             StaffSeeder::class,
             RoleAndPermissionSeeder::class,
+            SppSymbolSeeder::class,
 
             // With factories
             // Without foreign references
             InvitationLinkSeeder::class,
-            SppSymbolSeeder::class,
             ConferenceFeeSeeder::class,
             ExpenseSeeder::class,
             UserSeeder::class,
