@@ -84,6 +84,14 @@ class SynchronizationController extends Controller
      */
     public static function syncSingleBusinessTrip($businessTripId): bool
     {
+        // Handbrake to temporarily disable trip sync with Pritomnost
+        // since we are a bit afraid to write to the Pritomnost DB
+        $sync = false;
+        if (!$sync) {
+            // Pass this method
+            return true;
+        }
+
         // Fetch the specific business trip
         $businessTrip = BusinessTrip::find($businessTripId);
 
