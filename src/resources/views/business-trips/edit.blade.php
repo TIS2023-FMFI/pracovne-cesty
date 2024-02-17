@@ -193,12 +193,14 @@
                                     :value="$trip->purpose_details ?? ''"></x-textarea>
                     </div>
                 </div>
+            </x-content-section>
+
+            <x-content-section title="Prílohy">
                 <div class="form-row">
                     <div class="col-md col-12">
-                        <x-simple-input name="event_url" label="Link na udalosť" :value="$trip->event_url ?? ''"/>
+                        <p>Link na udalosť: <a href="{{$trip->event_url ?? ''}}">{{$trip->event_url ?? ''}}</a></p>
                     </div>
                 </div>
-
                 @php
                     $hasFile = $trip->upload_name != null;
                 @endphp
@@ -212,7 +214,6 @@
                                 </a>
                             </div>
                         </div>
-
                     </div>
                 </div>
             </x-content-section>
@@ -519,6 +520,8 @@
                 <x-slot:description>
                     @if($trip->note)
                         Používateľ zadal poznámku k tejto pracovnej ceste: <b>{{$trip->note}}</b>
+                    @else
+                        K tejto pracovnej ceste nebola pridaná žiadna poznámka.
                     @endif
                 </x-slot:description>
             @else
@@ -624,7 +627,7 @@
             <x-content-section title="Dokumenty na stiahnutie">
                 <x-slot:description>
                     Tu sa nachádzajú všetky relevantné dokumenty k ceste podľa jej stavu a typu používateľa. Ak v ceste
-                    urobíte nejaké zmeny, nezabudnite ich uložiť, aby ste v dokumentoch vždy mali aktuálne údaje.
+                    urobíte nejaké zmeny, nezabudnite ich vo formulári uložiť, aby ste v dokumentoch vždy mali aktuálne údaje.
                 </x-slot:description>
 
                 <div>
