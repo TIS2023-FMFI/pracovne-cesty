@@ -10,7 +10,8 @@ use App\Models\PritomnostUser;
 use App\Models\User;
 use Carbon\CarbonPeriod;
 use Exception;
-use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
+use Throwable;
 
 class SynchronizationController extends Controller
 {
@@ -26,10 +27,10 @@ class SynchronizationController extends Controller
         // Use LEFT JOIN to check if the user exists in the Cesty database
         $userToSync = PritomnostUser::leftJoin(
             'cesty.users',
-            'cesty.users.personal_id', '=', 'pritomnost.users.personal_id'
+            'cesty.users.personal_id', '=', 'dochadzka.users.personal_id'
         )
-            ->where('pritomnost.users.username', $username)
-            ->select('pritomnost.users.*', 'cesty.users.id as cesty_user_id')
+            ->where('dochadzka.users.username', $username)
+            ->select('dochadzka.users.*', 'cesty.users.id as cesty_user_id')
             ->first();
 
         // Update user details in the Cesty database based on the Pritomnost database
@@ -78,11 +79,19 @@ class SynchronizationController extends Controller
      * Synchronize a single business trip between Cesty and Pritomnost databases.
      *
      * @param $businessTripId
-     * @return void
-     * @throws Exception If there is an issue with DateTime
+     * @return bool true if the sync has been successful, false otherwise
+     * @throws Exception|Throwable If there is an issue with DateTime or DB connection
      */
-    public static function syncSingleBusinessTrip($businessTripId): void
+    public static function syncSingleBusinessTrip($businessTripId): bool
     {
+        // Handbrake to temporarily disable trip sync with Pritomnost
+        // since we are a bit afraid to write to the Pritomnost DB
+        $sync = false;
+        if (!$sync) {
+            // Pass this method
+            return true;
+        }
+
         // Fetch the specific business trip
         $businessTrip = BusinessTrip::find($businessTripId);
 
@@ -104,30 +113,43 @@ class SynchronizationController extends Controller
         $endDate = $businessTrip->datetime_end;
         $dateRange = new CarbonPeriod($startDate, '1 day', $endDate);
 
-        foreach ($dateRange as $date) {
-            // Calculate from_time and to_time for the current day in the loop
-            $fromTime = $date->isSameDay($startDate) ? $startDate->format('H:i:s') : '00:00:00';
-            $toTime = $date->isSameDay($endDate) ? $endDate->format('H:i:s') : '23:59:59';
+        // Start DB transaction
+        DB::connection('pritomnost')->beginTransaction();
 
-            // Check if the absence already exists in the Pritomnost database for this day
-            $existingAbsence = PritomnostAbsence::where([
-                'user_id' => $pritomnostUserId,
-                'date_time' => $date->format('Y-m-d')
-            ])->first();
+        try {
+            foreach ($dateRange as $date) {
+                // Calculate from_time and to_time for the current day in the loop
+                $fromTime = $date->isSameDay($startDate) ? $startDate->format('H:i:s') : '00:00:00';
+                $toTime = $date->isSameDay($endDate) ? $endDate->format('H:i:s') : '23:59:59';
 
-            if (!$existingAbsence) {
-                // Create absence record in the Pritomnost database
-                PritomnostAbsence::create([
+                // Check if the absence already exists in the Pritomnost database for this day
+                $existingAbsence = PritomnostAbsence::where([
                     'user_id' => $pritomnostUserId,
-                    'date_time' => $date->format('Y-m-d'),
-                    'from_time' => $fromTime,
-                    'to_time' => $toTime,
-                    'type' => PritomnostAbsenceType::BUSINESS_TRIP,
-                    'description' => $businessTrip->type->inSlovak()  . ' pracovná cesta',
-                    'confirmation' => false
-                    // Other values are not defined
-                ]);
+                    'date_time' => $date->format('Y-m-d')
+                ])->first();
+
+                if (!$existingAbsence) {
+                    // Create absence record in the Pritomnost database
+                    PritomnostAbsence::create([
+                        'user_id' => $pritomnostUserId,
+                        'date_time' => $date->format('Y-m-d'),
+                        'from_time' => $fromTime,
+                        'to_time' => $toTime,
+                        'type' => PritomnostAbsenceType::BUSINESS_TRIP,
+                        'description' => $businessTrip->type->inSlovak() . ' pracovná cesta',
+                        'confirmation' => false
+                        // Other values are not defined
+                    ]);
+                }
             }
+
+            DB::connection('pritomnost')->commit();
+
+        } catch (Exception $e) {
+            DB::connection('pritomnost')->rollBack();
+            return false;
         }
+
+        return true;
     }
 }

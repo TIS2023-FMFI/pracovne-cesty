@@ -20,19 +20,23 @@ class DatabaseSeeder extends Seeder
             TripPurposeSeeder::class,
             StaffSeeder::class,
             RoleAndPermissionSeeder::class,
+            SppSymbolSeeder::class,
+
+            // For development only
 
             // With factories
             // Without foreign references
-            InvitationLinkSeeder::class,
-            SppSymbolSeeder::class,
-            ConferenceFeeSeeder::class,
-            ExpenseSeeder::class,
-            UserSeeder::class,
+
+            // InvitationLinkSeeder::class,
+            // ConferenceFeeSeeder::class,
+            // ExpenseSeeder::class,
+            // UserSeeder::class,
 
             // With foreign references
-            ReimbursementSeeder::class,
-            BusinessTripSeeder::class,
-            TripContributionSeeder::class
+
+            // ReimbursementSeeder::class,
+            // BusinessTripSeeder::class,
+            // TripContributionSeeder::class
         ]);
     }
 }
