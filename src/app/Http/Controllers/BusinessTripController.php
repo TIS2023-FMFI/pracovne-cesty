@@ -16,6 +16,8 @@ use App\Models\Reimbursement;
 use App\Models\Staff;
 use App\Models\TripContribution;
 use App\Models\User;
+use Carbon\Carbon;
+use Carbon\CarbonPeriod;
 use DateTime;
 use Exception;
 use Illuminate\Http\JsonResponse;
@@ -852,13 +854,10 @@ class BusinessTripController extends Controller
      */
     private static function getTripDurationInDays(BusinessTrip $trip): int
     {
-        $startDate = new DateTime($trip->datetime_start);
-        $endDate = new DateTime($trip->datetime_end);
+        $startDate = (new Carbon($trip->datetime_start))->midDay();
+        $endDate = (new Carbon($trip->datetime_end))->midDay();
 
-        $interval = $endDate->diff($startDate);
-        $daysDifference = $interval->days;
-
-        return $daysDifference + 1;
+        return CarbonPeriod::create($startDate, '1 day', $endDate)->count();
     }
 
     /**
