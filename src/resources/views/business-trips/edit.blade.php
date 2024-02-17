@@ -268,6 +268,7 @@
                     vrátené do <b>ŠPP prvku 1</b>. Ako <b>dátum vrátenia peňazí</b> uveďte iba orientačný, predpokladaný
                     dátum.
                 </x-slot:description>
+
                 <div class="form-row align-items-center">
                     <div class="col-md col-12">
                         <x-dropdown-input name="spp_symbol_id" label="ŠPP prvok 1:" :values="$spp_symbols"
