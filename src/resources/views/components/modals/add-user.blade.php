@@ -1,4 +1,4 @@
-<x-modal title="Pridať použivateľov" name="add-users">
+<x-modal title="Pridať používateľov" name="add-users">
     <form action="{{ route('user.invite') }}" method="POST">
         @csrf
         <x-content-section>
