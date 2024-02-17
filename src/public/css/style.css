@@ -22,6 +22,10 @@
     text-decoration: underline;
 }
 
+form {
+    margin-block-end: 0;
+}
+
 [x-cloak] {
     display: none !important;
 }
