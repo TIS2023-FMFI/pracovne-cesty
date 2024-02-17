@@ -123,7 +123,7 @@
                             </div>
                         </div>
 
-                        @if($tripType == TripType::FOREIGN)
+                        @if($tripType == TripType::FOREIGN && $tripState != TripState::NEW)
                             <div class="form-row">
                                 <div class="col-md col-12">
                                     <x-simple-input name="datetime_border_crossing_start" type="datetime-local"
@@ -150,7 +150,7 @@
                             </div>
                         </div>
 
-                        @if($tripType == TripType::FOREIGN)
+                        @if($tripType == TripType::FOREIGN && $tripState != TripState::NEW)
                             <div class="form-row">
                                 <div class="col-md col-12">
                                     <x-simple-input name="datetime_border_crossing_end" type="datetime-local"
@@ -193,12 +193,14 @@
                                     :value="$trip->purpose_details ?? ''"></x-textarea>
                     </div>
                 </div>
+            </x-content-section>
+
+            <x-content-section title="Prílohy">
                 <div class="form-row">
                     <div class="col-md col-12">
-                        <x-simple-input name="event_url" label="Link na udalosť" :value="$trip->event_url ?? ''"/>
+                        <p>Link na udalosť: <a href="{{$trip->event_url ?? ''}}">{{$trip->event_url ?? ''}}</a></p>
                     </div>
                 </div>
-
                 @php
                     $hasFile = $trip->upload_name != null;
                 @endphp
@@ -212,7 +214,6 @@
                                 </a>
                             </div>
                         </div>
-
                     </div>
                 </div>
             </x-content-section>
@@ -267,6 +268,7 @@
                     vrátené do <b>ŠPP prvku 1</b>. Ako <b>dátum vrátenia peňazí</b> uveďte iba orientačný, predpokladaný
                     dátum.
                 </x-slot:description>
+
                 <div class="form-row align-items-center">
                     <div class="col-md col-12">
                         <x-dropdown-input name="spp_symbol_id" label="ŠPP prvok 1:" :values="$spp_symbols"
@@ -363,8 +365,10 @@
                     :disabled="$tripState == TripState::CANCELLED || (!$isAdmin && $tripState != TripState::UPDATED)">
 
                     <x-slot:description>
-                        Pre každý druh nákladov môžete použiť aj oba stĺpce naraz. Ak si preplatenie nejakého druhu
-                        nákladov nenárokujete, nezabudnite to, prosím, uviesť.
+                        Ak si preplatenie nejakého druhu nákladov nenárokujete, nezabudnite to, prosím, uviesť.
+                        @if ($tripType == TripType::FOREIGN)
+                            Pri nákladoch v cudzej mene uveďte aj danú menu.
+                        @endif
                     </x-slot:description>
 
                     <div class="table-responsive">
@@ -519,6 +523,8 @@
                 <x-slot:description>
                     @if($trip->note)
                         Používateľ zadal poznámku k tejto pracovnej ceste: <b>{{$trip->note}}</b>
+                    @else
+                        K tejto pracovnej ceste nebola pridaná žiadna poznámka.
                     @endif
                 </x-slot:description>
             @else
@@ -624,7 +630,7 @@
             <x-content-section title="Dokumenty na stiahnutie">
                 <x-slot:description>
                     Tu sa nachádzajú všetky relevantné dokumenty k ceste podľa jej stavu a typu používateľa. Ak v ceste
-                    urobíte nejaké zmeny, nezabudnite ich uložiť, aby ste v dokumentoch vždy mali aktuálne údaje.
+                    urobíte nejaké zmeny, nezabudnite ich vo formulári uložiť, aby ste v dokumentoch vždy mali aktuálne údaje.
                 </x-slot:description>
 
                 <div>

@@ -16,6 +16,8 @@ use App\Models\Reimbursement;
 use App\Models\Staff;
 use App\Models\TripContribution;
 use App\Models\User;
+use Carbon\Carbon;
+use Carbon\CarbonPeriod;
 use DateTime;
 use Exception;
 use Illuminate\Http\JsonResponse;
@@ -144,6 +146,10 @@ class BusinessTripController extends Controller
         // Validate all necessary data
         $validatedUserData = self::validateUserData($request);
         $validatedTripData = self::validateUpdatableTripData($request) + self::validateFixedTripData($request);
+        $validatedTripData = array_merge($validatedTripData,
+            $request->validate([
+                'event_url' => 'nullable|url|max:200'
+            ]));
 
         [$isReimbursement, $validatedReimbursementData] = self::validateReimbursementData($request);
         [$isConferenceFee, $validatedConferenceFeeData] = self::validateConferenceFeeData($request);
@@ -699,6 +705,7 @@ class BusinessTripController extends Controller
                 }
                 $data = [
                     'spp_symbol' => $trip->sppSymbol->spp_symbol ?? null,
+                    // ! rename expense_estimation to amount in PDF template
                     'expense_estimation' => $trip->conferenceFee->amount ?? null,
                     'source1' => $trip->sppSymbol->fund ?? null,
                     'functional_region1' => $trip->sppSymbol->functional_region ?? null,
@@ -713,6 +720,7 @@ class BusinessTripController extends Controller
                     return response()->json(['error' => 'Conference fee not requested.'], 403);
                 }
                 $data = [
+                    // ! rename fields PDF template
                     'advance_amount' => $trip->conferenceFee->amount ?? null,
                     'grantee' => $trip->conferenceFee->organiser_name ?? null,
                     'address' => $trip->conferenceFee->organiser_address ?? null,
@@ -739,8 +747,8 @@ class BusinessTripController extends Controller
                     . ' ' . $trip->user->last_name;
 
                 $mealsReimbursementText = $trip->meals_reimbursement
-                    ? 'mám záujem o preplatenie'
-                    : 'nemám záujem o preplatenie';
+                    ? 'mám záujem'
+                    : 'nemám záujem';
 
                 $data = [
                     'name' => $name,
@@ -754,7 +762,8 @@ class BusinessTripController extends Controller
                     'travelling_expense' => $trip->travellingExpense->amount_eur ?? null,
                     'accommodation_expense' => $trip->accommodationExpense->amount_eur ?? null,
                     'other_expenses' => $trip->otherExpense->amount_eur ?? null,
-                    'allowance' => $trip->allowanceExpense->amount_eur ?? null,
+                    // ! rename allowance to advance in PDF template
+                    'allowance' => $trip->advanceExpense->amount_eur ?? null,
                     'conclusion' => $trip->conclusion,
                     'iban' => $trip->iban,
                     'address' => $trip->user->address,
@@ -773,8 +782,8 @@ class BusinessTripController extends Controller
                     );
                 }
                 $mealsReimbursementText = $trip->meals_reimbursement
-                    ? 'mám záujem o preplatenie'
-                    : 'nemám záujem o preplatenie';
+                    ? 'mám záujem'
+                    : 'nemám záujem';
 
                 $data = [
                     'name' => $trip->user->first_name . ' ' . $trip->user->last_name,
@@ -791,14 +800,14 @@ class BusinessTripController extends Controller
                     'travelling_expense' => $trip->travellingExpense->amount_eur ?? null,
                     'accommodation_expense_foreign' => $trip->accommodationExpense->amount_foreign ?? null,
                     'accommodation_expense' => $trip->accommodationExpense->amount_eur ?? null,
-                    'allowance_foreign' => $trip->allowanceExpense->amount_foreign ?? null,
-                    'allowance' => $trip->allowanceExpense->amount_eur ?? null,
                     'meals_reimbursement' => $mealsReimbursementText,
                     'other_expenses_foreign' => $trip->otherExpense->amount_foreign ?? null,
                     'other_expenses' => $trip->otherExpense->amount_eur ?? null,
                     'conclusion' => $trip->conclusion,
                     'iban' => $trip->iban,
-                    'advance_expense_foreign' => $trip->advanceExpense->amount_foreign ?? null,
+                    // ! rename advance to allowance in PDF template
+                    'advance_expense_foreign' => $trip->allowanceExpense->amount_foreign ?? null,
+                    'advance_expense' => $trip->allowanceExpense->amount_eur ?? null,
                     'invitation_case_charges' => $trip->expense_estimation,
                 ];
                 break;
@@ -845,13 +854,10 @@ class BusinessTripController extends Controller
      */
     private static function getTripDurationInDays(BusinessTrip $trip): int
     {
-        $startDate = new DateTime($trip->datetime_start);
-        $endDate = new DateTime($trip->datetime_end);
+        $startDate = (new Carbon($trip->datetime_start))->midDay();
+        $endDate = (new Carbon($trip->datetime_end))->midDay();
 
-        $interval = $endDate->diff($startDate);
-        $daysDifference = $interval->days;
-
-        return $daysDifference + 1;
+        return CarbonPeriod::create($startDate, '1 day', $endDate)->count();
     }
 
     /**

@@ -66,7 +66,6 @@ enum TripState: int
                                 Čaká sa na kontrolu od administrátora.',
 
             self::CLOSED => 'Cesta je v stave Spracovaná.
-                             Už sa v nej nedajú vykonávať žiadne zmeny vycestovaným ani administrátorom.
                              Administrátor skontroloval a zaevidoval všetky údaje.',
 
             self::CANCELLATION_REQUEST => 'Pre cestu bola odoslaná žiadosť o stornovanie.
