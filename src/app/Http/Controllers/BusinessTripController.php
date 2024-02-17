@@ -144,6 +144,10 @@ class BusinessTripController extends Controller
         // Validate all necessary data
         $validatedUserData = self::validateUserData($request);
         $validatedTripData = self::validateUpdatableTripData($request) + self::validateFixedTripData($request);
+        $validatedTripData = array_merge($validatedTripData,
+            $request->validate([
+                'event_url' => 'nullable|url|max:200'
+            ]));
 
         [$isReimbursement, $validatedReimbursementData] = self::validateReimbursementData($request);
         [$isConferenceFee, $validatedConferenceFeeData] = self::validateConferenceFeeData($request);
