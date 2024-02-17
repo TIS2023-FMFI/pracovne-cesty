@@ -1,3 +1,5 @@
+@props(['name', 'label' => '', 'disabled' => false, 'value' => '', 'rows' => 3])
+
 <div class="form-group">
         <label for="{{ $name }}">{{ $label }}</label>
 
@@ -6,7 +8,7 @@
         id="{{ $name }}"
         name="{{ $name }}"
         rows="{{ $rows }}"
-        {{ $isDisabled() ? 'disabled' : '' }}
+        @disabled($disabled)
     >{{ old($name, $value) }}</textarea>
 
     @error($name)

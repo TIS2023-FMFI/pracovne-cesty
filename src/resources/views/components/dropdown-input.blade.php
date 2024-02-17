@@ -1,3 +1,6 @@
+@props(['name', 'values', 'label' => '', 'selected' => '', 'disabled' => false, 'control' => ''])
+
+
 <div class="form-group">
     @if ($label != '')
         <label for="{{ $name }}">{{ $label }}</label>
@@ -7,7 +10,7 @@
         class="custom-select"
         name="{{ $name }}"
         id="{{ $name }}"
-        {{ $isDisabled() ? 'disabled' : '' }}
+        @disabled($disabled)
         {{ $control != "" ? 'x-model='.$control : '' }}
     >
 
