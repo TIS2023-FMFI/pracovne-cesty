@@ -365,8 +365,10 @@
                     :disabled="$tripState == TripState::CANCELLED || (!$isAdmin && $tripState != TripState::UPDATED)">
 
                     <x-slot:description>
-                        Pre každý druh nákladov môžete použiť aj oba stĺpce naraz. Ak si preplatenie nejakého druhu
-                        nákladov nenárokujete, nezabudnite to, prosím, uviesť.
+                        Ak si preplatenie nejakého druhu nákladov nenárokujete, nezabudnite to, prosím, uviesť.
+                        @if ($tripType == TripType::FOREIGN)
+                            Pri nákladoch v cudzej mene uveďte aj danú menu.
+                        @endif
                     </x-slot:description>
 
                     <div class="table-responsive">
