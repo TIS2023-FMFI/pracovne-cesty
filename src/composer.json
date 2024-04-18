@@ -11,10 +11,10 @@
         "laravel/sanctum": "^3.3",
         "laravel/tinker": "^2.8",
         "mikehaertl/php-pdftk": "^0.13.1",
-        "spatie/laravel-permission": "^6.3"
+        "spatie/laravel-permission": "^6.3",
+        "fakerphp/faker": "^1.9.1"
     },
     "require-dev": {
-        "fakerphp/faker": "^1.9.1",
         "laravel-lang/common": "^6.1",
         "laravel/pint": "^1.0",
         "laravel/sail": "^1.18",
