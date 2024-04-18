@@ -54,7 +54,7 @@ return [
             ]) : [],
         ],
 
-        'pritomnost' => [
+        'dochadzka' => [
             'driver' => 'mysql',
             'url' => env('PRITOMNOST_DATABASE_URL'),
             'host' => env('PRITOMNOST_DB_HOST', '127.0.0.1'),

@@ -114,7 +114,7 @@ class SynchronizationController extends Controller
         $dateRange = new CarbonPeriod($startDate, '1 day', $endDate);
 
         // Start DB transaction
-        DB::connection('pritomnost')->beginTransaction();
+        DB::connection('dochadzka')->beginTransaction();
 
         try {
             foreach ($dateRange as $date) {
@@ -143,10 +143,10 @@ class SynchronizationController extends Controller
                 }
             }
 
-            DB::connection('pritomnost')->commit();
+            DB::connection('dochadzka')->commit();
 
         } catch (Exception $e) {
-            DB::connection('pritomnost')->rollBack();
+            DB::connection('dochadzka')->rollBack();
             return false;
         }
 

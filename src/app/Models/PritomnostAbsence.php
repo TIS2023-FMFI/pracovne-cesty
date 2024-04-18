@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class PritomnostAbsence extends Model
 {
-    protected $connection = 'pritomnost';
+    protected $connection = 'dochadzka';
     protected $table = 'absence';
 
     public $timestamps = false;
