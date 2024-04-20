@@ -115,7 +115,7 @@ class UserController extends Controller
     public function logout(): RedirectResponse
     {
         Auth::logout();
-        return redirect()->route('homepage')->with('message', 'Boli ste úspešne odhlásený.');
+        return redirect()->route('homepage')->with('message', 'Boli ste úspešne odhlásená/ný.');
     }
 
     /**
@@ -132,10 +132,21 @@ class UserController extends Controller
 
         if ($user && Auth::attempt($credentials)) {
             $request->session()->regenerate();
-            return redirect()->route('homepage')->with('message', 'Boli ste úspešne prihlásený.');
+            return redirect()->route('homepage')->with('message', 'Boli ste úspešne prihlásená/ný.');
         }
 
         return back()->with('message', 'Zadané meno alebo heslo nie sú správne.');
+    }
+
+    /** Translate URL from local to one that can be accessed from Internet, example:
+     *    http://localhost:8097/some/link/to/click -> https://kempelen.dai.fmph.uniba.sk/cesty/some/link/to/click
+     *
+     * @param a URL to be translated
+     * @Return a translated URL
+     */
+    private function htmlReverseProxy($url)
+    {
+        return str_replace("http://localhost:8097", "https://kempelen.dai.fmph.uniba.sk/cesty", $url);
     }
 
     /**
@@ -190,6 +201,7 @@ class UserController extends Controller
             ]);
 
             $url = route('user.register', ['token' => $token]);
+	    $url = $this->htmlReverseProxy($url);
             $messageText = "Pre registráciu kliknite na tento odkaz: " . $url;
 
             Mail::to($email)->send(new SimpleMail($messageText, $email, 'emails.registration_externist', 'Pracovné cesty - registrácia'));

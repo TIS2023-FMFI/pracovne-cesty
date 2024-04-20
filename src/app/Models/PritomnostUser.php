@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class PritomnostUser extends Model
 {
-    protected $connection = 'pritomnost';
+    protected $connection = 'dochadzka';
     protected $table = 'users';
 
     public $timestamps = false;
