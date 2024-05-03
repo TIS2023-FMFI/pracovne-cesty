@@ -758,6 +758,7 @@ class BusinessTripController extends Controller
                     'spp_symbol' => $trip->sppSymbol->spp_symbol,
                     'time_start' => $trip->datetime_start->format('H.i'),
                     'time_end' => $trip->datetime_end->format('H.i'),
+                    'place' => $trip->place,
                     'transport' => $trip->transport->name,
                     'travelling_expense' => $trip->travellingExpense->amount_eur ?? null,
                     'accommodation_expense' => $trip->accommodationExpense->amount_eur ?? null,
