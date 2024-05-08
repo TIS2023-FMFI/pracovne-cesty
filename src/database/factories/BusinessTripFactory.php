@@ -70,7 +70,7 @@ class BusinessTripFactory extends Factory
 
 
             'trip_purpose_id' => TripPurpose::all()->random()->id,
-            'purpose_details' => fake()->realText(50),
+            'purpose_details' => fake()->realText(200),
 
 
             'iban' => fake()->iban('SK'),

@@ -201,6 +201,7 @@ class BusinessTripController extends Controller
         } catch (Exception $e) {
             // Rollback in case something went wrong
             DB::rollBack();
+	    Log::info("add trip exception: " . $e->getMessage());
             return redirect()->route('homepage')
                 ->with('message', 'Pracovná cesta nebola kvôli chybe vytvorená. Zopakujte to neskôr, prosím.');
         }
@@ -933,7 +934,7 @@ class BusinessTripController extends Controller
             'transport_id' => 'required|exists:transports,id',
             'place' => 'required|string|max:200',
             'trip_purpose_id' => 'required|integer|min:0',
-            'purpose_details' => 'nullable|string|max:50',
+            'purpose_details' => 'nullable|string|max:200',
             'spp_symbol_id' => 'nullable|exists:spp_symbols,id',
         ]);
 
