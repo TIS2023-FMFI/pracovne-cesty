@@ -10,9 +10,8 @@
     $transports = Transport::where('user_visible', 1)->pluck('name', 'id');
     $purposes = TripPurpose::all()->pluck('name', 'id');
     $contributions = Contribution::all()->pluck('name', 'id');
-    $spp_symbols = SppSymbol::where('status', SppStatus::ACTIVE)
-        ->pluck('spp_symbol', 'id')
-        ->prepend('žiadny', '');
+    $spp_symbols = SppSymbol::where('status', SppStatus::ACTIVE)->orderBy('spp_symbol', 'ASC')
+        ->pluck('spp_symbol', 'id');
 
     $user = $selectedUser ?? Auth::user();
     $userType = $user->user_type;
@@ -141,7 +140,7 @@
                 </x-slot:description>
                 <div class="form-row align-items-center">
                     <div class="col-md col-12">
-                        <x-dropdown-input name="spp_symbol_id" label="ŠPP prvok 1" :values="$spp_symbols"/>
+                        <x-dropdown-input name="spp_symbol_id" label="ŠPP prvok 1 (vyberte prázdny, ak sa doplní ručne)" :values="$spp_symbols"/>
                     </div>
                     <div class="col-md col-12">
                         <x-checkbox name="reimbursement" label="Refundovať" control="reimbursementShow"></x-checkbox>

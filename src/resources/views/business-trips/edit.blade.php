@@ -24,7 +24,7 @@
 
     $contributions = Contribution::all()->pluck('name', 'id');
 
-    $sppSymbolsQuery = SppSymbol::where('status', SppStatus::ACTIVE);
+    $sppSymbolsQuery = SppSymbol::where('status', SppStatus::ACTIVE)->orderBy('spp_symbol', 'ASC');
     if ($trip->sppSymbol) {
         $sppSymbolsQuery = $sppSymbolsQuery->orWhere('id', $trip->sppSymbol->id);
     }
@@ -33,8 +33,7 @@
     }
 
     $spp_symbols = $sppSymbolsQuery
-        ->pluck('spp_symbol', 'id')
-        ->prepend('žiadny', '');
+        ->pluck('spp_symbol', 'id');
 
     $tripType = $trip->type;
     $tripState = $trip->state;
@@ -271,7 +270,7 @@
 
                 <div class="form-row align-items-center">
                     <div class="col-md col-12">
-                        <x-dropdown-input name="spp_symbol_id" label="ŠPP prvok 1:" :values="$spp_symbols"
+                        <x-dropdown-input name="spp_symbol_id" label="ŠPP prvok 1 (vyberte prázdny, ak sa doplní ručne):" :values="$spp_symbols"
                                           :selected="$trip->spp_symbol_id ?? ''"/>
                     </div>
                     <div class="col-md col-12">
