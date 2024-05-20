@@ -6,6 +6,12 @@
     use App\Models\SppSymbol;
     use App\Enums\SppStatus;
 
+    $old_country_id = old("country_id");
+    $old_transport_id = old("transport_id");
+    $old_trip_purpose_id = old("trip_purpose_id");
+    $old_spp_symbol_id = old("spp_symbol_id");
+    $old_reimbursement_spp_symbol_id = old("reimbursement_spp_symbol_id");
+
     $countries = Country::all()->pluck('name', 'id');
     $transports = Transport::where('user_visible', 1)->pluck('name', 'id');
     $purposes = TripPurpose::all()->pluck('name', 'id');
@@ -73,7 +79,8 @@
 
                 <div class="form-row">
                     <div class="col-md-6 col-12">
-                        <x-dropdown-input name="transport_id" label="Dopravný prostriedok" :values="$transports"/>
+			<x-dropdown-input name="transport_id" label="Dopravný prostriedok" :values="$transports" 
+                             :selected="$old_transport_id" />
                     </div>
                 </div>
 
@@ -84,14 +91,16 @@
                     <div class="col-md col-12">
                         <x-simple-input name="place" label="Miesto"/>
                     </div>
-                    <div class="col-md col-12">
-                        <x-dropdown-input name="country_id" label="Štát" :values="$countries"/>
+		    <div class="col-md col-12"> 
+                        <x-dropdown-input name="country_id" label="Štát" :values="$countries" 
+			          :selected="$old_country_id" />
                     </div>
 
                 </div>
                 <div class="form-row">
                     <div class="col-md col-12">
-                        <x-dropdown-input name="trip_purpose_id" label="Účel cesty" :values="$purposes"/>
+			<x-dropdown-input name="trip_purpose_id" label="Účel cesty" :values="$purposes"
+                             :selected="$old_trip_purpose_id" />
                     </div>
                     <div class="col-md col-12">
                         <x-textarea name="purpose_details" label="Špecifikácia účelu"></x-textarea>
@@ -140,7 +149,9 @@
                 </x-slot:description>
                 <div class="form-row align-items-center">
                     <div class="col-md col-12">
-                        <x-dropdown-input name="spp_symbol_id" label="ŠPP prvok 1 (vyberte prázdny, ak sa doplní ručne)" :values="$spp_symbols"/>
+                        <x-dropdown-input name="spp_symbol_id" label="ŠPP prvok 1 (vyberte prázdny, ak sa doplní ručne):" :values="$spp_symbols"
+                           :selected="$old_spp_symbol_id" />
+ 
                     </div>
                     <div class="col-md col-12">
                         <x-checkbox name="reimbursement" label="Refundovať" control="reimbursementShow"></x-checkbox>
@@ -149,7 +160,9 @@
                 <x-hideable-section control="reimbursementShow">
                     <div class="form-row">
                         <div class="col-md col-12">
-                            <x-dropdown-input name="reimbursement_spp_symbol_id" label="ŠPP prvok 2" :values="$spp_symbols"/>
+                            <x-dropdown-input name="reimbursement_spp_symbol_id" label="ŠPP prvok 2"
+					      :values="$spp_symbols"
+                                              :selected="$old_reimbursement_spp_symbol_id"/>
                         </div>
                         <div class="col-md col-12">
                             <x-simple-input name="reimbursement_date" type="date" label="Dátum vrátenia peňazí"/>
