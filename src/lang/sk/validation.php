@@ -82,9 +82,9 @@ return [
     'mac_address'          => ':Attribute musí byť platná adresa MAC.',
     'max'                  => [
         'array'   => ':Attribute nemôže mať viac ako :max prvkov.',
-        'file'    => ':Attribute nemôže byť väčší ako :max kilobajtov.',
-        'numeric' => ':Attribute nemôže byť väčší ako :max.',
-        'string'  => ':Attribute nemôže byť väčší ako :max znakov.',
+        'file'    => ':Attribute nemôže mať viac ako :max kilobajtov.',
+        'numeric' => ':Attribute nemôže byť viac ako :max.',
+        'string'  => ':Attribute nemôže mať viac ako :max znakov.',
     ],
     'max_digits'           => 'Číslo :attribute nesmie mať viac ako :max číslic.',
     'mimes'                => ':Attribute musí byť súbor s koncovkou: :values.',

@@ -201,6 +201,7 @@ class BusinessTripController extends Controller
         } catch (Exception $e) {
             // Rollback in case something went wrong
             DB::rollBack();
+	    Log::info("add trip exception: " . $e->getMessage());
             return redirect()->route('homepage')
                 ->with('message', 'Pracovná cesta nebola kvôli chybe vytvorená. Zopakujte to neskôr, prosím.');
         }
@@ -683,19 +684,19 @@ class BusinessTripController extends Controller
                             ->tripPurpose
                             ->name . (isset($trip->purpose_details) ? ' - ' . $trip->purpose_details : ''),
                     'fund' => $trip->sppSymbol->fund,
-                    'functional_region' => $trip->sppSymbol->functional_region ?? null,
-                    'financial_centre' => $trip->sppSymbol->financial_centre ?? null,
-                    'spp_symbol' => $trip->sppSymbol->spp_symbol ?? null,
+                    'functional_region' => $trip->sppSymbol->functional_region ?? "",
+                    'financial_centre' => $trip->sppSymbol->financial_centre ?? "",
+                    'spp_symbol' => $trip->sppSymbol->spp_symbol ?? "",
                     'account' => $trip->type == TripType::DOMESTIC ? '631001' : '631002',
-                    'grantee' => $trip->sppSymbol->grantee ?? null,
+                    'grantee' => $trip->sppSymbol->grantee ?? "",
                     'iban' => $trip->iban,
-                    'incumbent_name1' => $dean->incumbent_name ?? null,
-                    'incumbent_name2' => $secretary->incumbent_name ?? null,
-                    'position_name1' => $dean->position_name ?? null,
-                    'position_name2' => $secretary->position_name ?? null,
-                    'contribution1_text' => $contributions->where('id', 1)->first()?->pivot->detail ?? null,
-                    'contribution2_text' => $contributions->where('id', 2)->first()?->pivot->detail ?? null,
-                    'contribution3_text' => $contributions->where('id', 3)->first()?->pivot->detail ?? null,
+                    'incumbent_name1' => $dean->incumbent_name ?? "",
+                    'incumbent_name2' => $secretary->incumbent_name ?? "",
+                    'position_name1' => $dean->position_name ?? "",
+                    'position_name2' => $secretary->position_name ?? "",
+                    'contribution1_text' => $contributions->where('id', 1)->first()?->pivot->detail ?? "",
+                    'contribution2_text' => $contributions->where('id', 2)->first()?->pivot->detail ?? "",
+                    'contribution3_text' => $contributions->where('id', 3)->first()?->pivot->detail ?? "",
                 ];
                 break;
 
@@ -704,13 +705,13 @@ class BusinessTripController extends Controller
                     return response()->json(['error' => 'Conference fee not requested.'], 403);
                 }
                 $data = [
-                    'spp_symbol' => $trip->sppSymbol->spp_symbol ?? null,
+                    'spp_symbol' => $trip->sppSymbol->spp_symbol ?? "",
                     // ! rename expense_estimation to amount in PDF template
-                    'expense_estimation' => $trip->conferenceFee->amount ?? null,
-                    'source1' => $trip->sppSymbol->fund ?? null,
-                    'functional_region1' => $trip->sppSymbol->functional_region ?? null,
-                    'spp_symbol1' => $trip->sppSymbol->spp_symbol ?? null,
-                    'financial_centre1' => $trip->sppSymbol->financial_centre ?? null,
+                    'expense_estimation' => $trip->conferenceFee->amount ?? "",
+                    'source1' => $trip->sppSymbol->fund ?? "",
+                    'functional_region1' => $trip->sppSymbol->functional_region ?? "",
+                    'spp_symbol1' => $trip->sppSymbol->spp_symbol ?? "",
+                    'financial_centre1' => $trip->sppSymbol->financial_centre ?? "",
                     'purpose_details' => 'Úhrada vložného',
                 ];
                 break;
@@ -721,14 +722,14 @@ class BusinessTripController extends Controller
                 }
                 $data = [
                     // ! rename fields PDF template
-                    'advance_amount' => $trip->conferenceFee->amount ?? null,
-                    'grantee' => $trip->conferenceFee->organiser_name ?? null,
-                    'address' => $trip->conferenceFee->organiser_address ?? null,
-                    'source' => $trip->sppSymbol->fund ?? null,
-                    'functional_region' => $trip->sppSymbol->functional_region ?? null,
-                    'spp_symbol' => $trip->sppSymbol->spp_symbol ?? null,
-                    'financial_centre' => $trip->sppSymbol->financial_centre ?? null,
-                    'iban' => $trip->conferenceFee->iban ?? null,
+                    'advance_amount' => $trip->conferenceFee->amount ?? "Žiadne",
+                    'grantee' => $trip->conferenceFee->organiser_name ?? "---",
+                    'address' => $trip->conferenceFee->organiser_address ?? "---",
+                    'source' => $trip->sppSymbol->fund ?? "",
+                    'functional_region' => $trip->sppSymbol->functional_region ?? "",
+                    'spp_symbol' => $trip->sppSymbol->spp_symbol ?? "",
+                    'financial_centre' => $trip->sppSymbol->financial_centre ?? "",
+                    'iban' => $trip->conferenceFee->iban ?? "",
                 ];
                 break;
 
@@ -748,7 +749,7 @@ class BusinessTripController extends Controller
 
                 $mealsReimbursementText = $trip->meals_reimbursement
                     ? 'mám záujem'
-                    : 'nemám záujem';
+                    : 'Nenárokujem si';
 
                 $data = [
                     'name' => $name,
@@ -758,12 +759,13 @@ class BusinessTripController extends Controller
                     'spp_symbol' => $trip->sppSymbol->spp_symbol,
                     'time_start' => $trip->datetime_start->format('H.i'),
                     'time_end' => $trip->datetime_end->format('H.i'),
+                    'place' => $trip->place,
                     'transport' => $trip->transport->name,
-                    'travelling_expense' => $trip->travellingExpense->amount_eur ?? null,
-                    'accommodation_expense' => $trip->accommodationExpense->amount_eur ?? null,
-                    'other_expenses' => $trip->otherExpense->amount_eur ?? null,
-                    // ! rename allowance to advance in PDF template
-                    'allowance' => $trip->advanceExpense->amount_eur ?? null,
+                    'travelling_expense' => $trip->travellingExpense->amount_eur ?? "Nenárokujem si",
+                    'accommodation_expense' => $trip->accommodationExpense->amount_eur ?? "Nenárokujem si",
+                    'other_expenses' => $trip->otherExpense->amount_eur ?? "Nenárokujem si",
+                    // ! rename allowance to advance in PDF template //vlozne...
+                    'allowance' => $trip->advanceExpense->amount_eur ?? "Žiadne",
                     'conclusion' => $trip->conclusion,
                     'iban' => $trip->iban,
                     'address' => $trip->user->address,
@@ -783,7 +785,7 @@ class BusinessTripController extends Controller
                 }
                 $mealsReimbursementText = $trip->meals_reimbursement
                     ? 'mám záujem'
-                    : 'nemám záujem';
+                    : 'Nenárokujem si';
 
                 $data = [
                     'name' => $trip->user->first_name . ' ' . $trip->user->last_name,
@@ -796,18 +798,22 @@ class BusinessTripController extends Controller
                     'place' => $trip->place,
                     'spp_symbol' => $trip->sppSymbol->spp_symbol,
                     'transport' => $trip->transport->name,
-                    'travelling_expense_foreign' => $trip->travellingExpense->amount_foreign ?? null,
-                    'travelling_expense' => $trip->travellingExpense->amount_eur ?? null,
-                    'accommodation_expense_foreign' => $trip->accommodationExpense->amount_foreign ?? null,
-                    'accommodation_expense' => $trip->accommodationExpense->amount_eur ?? null,
+                    'travelling_expense_foreign' => $trip->travellingExpense->amount_foreign ?? "Nenárokujem si",
+                    'travelling_expense' => $trip->travellingExpense->amount_eur ?? "Nenárokujem si",
+                    'accommodation_expense_foreign' => $trip->accommodationExpense->amount_foreign ?? "Nenárokujem si",
+                    'accommodation_expense' => $trip->accommodationExpense->amount_eur ?? "Nenárokujem si",
                     'meals_reimbursement' => $mealsReimbursementText,
-                    'other_expenses_foreign' => $trip->otherExpense->amount_foreign ?? null,
-                    'other_expenses' => $trip->otherExpense->amount_eur ?? null,
+                    'meals_reimbursement_foreign' => $mealsReimbursementText,
+                    'other_expenses_foreign' => $trip->otherExpense->amount_foreign ?? "Nenárokujem si",
+                    'other_expenses' => $trip->otherExpense->amount_eur ?? "Nenárokujem si",
                     'conclusion' => $trip->conclusion,
                     'iban' => $trip->iban,
+		    // allowance is expected not to be reimbursed
+		    'allowance' => "Nenárokujem si",
+		    'allowance_foreign' => "Nenárokujem si",
                     // ! rename advance to allowance in PDF template
-                    'advance_expense_foreign' => $trip->allowanceExpense->amount_foreign ?? null,
-                    'advance_expense' => $trip->allowanceExpense->amount_eur ?? null,
+                    'advance_expense_foreign' => $trip->allowanceExpense->amount_foreign ?? "Nenárokujem si",
+                    'advance_expense' => $trip->allowanceExpense->amount_eur ?? "Nenárokujem si",
                     'invitation_case_charges' => $trip->expense_estimation,
                 ];
                 break;
@@ -818,7 +824,7 @@ class BusinessTripController extends Controller
 
         try {
             Log::info("Creating PDF object with template path: " . $templatePath);
-            $pdf = new Pdf($templatePath);
+            $pdf = new Pdf($templatePath, [ 'locale' => 'sk_SK.utf8', 'procEnv' => [ 'LANG' => 'sk_SK.utf-8', ], ]);
         } catch (Exception $e) {
             Log::error("Error creating PDF object: " . $e->getMessage());
             return response()->json(['error' => 'Failed to create PDF object: ' . $e->getMessage()], 500);
@@ -928,7 +934,7 @@ class BusinessTripController extends Controller
             'transport_id' => 'required|exists:transports,id',
             'place' => 'required|string|max:200',
             'trip_purpose_id' => 'required|integer|min:0',
-            'purpose_details' => 'nullable|string|max:50',
+            'purpose_details' => 'nullable|string|max:200',
             'spp_symbol_id' => 'nullable|exists:spp_symbols,id',
         ]);
 

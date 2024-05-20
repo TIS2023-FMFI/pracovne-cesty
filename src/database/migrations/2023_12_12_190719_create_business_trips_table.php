@@ -52,7 +52,7 @@ return new class extends Migration {
 
             // Purpose
             $table->foreignIdFor(TripPurpose::class);
-            $table->string('purpose_details', 50)->nullable();
+            $table->string('purpose_details', 200)->nullable();
 
 
             // Expenses and reimbursement
