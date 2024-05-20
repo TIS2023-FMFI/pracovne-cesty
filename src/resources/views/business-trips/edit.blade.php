@@ -38,6 +38,16 @@
     $tripType = $trip->type;
     $tripState = $trip->state;
     $tripUserType = $trip->user->user_type;
+
+    $old_transport_id = old('transport_id');
+    if (is_null($old_transport_id)) $old_transport_id = $trip->transport_id;
+    $old_country_id = old('country_id');
+    if (is_null($old_country_id)) $old_country_id = $trip->country_id;
+    $old_trip_purpose_id = old('trip_purpose_id');
+    if (is_null($old_trip_purpose_id)) $old_trip_purpose_id = $trip->trip_purpose_id;
+    $old_spp_symbol_id = old('spp_symbol_id');
+    if (is_null($old_spp_symbol_id)) $old_spp_symbol_id = $trip->spp_symbol_id;
+
 @endphp
 
 <x-layout>
@@ -164,7 +174,7 @@
                 <div class="form-row">
                     <div class="col-md-6 col-12">
                         <x-dropdown-input name="transport_id" label="Dopravný prostriedok" :values="$transports"
-                                          :selected="$trip->transport_id"/>
+                                          :selected="$old_transport_id"/>
                     </div>
                 </div>
             </x-content-section>
@@ -179,7 +189,7 @@
                     </div>
                     <div class="col-md col-12">
                         <x-dropdown-input name="country_id" label="Štát" :values="$countries"
-                                          :selected="$trip->country_id"/>
+                                          :selected="$old_country_id"/>
                     </div>
                 </div>
                 <div class="form-row">
@@ -252,7 +262,15 @@
 
             @php
                 $isReimbursed = $trip->reimbursement != null;
-                $spp2 = $isReimbursed ? $trip->reimbursement->spp_symbol_id : '';
+
+                if ($isReimbursed)
+                {
+		  $old_reimbursement_spp_symbol_id = old('reimbursement_spp_symbol_id');
+		  if (is_null($old_reimbursement_spp_symbol_id)) $old_reimbursement_spp_symbol_id = $trip->reimbursement->spp_symbol_id;
+                  $spp2 = $old_reimbursement_spp_symbol_id;
+                }
+                else $spp2 = '';
+
                 $reimbursementDate = $isReimbursed ? $trip->reimbursement->reimbursement_date->format('Y-m-d') : '';
             @endphp
 
@@ -271,7 +289,7 @@
                 <div class="form-row align-items-center">
                     <div class="col-md col-12">
                         <x-dropdown-input name="spp_symbol_id" label="ŠPP prvok 1 (vyberte prázdny, ak sa doplní ručne):" :values="$spp_symbols"
-                                          :selected="$trip->spp_symbol_id ?? ''"/>
+                                          :selected="$old_spp_symbol_id"/>
                     </div>
                     <div class="col-md col-12">
                         <x-checkbox name="reimbursement" label="Refundovať" control="reimbursementShow"
