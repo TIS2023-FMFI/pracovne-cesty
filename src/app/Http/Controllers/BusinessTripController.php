@@ -787,6 +787,32 @@ class BusinessTripController extends Controller
                     ? 'mám záujem'
                     : 'Nenárokujem si';
 
+		//TODO: fix after renaming
+		$other_exp = $trip->otherExpense->amount_eur;
+		if (is_null($other_exp))
+		{
+			$other_exp = $trip->advanceExpense->amount_eur;
+			if (is_null($other_exp)) $other_exp = "Nenárokujem si";
+		}
+		else 
+		{
+			if (!is_null($trip->advanceExpense->amount_eur))
+			    $other_exp = $other_exp . " + " . $trip->advanceExpense->amount_eur;
+			else $other_exp = $trip->advanceExpense->amount_eur;
+		}
+		$other_exp_foreign = $trip->otherExpense->amount_foreign;
+		if (is_null($other_exp_foreign))
+		{
+			$other_exp_foreign = $trip->advanceExpense->amount_foreign;
+			if (is_null($other_exp_foreign)) $other_exp_foreign = "Nenárokujem si";
+		}
+		else 
+		{
+			if (!is_null($trip->advanceExpense->amount_foreign))
+			    $other_exp_foreign = $other_exp_foreign . " + " . $trip->advanceExpense->amount_foreign;
+			else $other_exp_foreign = $trip->advanceExpense->amount_foreign;
+		}
+
                 $data = [
                     'name' => $trip->user->first_name . ' ' . $trip->user->last_name,
                     'department' => $trip->user->department,
@@ -804,8 +830,8 @@ class BusinessTripController extends Controller
                     'accommodation_expense' => $trip->accommodationExpense->amount_eur ?? "Nenárokujem si",
                     'meals_reimbursement' => $mealsReimbursementText,
                     'meals_reimbursement_foreign' => $mealsReimbursementText,
-                    'other_expenses_foreign' => $trip->otherExpense->amount_foreign ?? "Nenárokujem si",
-                    'other_expenses' => $trip->otherExpense->amount_eur ?? "Nenárokujem si",
+                    'other_expenses_foreign' => $other_exp_foreign, //$trip->otherExpense->amount_foreign ?? "Nenárokujem si",
+                    'other_expenses' => $other_exp, // $trip->otherExpense->amount_eur ?? "Nenárokujem si",
                     'conclusion' => $trip->conclusion,
                     'iban' => $trip->iban,
 		    // allowance is expected not to be reimbursed
