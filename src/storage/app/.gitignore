@@ -1,4 +1,4 @@
 *
 !public/
 !.gitignore
-!app/pdf_templates/
+!pdf_templates/
