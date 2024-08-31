@@ -1,3 +1,7 @@
+@php
+    $old_spp = old("spp");
+@endphp
+
 <x-layout>
     <x-content-box title="ŠPP prvky">
         <div>
@@ -7,7 +11,7 @@
                 <x-content-section title="Deaktivácia">
                     <div class="form-row">
                         <div class="col-md-6 col-12">
-                            <x-dropdown-input name="spp" :values="$spp_symbols" label="ŠPP prvok:"></x-dropdown-input>
+                            <x-dropdown-input name="spp" :values="$spp_symbols" label="ŠPP prvok:" :selected="$old_spp"></x-dropdown-input>
                         </div>
                         <div class="col-md-6 col-12">
                             <div class="d-flex justify-content-md-start justify-content-end h-100">

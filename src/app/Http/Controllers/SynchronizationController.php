@@ -30,6 +30,7 @@ class SynchronizationController extends Controller
             'cesty.users.personal_id', '=', 'dochadzka.users.personal_id'
         )
             ->where('dochadzka.users.username', $username)
+            ->where('dochadzka.users.personal_id', "<", 10790002)
             ->select('dochadzka.users.*', 'cesty.users.id as cesty_user_id')
             ->first();
 
