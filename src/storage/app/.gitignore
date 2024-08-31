@@ -1,3 +1,4 @@
 *
 !public/
 !.gitignore
+!app/pdf_templates/
