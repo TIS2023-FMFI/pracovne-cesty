@@ -1,0 +1,135 @@
+\documentclass[10pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{geometry}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{setspace}
+\usepackage{xcolor}
+
+\geometry{a4paper,left=20mm,right=20mm,top=20mm,bottom=20mm}
+\setlength\parindent{0pt}
+
+\renewcommand{\familydefault}{cmr}
+\pagenumbering{gobble}
+
+\newcommand{\placeholder}[1]{< #1 >}
+
+\newcommand{\name}{\placeholder{000}}
+\newcommand{\department}{\placeholder{000}}
+
+\newcommand{\datetimeStart}{\placeholder{000}}
+\newcommand{\placeStart}{\placeholder{000}}
+\newcommand{\datetimeBorderCrossingStart}{\placeholder{000}}
+
+\newcommand{\country}{\placeholder{000}}
+\newcommand{\place}{\placeholder{000}}
+
+\newcommand{\datetimeEnd}{\placeholder{000}}
+\newcommand{\placeEnd}{\placeholder{000}}
+\newcommand{\datetimeBorderCrossingEnd}{\placeholder{000}}
+
+\newcommand{\sppSymbol}{\placeholder{000}}
+\newcommand{\transportation}{\placeholder{000}}
+
+\newcommand{\travellingExpenseForeign}{\placeholder{000}}
+\newcommand{\travellingExpense}{\placeholder{000}}
+
+\newcommand{\accommodationExpenseForeign}{\placeholder{000}}
+\newcommand{\accommodationExpense}{\placeholder{000}}
+
+\newcommand{\mealsReimbursementForeign}{\placeholder{000}}
+\newcommand{\mealsReimbursement}{\placeholder{000}}
+
+\newcommand{\participationExpenseForeign}{\placeholder{000}}
+\newcommand{\participationExpense}{\placeholder{000}}
+
+\newcommand{\insuranceExpenseForeign}{\placeholder{000}}
+\newcommand{\insuranceExpense}{\placeholder{000}}
+
+\newcommand{\otherExpensesForeign}{\placeholder{000}}
+\newcommand{\otherExpenses}{\placeholder{000}}
+
+\newcommand{\allowanceForeign}{\placeholder{000}}
+\newcommand{\allowance}{\placeholder{000}}
+
+\newcommand{\advanceExpenseForeign}{\placeholder{000}}
+\newcommand{\advanceExpense}{\placeholder{000}}
+
+\newcommand{\invitationCaseCharges}{\placeholder{000}}
+\newcommand{\conclusion}{\placeholder{000}}
+\newcommand{\iban}{\placeholder{000}}
+
+
+\begin{document}
+{\Large\bf SPRÁVA ZO ZAHRANIČNEJ PRACOVNEJ CESTY}
+
+\def\arraystretch{1.25}
+\begin{table}[h!]
+\centering
+\begin{tabularx}{\linewidth}{|p{0.3\linewidth}|XXX|}
+	\hline
+	Meno a priezvisko zamestnanca: & \multicolumn{3}{l|}{\name} \\ \hline
+	Pracovisko -- skratka katedry: & \multicolumn{3}{l|}{\department} \\ \hline
+	Začiatok cesty (čas odchodu,\par dátum): & \multicolumn{1}{l|}{\datetimeStart, \placeStart} & \multicolumn{1}{l|}{Čas prekročenia hraníc:} & \datetimeBorderCrossingStart \\ \hline
+	Navštívený štát: & \multicolumn{1}{X|}{\country} & \multicolumn{2}{l|}{Miesto: \place} \\ \hline
+	Koniec cesty (čas príchodu,\par dátum): & \multicolumn{1}{l|}{\datetimeEnd, \placeEnd} & \multicolumn{1}{l|}{Čas prekročenia hraníc späť:} & \datetimeBorderCrossingEnd \\ \hline
+	\textbf{ÚHRADA Z FONDU:} & \multicolumn{1}{X|}{\sppSymbol} & \multicolumn{1}{l|}{Dopravný prostriedok:} & \transportation \\ \hline
+\end{tabularx}
+\end{table}
+
+{\large\bf VYÚČTOVANIE NÁKLADOV}
+\vspace*{-0.5em}
+\begin{table}[h!]
+\begin{tabularx}{\linewidth}{|l|X|X|}
+	\hline
+	& \textbf{suma v cudzej mene} & \textbf{suma v EUR} \\ \hline
+	Cestovné / 04: & \travellingExpenseForeign & \travellingExpense \\ \hline
+	Ubytovanie / 01: & \accommodationExpenseForeign & \accommodationExpense \\ \hline
+	Stravné: (uvádzať len ak je iné ako zákon stanovuje) & \mealsReimbursementForeign & \mealsReimbursement \\ \hline
+	Vložné / 05: & \participationExpenseForeign & \participationExpense \\ \hline
+	Poistenie / 02: & \insuranceExpenseForeign & \insuranceExpense \\ \hline
+	Iné výdavky / 03: & \otherExpensesForeign & \otherExpenses \\ \hline
+	Vreckové: (uvádzať len ak je iné ako zákon stanovuje) & \allowanceForeign & \allowance \\ \hline
+	\textbf{Záloha na cestu:} & \advanceExpenseForeign & \advanceExpense \\ \hline
+	\rule{0pt}{1.6em}{\large\bf NÁKLADY NA CESTU:}\rule{0pt}{1.6em} & & \\ \hline
+\end{tabularx}
+\end{table}
+
+\bgroup
+\def\arraystretch{1.5}
+\begin{table}[h!]
+\begin{tabularx}{\linewidth}{|X|}
+	\hline
+	\textcolor{red}{\textbf{V prípade pozvania druhou stranou vyčíslite/odhadnite preplatené výdavky:}} \invitationCaseCharges \\ \hline
+\end{tabularx}
+\end{table}
+\egroup
+
+\begin{table}[h!]
+\begin{tabularx}{\linewidth}{|X|}
+	\hline
+	\textbf{\underline{Výsledky cesty:}} \\
+	\conclusion
+ 	\vspace*{2em} \\ \hline
+\end{tabularx}
+\end{table}
+
+\vspace*{-1em}
+
+\begin{table}[h!]
+\centering
+\begin{tabularx}{\linewidth}{|lX|}
+	\hline
+	\multicolumn{2}{|l|}{\textbf{Účet vysielaného pracovníka}} \\ \hline
+	\multicolumn{1}{|l|}{číslo účtu -- kód banky:} &  \\ \hline
+	\multicolumn{1}{|l|}{\textbf{IBAN: (od 1.2.2014)}} & \iban \\ \hline
+\end{tabularx}
+\end{table}
+
+\begin{center}
+	\textbf{Podpis účastníka:}
+\end{center}
+
+\end{document}
