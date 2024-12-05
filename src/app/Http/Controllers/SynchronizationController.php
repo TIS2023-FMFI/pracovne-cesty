@@ -24,14 +24,17 @@ class SynchronizationController extends Controller
      */
     public static function syncSingleUser(string $username): bool
     {
+        $cestyDatabase = config('database.connections.cesty.database');
+        $dochadzkaDatabase = config('database.connections.dochadzka.database');
+
         // Use LEFT JOIN to check if the user exists in the Cesty database
         $userToSync = PritomnostUser::leftJoin(
-            'cesty.users',
-            'cesty.users.personal_id', '=', 'dochadzka.users.personal_id'
+            "{$cestyDatabase}.users",
+            "{$cestyDatabase}.users.personal_id", '=', "{$dochadzkaDatabase}.users.personal_id"
         )
-            ->where('dochadzka.users.username', $username)
-            ->where('dochadzka.users.personal_id', "<", 10790002)
-            ->select('dochadzka.users.*', 'cesty.users.id as cesty_user_id')
+            ->where("{$dochadzkaDatabase}.users.username", $username)
+            ->where("{$dochadzkaDatabase}.users.personal_id", "<", 10790002)
+            ->select("{$dochadzkaDatabase}.users.*", "{$cestyDatabase}.users.id as {$cestyDatabase}_user_id")
             ->first();
 
         // Update user details in the Cesty database based on the Pritomnost database
