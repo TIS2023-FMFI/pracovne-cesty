@@ -84,7 +84,7 @@ class BusinessTripController extends Controller
 
             // Retrieve filtered trips and all users for admin
             $trips = $trips->paginate(10)->withQueryString();
-            $users = User::all();
+            $users = User::getSortedByLastName();
         } else {
             // Retrieve only user's trips for regular users
             $trips = $user->businessTrips()->paginate(10);

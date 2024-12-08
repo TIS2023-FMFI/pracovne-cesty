@@ -73,4 +73,8 @@ class User extends Authenticatable
     public function fullName(): string {
         return $this->first_name . ' ' . $this->last_name;
     }
+
+    public static function getSortedByLastName() : Collection {
+        return self::orderBy('last_name', 'asc')->get();
+    }
 }
