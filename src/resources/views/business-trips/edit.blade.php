@@ -12,7 +12,8 @@
 
     $isAdmin = Auth::user()->hasRole('admin');
 
-    $countries = Country::all()->pluck('name', 'id');
+    $sortedCountries = Country::getSortedByTripsCount();
+    $countries = Country::makeSlovakiaFirst($sortedCountries)->pluck('name', 'id');
 
     $transportQuery = $isAdmin ?
         Transport::all() :
