@@ -35,5 +35,13 @@ class Country extends Model
         $otherCountries = $countries->filter(fn($country) => $country->name !== 'Slovensko');
     
         return $slovakia->concat($otherCountries);
-}
+    }
+
+    public function incrementTripsCount() : bool {
+        return $this->increment('trips_count');
+    }
+
+    public function decrementTripsCount() : bool {
+        return $this->decrement('trips_count');
+    }
 }

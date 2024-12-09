@@ -195,6 +195,9 @@ class BusinessTripController extends Controller
             // Update user details
             $targetUser->update($validatedUserData);
 
+            // Increment the trips count for the selected country
+            $trip->country->incrementTripsCount();
+
             // Save changes
             DB::commit();
 
@@ -348,10 +351,18 @@ class BusinessTripController extends Controller
 
                 $trip->user->update($validatedUserData);
 
+                $oldCountryId = $trip->country_id;
+
                 // Update the trip with the provided data
                 $trip->update($validatedTripData);
                 self::correctNotReimbursedMeals($trip);
 
+                // If country changed, update both countries' trip counts
+                if ($oldCountryId !== $trip->country_id) {
+                    Country::find($oldCountryId)->decrementTripsCount();
+                    $trip->country->incrementTripsCount();
+                }
+                
                 DB::commit();
 
             } catch (Exception $e) {
@@ -452,6 +463,9 @@ class BusinessTripController extends Controller
             $data['cancellation_reason'] = $request->input('cancellation_reason');
         }
         $trip->update($data);
+
+        // Decrement the trips count for the country
+        $trip->country->decrementTripsCount();
 
         //Send cancellation email to user
 
