@@ -12,7 +12,8 @@
     $old_spp_symbol_id = old("spp_symbol_id");
     $old_reimbursement_spp_symbol_id = old("reimbursement_spp_symbol_id");
 
-    $countries = Country::all()->pluck('name', 'id');
+    $sortedCountries = Country::getSortedByTripsCount();
+    $countries = Country::makeSlovakiaFirst($sortedCountries)->pluck('name', 'id');
     $transports = Transport::where('user_visible', 1)->pluck('name', 'id');
     $purposes = TripPurpose::all()->pluck('name', 'id');
     $contributions = Contribution::all()->pluck('name', 'id');
