@@ -1,3 +1,4 @@
+@use('App\Enums\TripState')
 @props(['trip'])
 
 <a
@@ -22,7 +23,16 @@
                 </div>
             </div>
             <div class="col-4">
-                {{ $trip->datetime_start->format('d.m.Y').' - '.$trip->datetime_end->format('d.m.Y') }}
+                <div class="row">
+                    <div class="col-12">
+                        {{ $trip->datetime_start->format('d.m.Y').' - '.$trip->datetime_end->format('d.m.Y') }}
+                    </div>
+                    @if($trip->state == TripState::CLOSED)
+                        <div class="col-12 text-danger small">
+                            {{ "Správu podať do: " . $trip->datetime_end->copy()->addDays(7)->format('d.m.Y')}}
+                        </div>
+                    @endif
+                </div>
             </div>
             <div class="col-1">
                 <x-state-icon :state="$trip->state"/>
