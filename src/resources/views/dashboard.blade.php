@@ -48,7 +48,7 @@
                     <div class="my-3"></div>
 
                     @foreach($users as $user)
-                        <x-overview-item :ref="route('homepage', ['user' => $user->id])">{{ $user->first_name.' '.$user->last_name }}</x-overview-item>
+                        <x-overview-item :ref="route('homepage', ['user' => $user->id])">{{ $user->last_name.' '.$user->first_name }}</x-overview-item>
                     @endforeach
                 </x-content-box>
             </div>
