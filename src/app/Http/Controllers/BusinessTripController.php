@@ -467,6 +467,9 @@ class BusinessTripController extends Controller
         // Decrement the trips count for the country
         $trip->country->decrementTripsCount();
 
+        // Remove the cancelled trip from the Pritomnost database
+        SynchronizationController::deleteCancelledTrip($trip->id);
+
         //Send cancellation email to user
 
         // Retrieve user's email associated with the trip

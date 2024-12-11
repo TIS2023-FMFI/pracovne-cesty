@@ -88,14 +88,6 @@ class SynchronizationController extends Controller
      */
     public static function syncSingleBusinessTrip($businessTripId): bool
     {
-        // Handbrake to temporarily disable trip sync with Pritomnost
-        // since we are a bit afraid to write to the Pritomnost DB
-        $sync = false;
-        if (!$sync) {
-            // Pass this method
-            return true;
-        }
-
         // Fetch the specific business trip
         $businessTrip = BusinessTrip::find($businessTripId);
 
@@ -146,6 +138,42 @@ class SynchronizationController extends Controller
                     ]);
                 }
             }
+
+            DB::connection('dochadzka')->commit();
+
+        } catch (Exception $e) {
+            DB::connection('dochadzka')->rollBack();
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Deletes a cancelled business trip from the Pritomnost database.
+     *
+     * @param int $businessTripId The ID of the business trip to be deleted.
+     * @return bool Returns true if the business trip was successfully deleted, false otherwise.
+     */
+    public static function deleteCancelledTrip($businessTripId) : bool {
+        $businessTrip = BusinessTrip::find($businessTripId);
+
+        if (!$businessTrip) {
+            throw new Exception();
+        }
+
+        $pritomnostUser = $businessTrip->user->pritomnostUser()->first();
+
+        if (!$pritomnostUser) {
+            throw new Exception();
+        }
+
+        DB::connection('dochadzka')->beginTransaction();
+
+        try {
+            PritomnostAbsence::where('user_id', $pritomnostUser->id)
+                ->whereBetween('date_time', [$businessTrip->datetime_start, $businessTrip->datetime_end])
+                ->delete();
 
             DB::connection('dochadzka')->commit();
 
