@@ -466,25 +466,33 @@ class BusinessTripController extends Controller
 
         // Decrement the trips count for the country
         $trip->country->decrementTripsCount();
-
-        // Remove the cancelled trip from the Pritomnost database
-        SynchronizationController::deleteCancelledTrip($trip->id);
-
+        
         //Send cancellation email to user
-
+        
         // Retrieve user's email associated with the trip
         $recipient = $trip->user->email;
         $message = 'Chceme vás informovať, že vaša pracovná cesta s ID ' .  $trip->sofia_id
-            . ' naplánovaná na ' . $trip->datetime_start
-            . ' s miestom konania ' . $trip->place . ' bola stornovaná.';
+        . ' naplánovaná na ' . $trip->datetime_start
+        . ' s miestom konania ' . $trip->place . ' bola stornovaná.';
         $viewTemplate = 'emails.cancellation_user';
-
+        
         // Create an instance of the SimpleMail class
         $email = new SimpleMail($message, $recipient, $viewTemplate, 'Pracovné cesty - stornovaná cesta');
-
+        
         // Send the email
         Mail::to($recipient)->send($email);
+        
+        // Remove the cancelled trip from the Pritomnost database
+        if ($trip->user->pritomnostUser()->first()) {
+            $status = SynchronizationController::deleteCancelledTrip($trip->id);
 
+            if (!$status) {
+                return redirect()
+                    ->route('trip.edit', ['trip' => $trip])
+                    ->with('message', 'Stornovanú cestu sa nepodarilo odstrániť z dochádzkového systému.');
+            }
+        }
+        
         return redirect()->route('trip.edit', $trip)->with('message', 'Cesta bola úspešne stornovaná.');
     }
 
