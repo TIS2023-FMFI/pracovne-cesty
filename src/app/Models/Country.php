@@ -42,6 +42,9 @@ class Country extends Model
     }
 
     public function decrementTripsCount() : bool {
+        if ($this->trips_count === 0)
+            return false;
+
         return $this->decrement('trips_count');
     }
 }
