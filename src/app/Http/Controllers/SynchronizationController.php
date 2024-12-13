@@ -123,8 +123,7 @@ class SynchronizationController extends Controller
                 $existingAbsence = PritomnostAbsence::where([
                     'user_id' => $pritomnostUserId,
                     'date_time' => $date->format('Y-m-d'),
-                    'cesty_id' => $businessTripId
-                ])->first();
+                ])->exists();
 
                 if (!$existingAbsence) {
                     // Create absence record in the Pritomnost database
