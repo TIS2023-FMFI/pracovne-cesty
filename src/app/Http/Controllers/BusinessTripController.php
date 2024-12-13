@@ -305,6 +305,8 @@ class BusinessTripController extends Controller
         $isAdmin = $user->hasRole('admin');
         $tripState = $trip->state;
 
+        $changedColumns = array();
+
         // Admin updating the trip
         if ($isAdmin) {
             $validatedUserData = self::validateUserData($request);
@@ -362,6 +364,8 @@ class BusinessTripController extends Controller
                     Country::find($oldCountryId)->decrementTripsCount();
                     $trip->country->incrementTripsCount();
                 }
+                
+                $changedColumns = array_keys($trip->getChanges());
 
                 DB::commit();
 
@@ -417,6 +421,8 @@ class BusinessTripController extends Controller
                 // Update the trip with the provided data
                 $trip->update($validatedTripData);
 
+                $changedColumns = array_keys($trip->getChanges());
+
                 DB::commit();
 
             } catch (Exception $e) {
@@ -441,19 +447,35 @@ class BusinessTripController extends Controller
             }
         }
 
-        if ($trip->user->pritomnostUser()->first()) {
-            $status = SynchronizationController::updateSingleBusinessTrip($trip->id);
+        if (self::isSyncRequired($changedColumns)) {
+            if ($trip->user->pritomnostUser()->first()) {
+                $status = SynchronizationController::updateSingleBusinessTrip($trip->id);
 
-            if (!$status) {
-                return redirect()
-                    ->route('trip.edit', ['trip' => $trip])
-                    ->with('message', 'Doplnenú cestu sa nepodarilo zosynchronizovať s dochádzkovým systémom.');
+                if (!$status) {
+                    return redirect()
+                        ->route('trip.edit', ['trip' => $trip])
+                        ->with('message', 'Doplnenú cestu sa nepodarilo zosynchronizovať s dochádzkovým systémom.');
+                }
             }
         }
 
         return redirect()
             ->route('trip.edit', ['trip' => $trip])
             ->with('message', 'Údaje o ceste boli úspešne aktualizované.');
+    }
+
+    private static function isSyncRequired(array $changedColumns): bool {
+        if (in_array('datetime_start', $changedColumns)) {
+            return true;
+        }
+        if (in_array('datetime_end', $changedColumns)) {
+            return true;
+        }
+        if (in_array('type', $changedColumns)) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
