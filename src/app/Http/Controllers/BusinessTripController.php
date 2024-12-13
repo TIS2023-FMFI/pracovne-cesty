@@ -223,7 +223,7 @@ class BusinessTripController extends Controller
             );
 
             // Send the email
-            Mail::to($recipient)->send($email);
+            //Mail::to($recipient)->send($email);
         }
 
         // Check if it was too late to add trip and inform user
@@ -305,7 +305,7 @@ class BusinessTripController extends Controller
         $isAdmin = $user->hasRole('admin');
         $tripState = $trip->state;
 
-        $changedColumns = array();
+        $oldTripData = $trip->getAttributes();
 
         // Admin updating the trip
         if ($isAdmin) {
@@ -364,8 +364,6 @@ class BusinessTripController extends Controller
                     Country::find($oldCountryId)->decrementTripsCount();
                     $trip->country->incrementTripsCount();
                 }
-                
-                $changedColumns = array_keys($trip->getChanges());
 
                 DB::commit();
 
@@ -421,8 +419,6 @@ class BusinessTripController extends Controller
                 // Update the trip with the provided data
                 $trip->update($validatedTripData);
 
-                $changedColumns = array_keys($trip->getChanges());
-
                 DB::commit();
 
             } catch (Exception $e) {
@@ -447,7 +443,7 @@ class BusinessTripController extends Controller
             }
         }
 
-        if (self::isSyncRequired($changedColumns)) {
+        if (self::isSyncRequired($oldTripData, $trip->getAttributes())) {
             if ($trip->user->pritomnostUser()->first()) {
                 $status = SynchronizationController::updateSingleBusinessTrip($trip->id);
 
@@ -464,19 +460,20 @@ class BusinessTripController extends Controller
             ->with('message', 'Údaje o ceste boli úspešne aktualizované.');
     }
 
-    private static function isSyncRequired(array $changedColumns): bool {
-        if (in_array('datetime_start', $changedColumns)) {
+    private static function isSyncRequired(array $oldTripData, array $tripData): bool {
+        if ($oldTripData['datetime_start'] !== $tripData['datetime_start']) {
             return true;
         }
-        if (in_array('datetime_end', $changedColumns)) {
+        if ($oldTripData['datetime_end'] !== $tripData['datetime_end']) {
             return true;
         }
-        if (in_array('type', $changedColumns)) {
+        if ($oldTripData['type'] !== $tripData['type']) {
             return true;
         }
-
+        
         return false;
     }
+    
 
     /**
      * Updating state of the trip to cancelled
@@ -613,7 +610,7 @@ class BusinessTripController extends Controller
                 );
 
                 // Send the email
-                Mail::to($recipient)->send($email);
+                //Mail::to($recipient)->send($email);
             }
         } else {
             throw ValidationException::withMessages(['state' => 'Invalid state for cancellation request.']);
@@ -650,7 +647,7 @@ class BusinessTripController extends Controller
             );
 
             // Send the email
-            Mail::to($recipient)->send($email);
+            //Mail::to($recipient)->send($email);
         }
 
         // Redirect or respond with a success message

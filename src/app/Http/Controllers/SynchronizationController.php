@@ -107,7 +107,8 @@ class SynchronizationController extends Controller
         // Calculate the number of days in the business trip
         $startDate = $businessTrip->datetime_start;
         $endDate = $businessTrip->datetime_end;
-        $dateRange = new CarbonPeriod($startDate, '1 day', $endDate);
+        $dateRange = CarbonPeriod::create($startDate, '1 day', $endDate->copy()->addDay());
+
 
         // Start DB transaction
         DB::connection('dochadzka')->beginTransaction();
@@ -121,7 +122,8 @@ class SynchronizationController extends Controller
                 // Check if the absence already exists in the Pritomnost database for this day
                 $existingAbsence = PritomnostAbsence::where([
                     'user_id' => $pritomnostUserId,
-                    'cesty_id' => $businessTripId,
+                    'date_time' => $date->format('Y-m-d'),
+                    'cesty_id' => $businessTripId
                 ])->first();
 
                 if (!$existingAbsence) {
