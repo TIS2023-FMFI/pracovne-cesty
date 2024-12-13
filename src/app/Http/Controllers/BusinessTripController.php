@@ -355,7 +355,6 @@ class BusinessTripController extends Controller
 
                 // Update the trip with the provided data
                 $trip->update($validatedTripData);
-                Log::info('Updating BusinessTrip:', $validatedTripData);
 
                 self::correctNotReimbursedMeals($trip);
 
