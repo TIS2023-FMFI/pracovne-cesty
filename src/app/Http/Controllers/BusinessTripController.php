@@ -305,6 +305,9 @@ class BusinessTripController extends Controller
         $isAdmin = $user->hasRole('admin');
         $tripState = $trip->state;
 
+
+        $oldCountryId = $trip->country_id;
+
         // Admin updating the trip
         if ($isAdmin) {
             $validatedUserData = self::validateUserData($request);
@@ -354,6 +357,12 @@ class BusinessTripController extends Controller
                 // Update the trip with the provided data
                 $trip->update($validatedTripData);
                 self::correctNotReimbursedMeals($trip);
+
+                // If country changed, update both countries' trip counts
+                if ($oldCountryId !== $trip->country_id) {
+                    Country::find($oldCountryId)->decrementTripsCount();
+                    $trip->country->incrementTripsCount();
+                }
                 
                 DB::commit();
 
@@ -408,6 +417,12 @@ class BusinessTripController extends Controller
 
                 // Update the trip with the provided data
                 $trip->update($validatedTripData);
+
+                // If country changed, update both countries' trip counts
+                if ($oldCountryId !== $trip->country_id) {
+                    Country::find($oldCountryId)->decrementTripsCount();
+                    $trip->country->incrementTripsCount();
+                }
 
                 DB::commit();
 
