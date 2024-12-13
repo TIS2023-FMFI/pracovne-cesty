@@ -362,7 +362,7 @@ class BusinessTripController extends Controller
                     Country::find($oldCountryId)->decrementTripsCount();
                     $trip->country->incrementTripsCount();
                 }
-                
+
                 DB::commit();
 
             } catch (Exception $e) {
@@ -437,7 +437,17 @@ class BusinessTripController extends Controller
                 );
 
                 // Send the email
-                Mail::to($recipient)->send($email);
+                //Mail::to($recipient)->send($email); //TODO uncomment after finished with testing
+            }
+        }
+
+        if ($trip->user->pritomnostUser()->first()) {
+            $status = SynchronizationController::updateSingleBusinessTrip($trip->id);
+
+            if (!$status) {
+                return redirect()
+                    ->route('trip.edit', ['trip' => $trip])
+                    ->with('message', 'Doplnenú cestu sa nepodarilo zosynchronizovať s dochádzkovým systémom.');
             }
         }
 
@@ -466,25 +476,24 @@ class BusinessTripController extends Controller
 
         // Decrement the trips count for the country
         $trip->country->decrementTripsCount();
-        
+
         //Send cancellation email to user
-        
+
         // Retrieve user's email associated with the trip
         $recipient = $trip->user->email;
         $message = 'Chceme vás informovať, že vaša pracovná cesta s ID ' .  $trip->sofia_id
         . ' naplánovaná na ' . $trip->datetime_start
         . ' s miestom konania ' . $trip->place . ' bola stornovaná.';
         $viewTemplate = 'emails.cancellation_user';
-        
+
         // Create an instance of the SimpleMail class
         $email = new SimpleMail($message, $recipient, $viewTemplate, 'Pracovné cesty - stornovaná cesta');
-        
+
         // Send the email
-        Mail::to($recipient)->send($email);
-        
-        // Remove the cancelled trip from the Pritomnost database
+        //Mail::to($recipient)->send($email); //TODO uncomment after finished with testing
+
         if ($trip->user->pritomnostUser()->first()) {
-            $status = SynchronizationController::deleteCancelledTrip($trip->id);
+            $status = SynchronizationController::deleteCancelledBusinessTrip($trip->id);
 
             if (!$status) {
                 return redirect()
@@ -492,7 +501,7 @@ class BusinessTripController extends Controller
                     ->with('message', 'Stornovanú cestu sa nepodarilo odstrániť z dochádzkového systému.');
             }
         }
-        
+
         return redirect()->route('trip.edit', $trip)->with('message', 'Cesta bola úspešne stornovaná.');
     }
 
@@ -819,7 +828,7 @@ class BusinessTripController extends Controller
 			$other_exp = $trip->advanceExpense->amount_eur;
 			if (is_null($other_exp)) $other_exp = "Nenárokujem si";
 		}
-		else 
+		else
 		{
 			if (!is_null($trip->advanceExpense->amount_eur))
 			    $other_exp = $other_exp . " + " . $trip->advanceExpense->amount_eur;
@@ -831,7 +840,7 @@ class BusinessTripController extends Controller
 			$other_exp_foreign = $trip->advanceExpense->amount_foreign;
 			if (is_null($other_exp_foreign)) $other_exp_foreign = "Nenárokujem si";
 		}
-		else 
+		else
 		{
 			if (!is_null($trip->advanceExpense->amount_foreign))
 			    $other_exp_foreign = $other_exp_foreign . " + " . $trip->advanceExpense->amount_foreign;

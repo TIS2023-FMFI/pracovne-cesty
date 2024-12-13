@@ -121,7 +121,7 @@ class SynchronizationController extends Controller
                 // Check if the absence already exists in the Pritomnost database for this day
                 $existingAbsence = PritomnostAbsence::where([
                     'user_id' => $pritomnostUserId,
-                    'date_time' => $date->format('Y-m-d')
+                    'cesty_id' => $businessTripId,
                 ])->first();
 
                 if (!$existingAbsence) {
@@ -131,9 +131,9 @@ class SynchronizationController extends Controller
                         'date_time' => $date->format('Y-m-d'),
                         'from_time' => $fromTime,
                         'to_time' => $toTime,
-                        'type' => PritomnostAbsenceType::BUSINESS_TRIP,
                         'description' => $businessTrip->type->inSlovak() . ' pracovná cesta',
-                        'confirmation' => false
+                        'type' => PritomnostAbsenceType::BUSINESS_TRIP,
+                        'cesty_id' => $businessTripId
                         // Other values are not defined
                     ]);
                 }
@@ -155,7 +155,7 @@ class SynchronizationController extends Controller
      * @param int $businessTripId The ID of the business trip to be deleted.
      * @return bool Returns true if the business trip was successfully deleted, false otherwise.
      */
-    public static function deleteCancelledTrip($businessTripId) : bool {
+    public static function deleteCancelledBusinessTrip($businessTripId) : bool {
         $businessTrip = BusinessTrip::find($businessTripId);
 
         if (!$businessTrip) {
@@ -172,7 +172,8 @@ class SynchronizationController extends Controller
 
         try {
             PritomnostAbsence::where('user_id', $pritomnostUser->id)
-                ->whereBetween('date_time', [$businessTrip->datetime_start, $businessTrip->datetime_end])
+                ->whereNotNull('cesty_id')
+                ->where('cesty_id', $businessTripId)
                 ->delete();
 
             DB::connection('dochadzka')->commit();
@@ -183,5 +184,19 @@ class SynchronizationController extends Controller
         }
 
         return true;
+    }
+
+    /**
+     * Updates a single business trip by first deleting it from the Prtiomnost system's database and then creating it again with the updated data.
+     *
+     * @param int $businessTripId The ID of the business trip to update.
+     * @return bool Returns true if the business trip was successfully updated, false otherwise.
+     */
+    public static function updateSingleBusinessTrip($businessTripId) : bool {
+        if (!self::deleteCancelledBusinessTrip($businessTripId)) {
+            return false;
+        }
+
+        return self::createSingleBusinessTrip($businessTripId);
     }
 }
