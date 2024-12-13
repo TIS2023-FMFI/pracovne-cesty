@@ -86,7 +86,7 @@ class SynchronizationController extends Controller
      * @return bool true if the sync has been successful, false otherwise
      * @throws Exception|Throwable If there is an issue with DateTime or DB connection
      */
-    public static function syncSingleBusinessTrip($businessTripId): bool
+    public static function createSingleBusinessTrip($businessTripId): bool
     {
         // Fetch the specific business trip
         $businessTrip = BusinessTrip::find($businessTripId);

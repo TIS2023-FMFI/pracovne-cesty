@@ -519,7 +519,7 @@ class BusinessTripController extends Controller
         ]);
 
         if ($trip->user->pritomnostUser()->first()) {
-            $status = SynchronizationController::syncSingleBusinessTrip($trip->id);
+            $status = SynchronizationController::createSingleBusinessTrip($trip->id);
 
             if (!$status) {
                 return redirect()
