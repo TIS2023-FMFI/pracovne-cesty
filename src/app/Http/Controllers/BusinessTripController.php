@@ -355,6 +355,8 @@ class BusinessTripController extends Controller
 
                 // Update the trip with the provided data
                 $trip->update($validatedTripData);
+                Log::info('Updating BusinessTrip:', $validatedTripData);
+
                 self::correctNotReimbursedMeals($trip);
 
                 // If country changed, update both countries' trip counts
@@ -362,7 +364,7 @@ class BusinessTripController extends Controller
                     Country::find($oldCountryId)->decrementTripsCount();
                     $trip->country->incrementTripsCount();
                 }
-                
+
                 DB::commit();
 
             } catch (Exception $e) {
@@ -808,7 +810,7 @@ class BusinessTripController extends Controller
 			$other_exp = $trip->advanceExpense->amount_eur;
 			if (is_null($other_exp)) $other_exp = "Nenárokujem si";
 		}
-		else 
+		else
 		{
 			if (!is_null($trip->advanceExpense->amount_eur))
 			    $other_exp = $other_exp . " + " . $trip->advanceExpense->amount_eur;
@@ -820,7 +822,7 @@ class BusinessTripController extends Controller
 			$other_exp_foreign = $trip->advanceExpense->amount_foreign;
 			if (is_null($other_exp_foreign)) $other_exp_foreign = "Nenárokujem si";
 		}
-		else 
+		else
 		{
 			if (!is_null($trip->advanceExpense->amount_foreign))
 			    $other_exp_foreign = $other_exp_foreign . " + " . $trip->advanceExpense->amount_foreign;
@@ -956,7 +958,8 @@ class BusinessTripController extends Controller
             'datetime_start' => 'required|date',
             'datetime_end' => 'required|date|after:datetime_start',
             'datetime_border_crossing_start' => 'sometimes|required|date',
-            'datetime_border_crossing_end' => 'sometimes|required|date'
+            'datetime_border_crossing_end' => 'sometimes|required|date',
+            'concluscion' => 'sometimes|required|string|max:5000'
         ];
 
         return $request->validate($rules);
