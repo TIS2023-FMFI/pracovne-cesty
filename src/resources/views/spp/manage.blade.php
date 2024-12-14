@@ -51,7 +51,7 @@
                         <x-simple-input name="agency" label="Agentúra:"></x-simple-input>
                     </div>
                     <div class="col-md-6 col-12">
-                        <x-simple-input name="acronym" label="Akrónym projektu:"></x-simple-input>
+                        <x-simple-input name="acronym" label="Akronym projektu:"></x-simple-input>
                     </div>
                 </div>
 
