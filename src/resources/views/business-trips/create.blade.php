@@ -28,7 +28,7 @@
 <x-layout>
     <x-content-box title="Nová pracovná cesta">
         @error('duplicate')
-        <p>{{ $message }}</p>
+        <p><span style="color: red;">{{ $message }}</span></p>
         @enderror
         <form method="POST" action="{{ route('trip.store') }}" enctype="multipart/form-data">
             @csrf
