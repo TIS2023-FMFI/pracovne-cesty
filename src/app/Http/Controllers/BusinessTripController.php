@@ -378,11 +378,7 @@ class BusinessTripController extends Controller
             switch ($tripState) {
                 case TripState::CONFIRMED:
                     $validatedTripData = self::validateUpdatableTripData($request);
-                    break;
 
-                // Adding report to an UPDATED state trip
-                case TripState::UPDATED:
-                    // Validation rules for expense-related fields
                     $validatedExpensesData = self::validateExpensesData($trip, $request);
 
                     $days = self::getTripDurationInDays($trip);
@@ -405,10 +401,8 @@ class BusinessTripController extends Controller
             try {
                 // Update based on trip state
                 if ($tripState === TripState::CONFIRMED) {
-                    // Change the state to UPDATED
-                    $trip->update(['state' => TripState::UPDATED]);
-                } else {
-                    // Adding report to an UPDATED state trip
+
+                    // Adding report to an CONFIRMED state trip
                     self::createOrUpdateExpenses($validatedExpensesData, $trip);
 
                     // Change the state to COMPLETED
