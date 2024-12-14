@@ -36,20 +36,22 @@ class SPPController extends Controller
             'exists' => 'Vybrané pole :attribute neexistuje.',
         ];
         $customAttributes = [
-            'fund' => 'fond',
             'spp_symbol' => 'symbol ŠPP',
             'functional_region' => 'funkčná oblasť',
             'account' => 'účet',
             'financial_centre' => 'finančné centrum',
             'grantee' => 'príjemca',
             'spp' => 'ŠPP prvok',
+            'agency' => 'Agentúra',
+            'acronym' => 'Akronym projektu',
         ];
         $validatedData = $request->validate([
-            'fund' => 'required|string|max:10',
             'spp_symbol' => 'required|string|max:30|unique:spp_symbols,spp_symbol',
             'functional_region' => 'required|string|max:10',
             'financial_centre' => 'required|string|max:10',
             'grantee' => 'required|string|max:100',
+            'agency' => 'required|string|max:100',
+            'acronym' => 'required|string|max:10',
             ],$customMessages, $customAttributes);
 
         SppSymbol::create($validatedData);

@@ -31,24 +31,27 @@
             <x-content-section title="Nový ŠPP prvok">
                 <div class="form-row">
                     <div class="col-md-6 col-12">
-                        <x-simple-input name="fund" label="Fond:"></x-simple-input>
-                    </div>
-                    <div class="col-md-6 col-12">
                         <x-simple-input name="spp_symbol" label="ŠPP prvok:"></x-simple-input>
                     </div>
 
-                </div>
-                <div class="form-row">
                     <div class="col-md-6 col-12">
                         <x-simple-input name="functional_region" label="Funkčná oblasť:"></x-simple-input>
                     </div>
+                </div>
+                <div class="form-row">
                     <div class="col-md-6 col-12">
                         <x-simple-input name="financial_centre" label="Finančné stredisko:"></x-simple-input>
+                    </div>
+                    <div class="col-md-6 col-12">
+                        <x-simple-input name="grantee" label="Zodpovedný riešiteľ"></x-simple-input>
                     </div>
                 </div>
                 <div class="form-row">
                     <div class="col-md-6 col-12">
-                        <x-simple-input name="grantee" label="Zodpovedný riešiteľ"></x-simple-input>
+                        <x-simple-input name="agency" label="Agentúra:"></x-simple-input>
+                    </div>
+                    <div class="col-md-6 col-12">
+                        <x-simple-input name="acronym" label="Akrónym projektu:"></x-simple-input>
                     </div>
                 </div>
 
