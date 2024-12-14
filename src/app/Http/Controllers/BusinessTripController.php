@@ -163,6 +163,15 @@ class BusinessTripController extends Controller
         // Add the authenticated user's ID to the validated data
         $validatedTripData['user_id'] = $targetUser->id;
 
+        //check for duplicity
+        $date_start = $validatedTripData['datetime_start'];
+        $date_end = $validatedTripData['datetime_end'];
+        if(BusinessTrip::isDuplicate($validatedTripData['user_id'], $validatedTripData['place'], $date_start, $date_end))
+        {
+
+            return redirect()->back()->withErrors(["duplicate" => "Táto cesta už v systéme existuje."]);
+        }
+
         // Start DB transaction before writing
         DB::beginTransaction();
 

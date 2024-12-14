@@ -269,4 +269,17 @@ class BusinessTrip extends Model
     {
         return self::getByType(TripType::FOREIGN, $columns);
     }
+
+    /**
+     *
+     */
+     public static function isDuplicate(int $user_id, string $place, string $datetime_start, string $datetime_end)
+     {
+         $duplicates = self::select()
+         ->where('user_id', $user_id)
+         ->where('place', $place)
+         ->where('datetime_start', $datetime_start)
+         ->where('datetime_end', $datetime_end)->get();
+          return count($duplicates) > 0;
+     }
 }

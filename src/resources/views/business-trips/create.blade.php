@@ -27,6 +27,9 @@
 
 <x-layout>
     <x-content-box title="Nová pracovná cesta">
+        @error('duplicate')
+        <p>{{ $message }}</p>
+        @enderror
         <form method="POST" action="{{ route('trip.store') }}" enctype="multipart/form-data">
             @csrf
             <x-simple-input name="target_user" :value="$user->id" hidden/>
@@ -80,7 +83,7 @@
 
                 <div class="form-row">
                     <div class="col-md-6 col-12">
-			<x-dropdown-input name="transport_id" label="Dopravný prostriedok" :values="$transports" 
+			<x-dropdown-input name="transport_id" label="Dopravný prostriedok" :values="$transports"
                              :selected="$old_transport_id" />
                     </div>
                 </div>
@@ -92,8 +95,8 @@
                     <div class="col-md col-12">
                         <x-simple-input name="place" label="Miesto"/>
                     </div>
-		    <div class="col-md col-12"> 
-                        <x-dropdown-input name="country_id" label="Štát" :values="$countries" 
+		    <div class="col-md col-12">
+                        <x-dropdown-input name="country_id" label="Štát" :values="$countries"
 			          :selected="$old_country_id" />
                     </div>
 
@@ -152,7 +155,7 @@
                     <div class="col-md col-12">
                         <x-dropdown-input name="spp_symbol_id" label="ŠPP prvok 1 (vyberte prázdny, ak sa doplní ručne):" :values="$spp_symbols"
                            :selected="$old_spp_symbol_id" />
- 
+
                     </div>
                     <div class="col-md col-12">
                         <x-checkbox name="reimbursement" label="Refundovať" control="reimbursementShow"></x-checkbox>
