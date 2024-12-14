@@ -223,7 +223,7 @@ class BusinessTripController extends Controller
             );
 
             // Send the email
-            //Mail::to($recipient)->send($email);
+            Mail::to($recipient)->send($email);
         }
 
         // Check if it was too late to add trip and inform user
@@ -439,7 +439,7 @@ class BusinessTripController extends Controller
                 );
 
                 // Send the email
-                //Mail::to($recipient)->send($email); //TODO uncomment after finished with testing
+                Mail::to($recipient)->send($email);
             }
         }
 
@@ -509,7 +509,7 @@ class BusinessTripController extends Controller
         $email = new SimpleMail($message, $recipient, $viewTemplate, 'Pracovné cesty - stornovaná cesta');
 
         // Send the email
-        //Mail::to($recipient)->send($email); //TODO uncomment after finished with testing
+        Mail::to($recipient)->send($email);
 
         if ($trip->user->pritomnostUser()->first()) {
             $status = SynchronizationController::deleteCancelledBusinessTrip($trip->id);
@@ -610,7 +610,7 @@ class BusinessTripController extends Controller
                 );
 
                 // Send the email
-                //Mail::to($recipient)->send($email);
+                Mail::to($recipient)->send($email);
             }
         } else {
             throw ValidationException::withMessages(['state' => 'Invalid state for cancellation request.']);
@@ -647,7 +647,7 @@ class BusinessTripController extends Controller
             );
 
             // Send the email
-            //Mail::to($recipient)->send($email);
+            Mail::to($recipient)->send($email);
         }
 
         // Redirect or respond with a success message
