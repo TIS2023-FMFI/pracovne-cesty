@@ -169,7 +169,7 @@ class BusinessTripController extends Controller
         if(BusinessTrip::isDuplicate($validatedTripData['user_id'], $validatedTripData['place'], $date_start, $date_end))
         {
 
-            return redirect()->back()->withErrors(["duplicate" => "Táto cesta už v systéme existuje."]);
+            return redirect()->back()->withErrors(["duplicate" => "Cesta s rovnakými údajmi už v systéme existuje a preto táto cesta nebola uložená."]);
         }
 
         // Start DB transaction before writing
