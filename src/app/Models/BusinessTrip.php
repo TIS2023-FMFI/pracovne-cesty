@@ -271,7 +271,14 @@ class BusinessTrip extends Model
     }
 
     /**
+     * Checks if there is another trip in database with same user id, place, start date and end date
+     * that is not cancelled
      *
+     * @param int $user_id
+     * @param string $place
+     * @param string $datetime_start
+     * @param string $datetime_end
+     * @return boolean
      */
      public static function isDuplicate(int $user_id, string $place, string $datetime_start, string $datetime_end)
      {
