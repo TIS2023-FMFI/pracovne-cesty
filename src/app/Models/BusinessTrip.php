@@ -279,7 +279,9 @@ class BusinessTrip extends Model
          ->where('user_id', $user_id)
          ->where('place', $place)
          ->where('datetime_start', $datetime_start)
-         ->where('datetime_end', $datetime_end)->get();
+         ->where('datetime_end', $datetime_end)
+         ->where('state', '!=', TripState::CANCELLATION_REQUEST)
+         ->where('state', '!=', TripState::CANCELLED)->get();
           return count($duplicates) > 0;
      }
 }
