@@ -380,7 +380,7 @@
                 <x-content-section
                     title="Náklady"
                     x-data="{mealsTableHide: {{ $doesNotWantMeals ? 'true' : 'false'}} }"
-                    :disabled="$tripState == TripState::CANCELLED || (!$isAdmin && $tripState != TripState::UPDATED)">
+                    :disabled="$tripState == TripState::CANCELLED || (!$isAdmin && $tripState != TripState::CONFIRMED)">
 
                     <x-slot:description>
                         Ak si preplatenie nejakého druhu nákladov nenárokujete, nezabudnite to, prosím, uviesť.
@@ -521,7 +521,7 @@
 
                 <x-content-section
                     title="Správa"
-                    :disabled="$tripState == TripState::CANCELLED || (!$isAdmin && $tripState != TripState::UPDATED)">
+                    :disabled="$tripState == TripState::CANCELLED || (!$isAdmin && $tripState != TripState::CONFIRMED)">
 
                     <x-textarea name="conclusion" label="Výsledky cesty" :value="$trip->conclusion ?? ''"
                                 rows="10"></x-textarea>
