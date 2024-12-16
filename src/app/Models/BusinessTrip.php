@@ -269,4 +269,28 @@ class BusinessTrip extends Model
     {
         return self::getByType(TripType::FOREIGN, $columns);
     }
+
+    /**
+     * Check if a given sofia_id already exists in the database.
+     * Allow for duplicates of the value '0000'.
+     *
+     * @param $sofiaId
+     * @param $tripId
+     * @return boolean
+     */
+    public static function isDuplicateSofiaId($sofiaId, $tripId = null)
+    {
+        // Allow multiple '0000' values
+        if ($sofiaId === '0000') {
+            return false;
+        }
+
+        // Check for duplicates, excluding the current trip ID (for updates)
+        return self::where('sofia_id', $sofiaId)
+            ->when($tripId, function ($query, $tripId) {
+                $query->where('id', '!=', $tripId);
+            })
+            ->exists();
+    }
+
 }

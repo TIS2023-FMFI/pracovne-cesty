@@ -112,6 +112,16 @@ class BusinessTripController extends Controller
             }
         }
 
+        $sofiaId = $request->query('sofia_id');
+        // Check for duplicate sofia_id
+        if ($sofiaId && BusinessTrip::isDuplicateSofiaId($sofiaId)) {
+            // If sofia_id is a duplicate (not '0000'), return with an error
+            return redirect()
+                ->route('homepage')
+                ->withErrors('Tento identifikátor je už v systéme použitý.')
+                ->withInput();
+        }
+
         return view('business-trips.create', [
             'selectedUser' => $selectedUser,
         ]);
@@ -325,6 +335,18 @@ class BusinessTripController extends Controller
                     ['conclusion' => 'required|max:5000']));
             }
 
+            // Check if sofia_id is updated and check for duplicates
+            $sofiaId = $request->input('sofia_id', $trip->sofia_id);
+            if ($sofiaId !== $trip->sofia_id) {
+                if (BusinessTrip::isDuplicateSofiaId($sofiaId, $trip->id)) {
+                    return redirect()
+                        ->back()
+                        ->withErrors(["sofia_id" => "Tento identifikátor je už v systéme použitý."])
+                        ->withInput();
+                }
+                $validatedTripData['sofia_id'] = $sofiaId;
+            }
+
             // Start DB transaction before writing
             DB::beginTransaction();
 
@@ -501,6 +523,14 @@ class BusinessTripController extends Controller
         $validatedData = $request->validate([
             'sofia_id' => 'required|string|max:40',
         ]);
+
+        // Check if the sofia_id is a duplicate
+        if (BusinessTrip::isDuplicateSofiaId($validatedData['sofia_id'], $trip->id)) {
+            return redirect()
+                ->back()
+                ->withErrors(["sofia_id" => "Tento identifikátor je už v systéme použitý."])
+                ->withInput();
+        }
 
         // Confirm the trip and record sofia_id
         $trip->update([
@@ -958,7 +988,8 @@ class BusinessTripController extends Controller
             'datetime_end' => 'required|date|after:datetime_start',
             'datetime_border_crossing_start' => 'sometimes|required|date',
             'datetime_border_crossing_end' => 'sometimes|required|date',
-            'concluscion' => 'sometimes|required|string|max:5000'
+            'concluscion' => 'sometimes|required|string|max:5000',
+            'sofia_id' => 'required|string|max:40'
         ];
 
         return $request->validate($rules);
