@@ -483,31 +483,68 @@
                                     $meals = $trip->not_reimbursed_meals;
                                     $meals = ($meals == null || $meals == '') ? str_repeat('0', $days*3) : $meals;
                                     $currentDate = clone $trip->datetime_start;
+                                    $endDate = clone $trip->datetime_end;
                                 @endphp
                                 @for ($i = 0; $i < $days; $i++)
                                     <tr>
                                         <td>{{ $currentDate->format('d.m.') }}</td>
+
+                                        @php
+                                            $isFirstDay = $i == 0;
+                                            $isLastDay = $i == $days - 1;
+                                            $currentTime = $currentDate->format('H:i');
+                                            $endTime = $endDate->format('H:i');
+
+                                            $shouldCheckBreakfast = 'false';
+                                            $shouldCheckLunch = 'false';
+                                            $shouldCheckDinner = 'false';
+
+                                            if ($isFirstDay) {
+                                                if (strtotime($currentTime) > strtotime('16:00')) {
+                                                    $shouldCheckBreakfast = 'true';
+                                                    $shouldCheckLunch = 'true';
+                                                } elseif (strtotime($currentTime) > strtotime('12:00')) {
+                                                    $shouldCheckBreakfast = 'true';
+                                                }
+                                            } elseif ($isLastDay) {
+                                                if (strtotime($endTime) < strtotime('11:00')) {
+                                                    $shouldCheckLunch = 'true';
+                                                    $shouldCheckDinner = 'true';
+                                                } elseif (strtotime($endTime) < strtotime('17:00')) {
+                                                    $shouldCheckDinner = 'true';
+                                                }
+                                            } else {
+                                                $shouldCheckBreakfast = ($meals[$i * 3] === '1') ? 'true' : 'false';
+                                                $shouldCheckLunch = ($meals[$i * 3 + 1] === '1') ? 'true' : 'false';
+                                                $shouldCheckDinner = ($meals[$i * 3 + 2] === '1') ? 'true' : 'false';
+                                            }
+                                        @endphp
+
                                         <td>
                                             <input
                                                 type="checkbox"
                                                 name="{{ 'b'.$i }}"
-                                                x-init="$el.checked = {{$meals[$i * 3 ] === '1' ? 'true' : 'false'}}"
-                                                x-bind:checked="checkBreakfast">
+                                                x-init="$el.checked = {{$shouldCheckBreakfast}}"
+                                                x-bind:checked="checkBreakfast"
+                                                x-bind:disabled="{{ ($isFirstDay || $isLastDay) && $shouldCheckBreakfast === 'true' }}">
                                         </td>
                                         <td>
                                             <input
                                                 type="checkbox"
                                                 name="{{ 'l'.$i }}"
-                                                x-init="$el.checked = {{$meals[$i * 3 + 1] === '1' ? 'true' : 'false'}}"
-                                                x-bind:checked="checkLunch">
+                                                x-init="$el.checked = {{$shouldCheckLunch}}"
+                                                x-bind:checked="checkLunch"
+                                                x-bind:disabled="{{ ($isFirstDay || $isLastDay) && $shouldCheckLunch === 'true' }}">
                                         </td>
                                         <td>
                                             <input
                                                 type="checkbox"
                                                 name="{{ 'd'.$i }}"
-                                                x-init="$el.checked = {{$meals[$i * 3 + 2] === '1' ? 'true' : 'false'}}"
-                                                x-bind:checked="checkDinner">
+                                                x-init="$el.checked = {{$shouldCheckDinner}}"
+                                                x-bind:checked="checkDinner"
+                                                x-bind:disabled="{{ ($isFirstDay || $isLastDay) && $shouldCheckDinner === 'true' }}">
                                         </td>
+
                                     </tr>
 
                                     @php $currentDate->modify('+1 day'); @endphp
