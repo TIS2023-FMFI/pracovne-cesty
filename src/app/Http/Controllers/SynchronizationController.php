@@ -107,7 +107,7 @@ class SynchronizationController extends Controller
         // Calculate the number of days in the business trip
         $startDate = $businessTrip->datetime_start;
         $endDate = $businessTrip->datetime_end;
-        $dateRange = CarbonPeriod::create($startDate, '1 day', $endDate);
+        $dateRange = CarbonPeriod::create($startDate->copy()->startOfDay(), '1 day', $endDate->copy()->startOfDay());
 
 
         // Start DB transaction
