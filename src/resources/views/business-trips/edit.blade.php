@@ -34,7 +34,9 @@
     }
 
     $spp_symbols = $sppSymbolsQuery
-        ->pluck('spp_symbol', 'id');
+        ->get()
+        ->mapWithKeys(fn ($spp) => [$spp->id => $spp->spp_symbol . ' - ' . $spp->agency. ', ' . $spp->acronym . ', ' . $spp->grantee ]);
+
 
     $tripType = $trip->type;
     $tripState = $trip->state;
