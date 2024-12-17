@@ -379,11 +379,7 @@ class BusinessTripController extends Controller
                 case TripState::NEW:
                 case TripState::CONFIRMED:
                     $validatedTripData = self::validateUpdatableTripData($request);
-                    break;
 
-                // Adding report to an UPDATED state trip
-                case TripState::UPDATED:
-                    // Validation rules for expense-related fields
                     $validatedExpensesData = self::validateExpensesData($trip, $request);
 
                     $days = self::getTripDurationInDays($trip);
