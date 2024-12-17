@@ -31,7 +31,8 @@ class User extends Authenticatable
     protected $fillable = [
         'first_name', 'last_name', 'academic_degrees',
         'personal_id', 'department', 'address',
-        'email', 'username', 'password', 'status'
+        'email', 'username', 'password', 'status',
+        'iban', 'spp_user_type'
     ];
 
     /**

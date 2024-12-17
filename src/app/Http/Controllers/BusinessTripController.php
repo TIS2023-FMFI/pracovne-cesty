@@ -700,7 +700,6 @@ class BusinessTripController extends Controller
                     'trip_purpose' => $trip
                             ->tripPurpose
                             ->name . (isset($trip->purpose_details) ? ' - ' . $trip->purpose_details : ''),
-                    'fund' => $trip->sppSymbol->fund,
                     'functional_region' => $trip->sppSymbol->functional_region ?? "",
                     'financial_centre' => $trip->sppSymbol->financial_centre ?? "",
                     'spp_symbol' => $trip->sppSymbol->spp_symbol ?? "",
@@ -725,7 +724,6 @@ class BusinessTripController extends Controller
                     'spp_symbol' => $trip->sppSymbol->spp_symbol ?? "",
                     // ! rename expense_estimation to amount in PDF template
                     'expense_estimation' => $trip->conferenceFee->amount ?? "",
-                    'source1' => $trip->sppSymbol->fund ?? "",
                     'functional_region1' => $trip->sppSymbol->functional_region ?? "",
                     'spp_symbol1' => $trip->sppSymbol->spp_symbol ?? "",
                     'financial_centre1' => $trip->sppSymbol->financial_centre ?? "",
@@ -742,7 +740,6 @@ class BusinessTripController extends Controller
                     'advance_amount' => $trip->conferenceFee->amount ?? "Žiadne",
                     'grantee' => $trip->conferenceFee->organiser_name ?? "---",
                     'address' => $trip->conferenceFee->organiser_address ?? "---",
-                    'source' => $trip->sppSymbol->fund ?? "",
                     'functional_region' => $trip->sppSymbol->functional_region ?? "",
                     'spp_symbol' => $trip->sppSymbol->spp_symbol ?? "",
                     'financial_centre' => $trip->sppSymbol->financial_centre ?? "",
