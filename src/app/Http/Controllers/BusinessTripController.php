@@ -164,12 +164,12 @@ class BusinessTripController extends Controller
         $validatedTripData['user_id'] = $targetUser->id;
 
         //check for duplicity
-        $date_start = $validatedTripData['datetime_start'];
-        $date_end = $validatedTripData['datetime_end'];
+        $date_start = date('Y-m-d', strtotime($validatedTripData['datetime_start']));
+        $date_end = date('Y-m-d', strtotime($validatedTripData['datetime_end']));
         if(BusinessTrip::isDuplicate($validatedTripData['user_id'], $validatedTripData['place'], $date_start, $date_end))
         {
 
-            return redirect()->back()->withErrors(["duplicate" => "Cesta s rovnakými údajmi už v systéme existuje a preto táto cesta nebola uložená."]);
+            return redirect()->back()->withInput()->withErrors(["duplicate" => "Cesta s rovnakými údajmi už v systéme existuje a preto táto cesta nebola uložená."]);
         }
 
         // Start DB transaction before writing
