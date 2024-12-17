@@ -148,8 +148,15 @@ class BusinessTripController extends Controller
         $validatedTripData = self::validateUpdatableTripData($request) + self::validateFixedTripData($request);
         $validatedTripData = array_merge($validatedTripData,
             $request->validate([
-                'event_url' => 'nullable|url|max:200'
+                'event_url' => 'nullable|url|max:200',
+                'spp_symbol_id' => 'required'
             ]));
+
+        if (!$request->filled('spp_symbol_id')) {
+            return redirect()->back()
+                ->withInput()
+                ->withErrors(['spp_symbol_id' => 'ŠPP je povinné.']);
+        }
 
         [$isReimbursement, $validatedReimbursementData] = self::validateReimbursementData($request);
         [$isConferenceFee, $validatedConferenceFeeData] = self::validateConferenceFeeData($request);
@@ -971,7 +978,7 @@ class BusinessTripController extends Controller
             'place' => 'required|string|max:200',
             'trip_purpose_id' => 'required|integer|min:0',
             'purpose_details' => 'nullable|string|max:200',
-            'spp_symbol_id' => 'nullable|exists:spp_symbols,id',
+            'spp_symbol_id' => 'required|exists:spp_symbols,id',
         ]);
 
         // Set the type of trip based on the selected country
