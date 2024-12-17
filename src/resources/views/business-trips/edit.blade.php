@@ -77,7 +77,7 @@
             @method('PUT')
             <x-content-section
                 title="Osobné údaje"
-                :disabled="!$isAdmin || $tripState == TripState::CANCELLED">
+                :disabled="(!$isAdmin && $tripState != TripState::NEW) || $tripState == TripState::CANCELLED">
 
                 <div class="form-row">
                     <div class="col-md col-12">
@@ -100,7 +100,7 @@
 
                 <div class="form-row">
                     <div class="col-md col-12">
-                        <x-simple-input name="personal_id" label="Osobné číslo"
+                        <x-simple-input name="personal_id" label="Osobné číslo" :readonly="!$isAdmin"
                                         :value="$trip->user->personal_id ?? ''"/>
                     </div>
                     <div class="col-md col-12">
@@ -115,7 +115,7 @@
             </x-content-section>
 
             <x-content-section
-                :disabled="$tripState == TripState::CANCELLED || (!$isAdmin && $tripState != TripState::CONFIRMED)">
+                :disabled="$tripState == TripState::CANCELLED || (!$isAdmin && $tripState != TripState::CONFIRMED && $tripState != TripState::NEW)">
                 <div class="form-row">
                     <x-content-section
                         class="col-md col-12"
@@ -182,7 +182,7 @@
 
             <x-content-section
                 title="Cieľ cesty"
-                :disabled="!$isAdmin || $tripState == TripState::CANCELLED">
+                :disabled="(!$isAdmin && $tripState != TripState::NEW) || $tripState == TripState::CANCELLED">
 
                 <div class="form-row">
                     <div class="col-md col-12">
@@ -231,7 +231,7 @@
             @if($tripUserType->isExternal())
                 <x-content-section
                     title="Prínos pre fakultu"
-                    :disabled="!$isAdmin || $tripState == TripState::CANCELLED">
+                    :disabled="(!$isAdmin && $tripState != TripState::NEW) || $tripState == TripState::CANCELLED">
 
                     @foreach($contributions as $id => $name)
                         @php
@@ -278,7 +278,7 @@
             <x-content-section
                 title="Financovanie"
                 x-data="{reimbursementShow: {{ old('reimbursement', $isReimbursed) ? 'true' : 'false' }} }"
-                :disabled="!$isAdmin || $tripState == TripState::CANCELLED">
+                :disabled="(!$isAdmin && $tripState != TripState::NEW) || $tripState == TripState::CANCELLED">
 
                 <x-slot:description>
                     V prípade refundácie, prosím, vyberte ako <b>ŠPP prvok 2</b> ten prvok, z ktorého budú peniaze
@@ -325,7 +325,7 @@
             <x-content-section
                 title="Úhrada konferenčného poplatku"
                 x-data="{conferenceFeeShow: {{ $wantsConferenceFee ? 'true' : 'false' }} }"
-                :disabled="!$isAdmin || $tripState == TripState::CANCELLED">
+                :disabled="(!$isAdmin && $tripState != TripState::NEW) || $tripState == TripState::CANCELLED">
 
                 <div class="form-row">
                     <div class="col-md col-12">

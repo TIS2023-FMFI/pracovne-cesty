@@ -376,6 +376,7 @@ class BusinessTripController extends Controller
         } else { // Non-admin user updating the trip
             // Validate based on trip state
             switch ($tripState) {
+                case TripState::NEW:
                 case TripState::CONFIRMED:
                     $validatedTripData = self::validateUpdatableTripData($request);
 
