@@ -38,7 +38,7 @@
         ->mapWithKeys(fn ($spp) => [$spp->id => $spp->spp_symbol . ' - ' . $spp->agency. ', ' . $spp->acronym . ', ' . $spp->grantee ]);
 
 
-$tripType = $trip->type;
+    $tripType = $trip->type;
     $tripState = $trip->state;
     $tripUserType = $trip->user->user_type;
 
