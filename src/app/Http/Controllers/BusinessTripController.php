@@ -402,10 +402,8 @@ class BusinessTripController extends Controller
             try {
                 // Update based on trip state
                 if ($tripState === TripState::CONFIRMED) {
-                    // Change the state to UPDATED
-                    $trip->update(['state' => TripState::UPDATED]);
-                } else if($tripState === TripState::UPDATED) {
-                    // Adding report to an UPDATED state trip
+
+                    // Adding report to an CONFIRMED state trip
                     self::createOrUpdateExpenses($validatedExpensesData, $trip);
 
                     // Change the state to COMPLETED
