@@ -31,6 +31,9 @@
 
 <x-layout>
     <x-content-box title="Nová pracovná cesta">
+        @error('duplicate')
+        <p><span style="color: red;">{{ $message }}</span></p>
+        @enderror
         <form method="POST" action="{{ route('trip.store') }}" enctype="multipart/form-data">
             @csrf
             <x-simple-input name="target_user" :value="$user->id" hidden/>

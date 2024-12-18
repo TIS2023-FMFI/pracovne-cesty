@@ -271,4 +271,26 @@ class BusinessTrip extends Model
     {
         return self::getByType(TripType::FOREIGN, $columns);
     }
+
+    /**
+     * Checks if there is another trip in database with same user id, place, start date and end date
+     * that is not cancelled
+     *
+     * @param int $user_id
+     * @param string $place
+     * @param string $datetime_start
+     * @param string $datetime_end
+     * @return boolean
+     */
+     public static function isDuplicate(int $user_id, string $place, string $datetime_start, string $datetime_end)
+     {
+         $duplicates = self::select()
+         ->where('user_id', $user_id)
+         ->where('place', $place)
+         ->whereDate('datetime_start', $datetime_start)
+         ->whereDate('datetime_end', $datetime_end)
+         ->where('state', '!=', TripState::CANCELLATION_REQUEST)
+         ->where('state', '!=', TripState::CANCELLED)->get();
+          return count($duplicates) > 0;
+     }
 }
