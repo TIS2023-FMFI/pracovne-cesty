@@ -112,16 +112,6 @@ class BusinessTripController extends Controller
             }
         }
 
-        $sofiaId = $request->query('sofia_id');
-        // Check for duplicate sofia_id
-        if ($sofiaId && BusinessTrip::isDuplicateSofiaId($sofiaId)) {
-            // If sofia_id is a duplicate (not '0000'), return with an error
-            return redirect()
-                ->route('homepage')
-                ->withErrors('Tento identifikátor je už v systéme použitý.')
-                ->withInput();
-        }
-
         return view('business-trips.create', [
             'selectedUser' => $selectedUser,
         ]);
@@ -989,7 +979,7 @@ class BusinessTripController extends Controller
             'datetime_border_crossing_start' => 'sometimes|required|date',
             'datetime_border_crossing_end' => 'sometimes|required|date',
             'concluscion' => 'sometimes|required|string|max:5000',
-            'sofia_id' => 'required|string|max:40'
+            'sofia_id' => 'string|max:40'
         ];
 
         return $request->validate($rules);
