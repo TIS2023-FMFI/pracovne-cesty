@@ -49,6 +49,9 @@ class BusinessTripController extends Controller
             throw new Exception();
         }
 
+        // Get sort parameter, default to 'date_created'
+        $sort = $request->query('sort', 'date_created');
+
         // Check if the user is an admin
         if ($user->hasRole('admin')) {
             // Get filter parameters
@@ -59,11 +62,12 @@ class BusinessTripController extends Controller
                 ['filter' => $filter, 'user' => $selectedUser],
                 [
                     'filter' => 'string|nullable',
-                    'user' => 'integer|nullable'
+                    'user' => 'integer|nullable',
+                    'sort' => 'string|nullable|in:sofia_id,place,date_created,date_start'
                 ]
             );
 
-            $trips = new BusinessTrip();
+            $trips = BusinessTrip::query();
 
             // If the filter parameters are correct
             if (!$validator->fails()) {
@@ -72,10 +76,10 @@ class BusinessTripController extends Controller
                 // Only a single parameter can be used
                 if ($filter) {
                     $trips = match ($filter) {
-                        'newest' => BusinessTrip::newest(),
+                        'all' => BusinessTrip::getAll(),
                         'unconfirmed' => BusinessTrip::unconfirmed(),
                         'unaccounted' => BusinessTrip::unaccounted(),
-                        default => new BusinessTrip(),
+                        default => BusinessTrip::query(),
                     };
                 } else if ($selectedUser) {
                     $trips = $selectedUser->businessTrips();
@@ -83,14 +87,25 @@ class BusinessTripController extends Controller
             }
 
             // Retrieve filtered trips and all users for admin
-            $trips = $trips->paginate(10)->withQueryString();
             $users = User::getSortedByLastName();
         } else {
             // Retrieve only user's trips for regular users
-            $trips = $user->businessTrips()->paginate(10);
+            $trips = $user->businessTrips();
             // No need for a list of users
             $users = null;
         }
+
+        // Apply sorting based on the 'sort' parameter
+        $trips = match ($sort) {
+            'date_created' => $trips->orderBy('created_at', 'desc'),
+            'date_start' => $trips->orderBy('datetime_start', 'asc'),
+            'place' => $trips->orderBy('place', 'asc'),
+            'sofia_id' => $trips->orderByRaw('CAST(sofia_id AS UNSIGNED) DESC'),
+            default => $trips,
+        };
+
+        // Paginate the results
+        $trips = $trips->paginate(10)->withQueryString();
 
         // Return the dashboard view with trips and users
         return view('dashboard', [

@@ -174,29 +174,14 @@ class BusinessTrip extends Model
     // Accessors
 
     /**
-     * Get all business trip records from the database
-     * sorted by the specified key
-     *
-     * @param array|string $columns
-     * @param string $sortBy
-     * @return Builder
-     */
-    public static function sortedAll(array|string $columns = ['*'], string $sortBy = 'created_at'): Builder
-    {
-        return self::orderBy($sortBy, 'DESC')
-            ->select($columns);
-    }
-
-    /**
-     * Get all business trip records sorted
-     * from the newest to the oldest
+     * Get all business trip records
      *
      * @param array|string $columns
      * @return Builder
      */
-    public static function newest(array|string $columns = ['*']): Builder
+    public static function getAll(array|string $columns = ['*']): Builder
     {
-        return self::sortedAll($columns, 'created_at');
+        return self::select($columns);
     }
 
     /**
