@@ -282,6 +282,8 @@
                 x-data="{reimbursementShow: {{ old('reimbursement', $isReimbursed) ? 'true' : 'false' }} }"
                 :disabled="(!$isAdmin && $tripState != TripState::NEW) || $tripState == TripState::CANCELLED">
 
+                <x-hover-tooltip text="This is THE tooltip text for this field" icon="question-circle" />
+
                 <x-slot:description>
                     V prípade refundácie, prosím, vyberte ako <b>ŠPP prvok 2</b> ten prvok, z ktorého budú peniaze
                     neskôr

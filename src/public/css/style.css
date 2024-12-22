@@ -29,3 +29,28 @@ form {
 [x-cloak] {
     display: none !important;
 }
+
+.hover-icon {
+    position: relative;
+    display: inline-block;
+}
+
+.tooltip {
+    visibility: hidden;
+    width: max-content;
+    background-color: #333;
+    color: red;
+    text-align: center;
+    border-radius: 5px;
+    padding: 5px;
+    position: absolute;
+    bottom: 120%;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1;
+    white-space: nowrap;
+}
+
+.hover-icon:hover .tooltip {
+    visibility: visible;
+}
