@@ -16,30 +16,28 @@ enum TripState: int
     // the traveller can update trip details
 
     // Trip details are updated
-    case UPDATED = 2;
 
     // Trip editing is finalized
-    case COMPLETED = 3;
+    case COMPLETED = 2;
 
     // A secretariat does an accounting for the trip
 
     // Trip is closed as processed
-    case CLOSED = 4;
+    case CLOSED = 3;
 
     // In case of a cancellation prior to the trip happening
 
     // The traveller has requested a cancellation of the trip
-    case CANCELLATION_REQUEST = 5;
+    case CANCELLATION_REQUEST = 4;
 
     // Trip cancellation is approved by a secretariat
-    case CANCELLED = 6;
+    case CANCELLED = 5;
 
     public function inSlovak(): string
     {
         return match ($this) {
             self::NEW => 'Nová',
             self::CONFIRMED => 'Potvrdená',
-            self::UPDATED => 'Doplnená',
             self::COMPLETED => 'Ukončená',
             self::CLOSED => 'Spracovaná',
             self::CANCELLATION_REQUEST => 'Žiadosť o stornovanie',
@@ -55,11 +53,7 @@ enum TripState: int
             self::CONFIRMED => 'Cesta je v stave Potvrdená.
                                 Administrátor ju potvrdil a zaevidoval, ceste pridelil číselný identifikátor.
                                 Teraz je možné aktualizovať niektoré z dávnejšie uvedených údajov. Ak nechcete vykonať žiadne zmeny, údaje iba potvrďte.
-                                Vykonajte tak až po absolvovaní cesty, keď si budete istý presnosťou týchto údajov.',
-
-            self::UPDATED => 'Cesta je v stave Doplnená.
-                              Údaje, ktoré bolo po jej absolvovaní možné zmeniť, boli aktualizované alebo potvrdené.
-                              Teraz treba doplniť údaje o výdavkoch a výsledkoch cesty.',
+                                Vykonajte tak až po absolvovaní cesty, keď si budete istý presnosťou týchto údajov. Zároveň doplňte údaje o výdavkoch a výsledkoch cesty.',
 
             self::COMPLETED => 'Cesta je v stave Ukončená.
                                 Sú pri nej zaevidované všetky potrebné údaje.
@@ -78,7 +72,7 @@ enum TripState: int
     public function isFinal(): bool
     {
         return match ($this) {
-            self::NEW, self::CONFIRMED, self::UPDATED, self::COMPLETED, self::CANCELLATION_REQUEST => false,
+            self::NEW, self::CONFIRMED, self::COMPLETED, self::CANCELLATION_REQUEST => false,
             self::CLOSED, self::CANCELLED => true,
         };
     }
@@ -89,7 +83,6 @@ enum TripState: int
         return match ($this) {
             TripState::NEW => 'sun',
             TripState::CONFIRMED => 'file-circle-question',
-            TripState::UPDATED => 'file-circle-plus',
             TripState::COMPLETED => 'file-circle-check',
             TripState::CLOSED => 'circle-check',
             TripState::CANCELLATION_REQUEST => 'file-circle-xmark',
@@ -100,8 +93,8 @@ enum TripState: int
     public function hasTravellerReturned(): bool
     {
         return match ($this) {
-            self::NEW, self::CONFIRMED, self::CANCELLATION_REQUEST, self::CANCELLED => false,
-            self::UPDATED, self::COMPLETED, self::CLOSED => true,
+            self::NEW, self::CANCELLATION_REQUEST, self::CANCELLED => false,
+            self::CONFIRMED, self::COMPLETED, self::CLOSED => true,
         };
     }
 }

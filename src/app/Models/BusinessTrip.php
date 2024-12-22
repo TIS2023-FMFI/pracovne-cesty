@@ -25,16 +25,18 @@ class BusinessTrip extends Model
         'datetime_border_crossing_start' => 'datetime',
         'datetime_border_crossing_end' => 'datetime',
 
-        'meals_reimbursement' => 'boolean'
+        'meals_reimbursement' => 'boolean',
+        'is_template' => 'boolean'
     ];
 
     protected $fillable = [
         'user_id', 'type', 'country_id', 'transport_id', 'place', 'event_url', 'upload_name', 'sofia_id',
         'state', 'datetime_start', 'datetime_end', 'place_start', 'place_end', 'datetime_border_crossing_start',
         'datetime_border_crossing_end', 'trip_purpose_id', 'purpose_details', 'iban', 'conference_fee_id',
-        'reimbursement_id', 'spp_symbol_id', 'accommodation_expense_id', 'travelling_expense_id',
-        'other_expense_id', 'allowance_expense_id', 'not_reimbursed_meals', 'meals_reimbursement', 'advance_expense_id',
-        'expense_estimation', 'cancellation_reason', 'note', 'conclusion'
+        'reimbursement_id', 'spp_symbol_id', 'spp_symbol_id_2', 'spp_symbol_id_3', 'amount_eur', 'amount_eur_2',
+        'amount_eur_3', 'accommodation_expense_id', 'travelling_expense_id', 'other_expense_id',
+        'allowance_expense_id', 'not_reimbursed_meals', 'meals_reimbursement', 'advance_expense_id',
+        'expense_estimation', 'cancellation_reason', 'note', 'conclusion', 'is_template'
     ];
 
     // Foreign relationships
@@ -293,4 +295,25 @@ class BusinessTrip extends Model
             ->exists();
     }
 
+     /**
+     * Checks if there is another trip in database with same user id, place, start date and end date
+     * that is not cancelled
+     *
+     * @param int $user_id
+     * @param string $place
+     * @param string $datetime_start
+     * @param string $datetime_end
+     * @return boolean
+     */
+     public static function isDuplicate(int $user_id, string $place, string $datetime_start, string $datetime_end)
+     {
+         $duplicates = self::select()
+         ->where('user_id', $user_id)
+         ->where('place', $place)
+         ->whereDate('datetime_start', $datetime_start)
+         ->whereDate('datetime_end', $datetime_end)
+         ->where('state', '!=', TripState::CANCELLATION_REQUEST)
+         ->where('state', '!=', TripState::CANCELLED)->get();
+          return count($duplicates) > 0;
+     }
 }

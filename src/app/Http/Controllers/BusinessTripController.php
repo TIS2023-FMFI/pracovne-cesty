@@ -148,8 +148,15 @@ class BusinessTripController extends Controller
         $validatedTripData = self::validateUpdatableTripData($request) + self::validateFixedTripData($request);
         $validatedTripData = array_merge($validatedTripData,
             $request->validate([
-                'event_url' => 'nullable|url|max:200'
+                'event_url' => 'nullable|url|max:200',
+                'spp_symbol_id' => 'required'
             ]));
+
+        if (!$request->filled('spp_symbol_id')) {
+            return redirect()->back()
+                ->withInput()
+                ->withErrors(['spp_symbol_id' => 'ŠPP je povinné.']);
+        }
 
         [$isReimbursement, $validatedReimbursementData] = self::validateReimbursementData($request);
         [$isConferenceFee, $validatedConferenceFeeData] = self::validateConferenceFeeData($request);
@@ -162,6 +169,15 @@ class BusinessTripController extends Controller
 
         // Add the authenticated user's ID to the validated data
         $validatedTripData['user_id'] = $targetUser->id;
+
+        //check for duplicity
+        $date_start = date('Y-m-d', strtotime($validatedTripData['datetime_start']));
+        $date_end = date('Y-m-d', strtotime($validatedTripData['datetime_end']));
+        if(BusinessTrip::isDuplicate($validatedTripData['user_id'], $validatedTripData['place'], $date_start, $date_end))
+        {
+
+            return redirect()->back()->withInput()->withErrors(["duplicate" => "Cesta s rovnakými údajmi už v systéme existuje a preto táto cesta nebola uložená."]);
+        }
 
         // Start DB transaction before writing
         DB::beginTransaction();
@@ -305,6 +321,8 @@ class BusinessTripController extends Controller
         $isAdmin = $user->hasRole('admin');
         $tripState = $trip->state;
 
+        $oldTripData = $trip->getAttributes();
+
         // Admin updating the trip
         if ($isAdmin) {
             $validatedUserData = self::validateUserData($request);
@@ -388,13 +406,10 @@ class BusinessTripController extends Controller
         } else { // Non-admin user updating the trip
             // Validate based on trip state
             switch ($tripState) {
+                case TripState::NEW:
                 case TripState::CONFIRMED:
                     $validatedTripData = self::validateUpdatableTripData($request);
-                    break;
 
-                // Adding report to an UPDATED state trip
-                case TripState::UPDATED:
-                    // Validation rules for expense-related fields
                     $validatedExpensesData = self::validateExpensesData($trip, $request);
 
                     $days = self::getTripDurationInDays($trip);
@@ -417,10 +432,8 @@ class BusinessTripController extends Controller
             try {
                 // Update based on trip state
                 if ($tripState === TripState::CONFIRMED) {
-                    // Change the state to UPDATED
-                    $trip->update(['state' => TripState::UPDATED]);
-                } else {
-                    // Adding report to an UPDATED state trip
+
+                    // Adding report to an CONFIRMED state trip
                     self::createOrUpdateExpenses($validatedExpensesData, $trip);
 
                     // Change the state to COMPLETED
@@ -454,10 +467,37 @@ class BusinessTripController extends Controller
             }
         }
 
+        if (self::isSyncRequired($oldTripData, $trip->getAttributes())) {
+            if ($trip->user->pritomnostUser()->first()) {
+                $status = SynchronizationController::updateSingleBusinessTrip($trip->id);
+
+                if (!$status) {
+                    return redirect()
+                        ->route('trip.edit', ['trip' => $trip])
+                        ->with('message', 'Doplnenú cestu sa nepodarilo zosynchronizovať s dochádzkovým systémom.');
+                }
+            }
+        }
+
         return redirect()
             ->route('trip.edit', ['trip' => $trip])
             ->with('message', 'Údaje o ceste boli úspešne aktualizované.');
     }
+
+    private static function isSyncRequired(array $oldTripData, array $tripData): bool {
+        if ($oldTripData['datetime_start'] !== $tripData['datetime_start']) {
+            return true;
+        }
+        if ($oldTripData['datetime_end'] !== $tripData['datetime_end']) {
+            return true;
+        }
+        if ($oldTripData['type'] !== $tripData['type']) {
+            return true;
+        }
+        
+        return false;
+    }
+    
 
     /**
      * Updating state of the trip to cancelled
@@ -485,8 +525,8 @@ class BusinessTripController extends Controller
         // Retrieve user's email associated with the trip
         $recipient = $trip->user->email;
         $message = 'Chceme vás informovať, že vaša pracovná cesta s ID ' .  $trip->sofia_id
-            . ' naplánovaná na ' . $trip->datetime_start
-            . ' s miestom konania ' . $trip->place . ' bola stornovaná.';
+        . ' naplánovaná na ' . $trip->datetime_start
+        . ' s miestom konania ' . $trip->place . ' bola stornovaná.';
         $viewTemplate = 'emails.cancellation_user';
 
         // Create an instance of the SimpleMail class
@@ -494,6 +534,16 @@ class BusinessTripController extends Controller
 
         // Send the email
         Mail::to($recipient)->send($email);
+
+        if ($trip->user->pritomnostUser()->first()) {
+            $status = SynchronizationController::deleteCancelledBusinessTrip($trip->id);
+
+            if (!$status) {
+                return redirect()
+                    ->route('trip.edit', ['trip' => $trip])
+                    ->with('message', 'Stornovanú cestu sa nepodarilo odstrániť z dochádzkového systému.');
+            }
+        }
 
         return redirect()->route('trip.edit', $trip)->with('message', 'Cesta bola úspešne stornovaná.');
     }
@@ -529,7 +579,7 @@ class BusinessTripController extends Controller
         ]);
 
         if ($trip->user->pritomnostUser()->first()) {
-            $status = SynchronizationController::syncSingleBusinessTrip($trip->id);
+            $status = SynchronizationController::createSingleBusinessTrip($trip->id);
 
             if (!$status) {
                 return redirect()
@@ -718,7 +768,6 @@ class BusinessTripController extends Controller
                     'trip_purpose' => $trip
                             ->tripPurpose
                             ->name . (isset($trip->purpose_details) ? ' - ' . $trip->purpose_details : ''),
-                    'fund' => $trip->sppSymbol->fund,
                     'functional_region' => $trip->sppSymbol->functional_region ?? "",
                     'financial_centre' => $trip->sppSymbol->financial_centre ?? "",
                     'spp_symbol' => $trip->sppSymbol->spp_symbol ?? "",
@@ -743,7 +792,6 @@ class BusinessTripController extends Controller
                     'spp_symbol' => $trip->sppSymbol->spp_symbol ?? "",
                     // ! rename expense_estimation to amount in PDF template
                     'expense_estimation' => $trip->conferenceFee->amount ?? "",
-                    'source1' => $trip->sppSymbol->fund ?? "",
                     'functional_region1' => $trip->sppSymbol->functional_region ?? "",
                     'spp_symbol1' => $trip->sppSymbol->spp_symbol ?? "",
                     'financial_centre1' => $trip->sppSymbol->financial_centre ?? "",
@@ -760,7 +808,6 @@ class BusinessTripController extends Controller
                     'advance_amount' => $trip->conferenceFee->amount ?? "Žiadne",
                     'grantee' => $trip->conferenceFee->organiser_name ?? "---",
                     'address' => $trip->conferenceFee->organiser_address ?? "---",
-                    'source' => $trip->sppSymbol->fund ?? "",
                     'functional_region' => $trip->sppSymbol->functional_region ?? "",
                     'spp_symbol' => $trip->sppSymbol->spp_symbol ?? "",
                     'financial_centre' => $trip->sppSymbol->financial_centre ?? "",
@@ -998,7 +1045,7 @@ class BusinessTripController extends Controller
             'place' => 'required|string|max:200',
             'trip_purpose_id' => 'required|integer|min:0',
             'purpose_details' => 'nullable|string|max:200',
-            'spp_symbol_id' => 'nullable|exists:spp_symbols,id',
+            'spp_symbol_id' => 'required|exists:spp_symbols,id',
         ]);
 
         // Set the type of trip based on the selected country
