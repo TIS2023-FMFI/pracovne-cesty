@@ -1,11 +1,13 @@
 @php
     use App\Models\User;
+    use App\Enums\UserStatus;
 
     $isAdmin = Auth::user()->hasRole('admin');
 
     $selectedUserId = request()->query('user');
     $selectedUser = $selectedUserId ? User::find($selectedUserId) : null;
     $selectedUserName = $selectedUser ? $selectedUser->first_name.' '.$selectedUser->last_name : '';
+    $visibleUsersStatus = request('inactive') == 'true' ? UserStatus:: INACTIVE : UserStatus::ACTIVE;
 @endphp
 
 <x-layout>
@@ -30,6 +32,18 @@
             <x-link-button color="danger" href="{{ route('spp.manage') }}">ŠPP prvky</x-link-button>
         </div>
 
+            <div class="mr-2 btn-group">
+                @if(request('inactive')=='true')
+                <x-link-button color="danger"
+                href="{!!route('homepage', ['filter'=>request('filter'),'sort'=>request('sort'),'inactive'=>'false'])!!}"
+                >Aktívni používatelia</x-link-button>
+                @else
+                <x-link-button color="danger"
+                href="{!!route('homepage', ['filter'=>request('filter'),'sort'=>request('sort'),'inactive'=>'true'])!!}"
+                >Neaktívni používatelia</x-link-button>
+                @endif
+            </div>
+
         @endif
     </div>
 
@@ -41,14 +55,16 @@
         @if($isAdmin)
             <div class="col-md-4">
                 <x-content-box title="Prehľad">
-                    <x-overview-item :ref="route('homepage', ['filter' => 'all', 'sort' => request('sort')])"><b>Všetky</b></x-overview-item>
-                    <x-overview-item :ref="route('homepage', ['filter' => 'unconfirmed', 'sort' => request('sort')])"><b>Nepotvrdené</b></x-overview-item>
-                    <x-overview-item :ref="route('homepage', ['filter' => 'unaccounted', 'sort' => request('sort')])"><b>Nevyúčtované</b></x-overview-item>
+                    <x-overview-item :ref="route('homepage', ['filter' => 'all', 'sort' => request('sort'), 'inactive' => request('inactive')])"><b>Všetky</b></x-overview-item>
+                    <x-overview-item :ref="route('homepage', ['filter' => 'unconfirmed', 'sort' => request('sort'), 'inactive' => request('inactive')])"><b>Nepotvrdené</b></x-overview-item>
+                    <x-overview-item :ref="route('homepage', ['filter' => 'unaccounted', 'sort' => request('sort'), 'inactive' => request('inactive')])"><b>Nevyúčtované</b></x-overview-item>
 
                     <div class="my-3"></div>
 
                     @foreach($users as $user)
-                        <x-overview-item :ref="route('homepage', ['user' => $user->id, 'sort' => request('sort')])">{{ $user->last_name.' '.$user->first_name }}</x-overview-item>
+                        @if($user['status'] == $visibleUsersStatus)
+                        <x-overview-item :ref="route('homepage', ['user' => $user->id, 'sort' => request('sort'), 'inactive' => request('inactive')])">{{ $user->last_name.' '.$user->first_name }}</x-overview-item>
+                        @endif
                     @endforeach
                 </x-content-box>
             </div>
@@ -60,6 +76,7 @@
                 <form method="GET" action="{{ route('trip.index') }}">
                     <input type="hidden" name="filter" value="{{ request('filter') }}">
                     <input type="hidden" name="user" value="{{ request('user') }}">
+                    <input type="hidden" name="inactive" value="{{ request('inactive') }}">
                     <x-content-section title="Usporiadať cesty podľa">
                         <div class="form-row">
                             <div class="col-md-6 col-12">

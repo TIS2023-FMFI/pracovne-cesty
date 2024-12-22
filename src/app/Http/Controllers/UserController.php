@@ -128,14 +128,15 @@ class UserController extends Controller
     {
         $credentials = $request->only('username', 'password');
         $synced = SynchronizationController::syncSingleUser($credentials['username']);
-        $user = User::where('username', $credentials['username'])->first();
+        $user = User::where('username', $credentials['username'])
+                ->where('status', 1)->first();
 
         if ($user && Auth::attempt($credentials)) {
             $request->session()->regenerate();
             return redirect()->route('homepage')->with('message', 'Boli ste úspešne prihlásená/ný.');
         }
 
-        return back()->with('message', 'Zadané meno alebo heslo nie sú správne.');
+        return back()->with('message', 'Zadané meno alebo heslo nie sú správne, alebo je váš účet deaktivovaný.');
     }
 
     /** Translate URL from local to one that can be accessed from Internet, example:
