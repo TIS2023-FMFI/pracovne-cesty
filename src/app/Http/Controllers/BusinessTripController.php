@@ -321,6 +321,8 @@ class BusinessTripController extends Controller
         $isAdmin = $user->hasRole('admin');
         $tripState = $trip->state;
 
+        $oldTripData = $trip->getAttributes();
+
         // Admin updating the trip
         if ($isAdmin) {
             $validatedUserData = self::validateUserData($request);
@@ -453,10 +455,37 @@ class BusinessTripController extends Controller
             }
         }
 
+        if (self::isSyncRequired($oldTripData, $trip->getAttributes())) {
+            if ($trip->user->pritomnostUser()->first()) {
+                $status = SynchronizationController::updateSingleBusinessTrip($trip->id);
+
+                if (!$status) {
+                    return redirect()
+                        ->route('trip.edit', ['trip' => $trip])
+                        ->with('message', 'Doplnenú cestu sa nepodarilo zosynchronizovať s dochádzkovým systémom.');
+                }
+            }
+        }
+
         return redirect()
             ->route('trip.edit', ['trip' => $trip])
             ->with('message', 'Údaje o ceste boli úspešne aktualizované.');
     }
+
+    private static function isSyncRequired(array $oldTripData, array $tripData): bool {
+        if ($oldTripData['datetime_start'] !== $tripData['datetime_start']) {
+            return true;
+        }
+        if ($oldTripData['datetime_end'] !== $tripData['datetime_end']) {
+            return true;
+        }
+        if ($oldTripData['type'] !== $tripData['type']) {
+            return true;
+        }
+        
+        return false;
+    }
+    
 
     /**
      * Updating state of the trip to cancelled
@@ -484,8 +513,8 @@ class BusinessTripController extends Controller
         // Retrieve user's email associated with the trip
         $recipient = $trip->user->email;
         $message = 'Chceme vás informovať, že vaša pracovná cesta s ID ' .  $trip->sofia_id
-            . ' naplánovaná na ' . $trip->datetime_start
-            . ' s miestom konania ' . $trip->place . ' bola stornovaná.';
+        . ' naplánovaná na ' . $trip->datetime_start
+        . ' s miestom konania ' . $trip->place . ' bola stornovaná.';
         $viewTemplate = 'emails.cancellation_user';
 
         // Create an instance of the SimpleMail class
@@ -493,6 +522,16 @@ class BusinessTripController extends Controller
 
         // Send the email
         Mail::to($recipient)->send($email);
+
+        if ($trip->user->pritomnostUser()->first()) {
+            $status = SynchronizationController::deleteCancelledBusinessTrip($trip->id);
+
+            if (!$status) {
+                return redirect()
+                    ->route('trip.edit', ['trip' => $trip])
+                    ->with('message', 'Stornovanú cestu sa nepodarilo odstrániť z dochádzkového systému.');
+            }
+        }
 
         return redirect()->route('trip.edit', $trip)->with('message', 'Cesta bola úspešne stornovaná.');
     }
@@ -520,7 +559,7 @@ class BusinessTripController extends Controller
         ]);
 
         if ($trip->user->pritomnostUser()->first()) {
-            $status = SynchronizationController::syncSingleBusinessTrip($trip->id);
+            $status = SynchronizationController::createSingleBusinessTrip($trip->id);
 
             if (!$status) {
                 return redirect()
