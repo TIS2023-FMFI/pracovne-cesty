@@ -41,14 +41,14 @@
         @if($isAdmin)
             <div class="col-md-4">
                 <x-content-box title="Prehľad">
-                    <x-overview-item :ref="route('homepage', ['filter' => 'newest'])"><b>Najnovšie</b></x-overview-item>
-                    <x-overview-item :ref="route('homepage', ['filter' => 'unconfirmed'])"><b>Nepotvrdené</b></x-overview-item>
-                    <x-overview-item :ref="route('homepage', ['filter' => 'unaccounted'])"><b>Nevyúčtované</b></x-overview-item>
+                    <x-overview-item :ref="route('homepage', ['filter' => 'all', 'sort' => request('sort')])"><b>Všetky</b></x-overview-item>
+                    <x-overview-item :ref="route('homepage', ['filter' => 'unconfirmed', 'sort' => request('sort')])"><b>Nepotvrdené</b></x-overview-item>
+                    <x-overview-item :ref="route('homepage', ['filter' => 'unaccounted', 'sort' => request('sort')])"><b>Nevyúčtované</b></x-overview-item>
 
                     <div class="my-3"></div>
 
                     @foreach($users as $user)
-                        <x-overview-item :ref="route('homepage', ['user' => $user->id])">{{ $user->last_name.' '.$user->first_name }}</x-overview-item>
+                        <x-overview-item :ref="route('homepage', ['user' => $user->id, 'sort' => request('sort')])">{{ $user->last_name.' '.$user->first_name }}</x-overview-item>
                     @endforeach
                 </x-content-box>
             </div>
@@ -56,6 +56,29 @@
 
         <div class="{{$isAdmin ? 'col-md-8' : 'col-md'}}">
             <x-content-box title="Pracovné cesty">
+
+                <form method="GET" action="{{ route('trip.index') }}">
+                    <input type="hidden" name="filter" value="{{ request('filter') }}">
+                    <input type="hidden" name="user" value="{{ request('user') }}">
+                    <x-content-section title="Usporiadať cesty podľa">
+                        <div class="form-row">
+                            <div class="col-md-6 col-12">
+                                <select
+                                    class="custom-select"
+                                    name="sort"
+                                    id="sort"
+                                    onchange="this.form.submit();"
+                                >
+                                    <option value="date_created" {{ request('sort') == 'date_created' ? 'selected' : '' }}>Najnovšie</option>
+                                    <option value="date_start" {{ request('sort') == 'date_start' ? 'selected' : '' }}>Dátum začiatku</option>
+                                    <option value="place" {{ request('sort') == 'place' ? 'selected' : '' }}>Miesto</option>
+                                    <option value="sofia_id" {{ request('sort') == 'sofia_id' ? 'selected' : '' }}>Identifikátor</option>
+                                </select>
+                            </div>
+                        </div>
+                    </x-content-section>
+                </form>
+
                 @forelse ($trips as $trip)
                     @php
                         $user = $trip->user;
