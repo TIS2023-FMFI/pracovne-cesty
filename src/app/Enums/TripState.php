@@ -90,6 +90,18 @@ enum TripState: int
         };
     }
 
+    public function iconColor(): string
+    {
+        return match ($this) {
+            TripState::NEW => '#ffb000',
+            TripState::CONFIRMED => '#00baff',
+            TripState::COMPLETED => '#00a000',
+            TripState::CLOSED => '#575757',
+            TripState::CANCELLATION_REQUEST => '#FF0000',
+            TripState::CANCELLED => '#d9390c',
+        };
+    }
+
     public function hasTravellerReturned(): bool
     {
         return match ($this) {
