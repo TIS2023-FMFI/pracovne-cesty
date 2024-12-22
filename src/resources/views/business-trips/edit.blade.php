@@ -51,6 +51,8 @@
     $old_spp_symbol_id = old('spp_symbol_id');
     if (is_null($old_spp_symbol_id)) $old_spp_symbol_id = $trip->spp_symbol_id;
 
+    $old_sofia_id = old('sofia_id');
+    if (is_null($old_sofia_id)) $old_sofia_id = $trip->sofia_id;
 @endphp
 
 <x-layout>
@@ -77,6 +79,18 @@
         <form method="POST" action="{{ route('trip.update', ['trip' => $trip->id]) }}" enctype="multipart/form-data">
             @csrf
             @method('PUT')
+
+            <x-content-section
+                title="Identifikátor"
+                :disabled="!$isAdmin || $tripState == TripState::CANCELLED">
+
+                <div class="form-row">
+                    <div class="col-md col-12">
+                        <x-simple-input name="sofia_id" label="Identifikátor" :value="old('sofia_id', $trip->sofia_id)"/>
+                    </div>
+                </div>
+            </x-content-section>
+
             <x-content-section
                 title="Osobné údaje"
                 :disabled="(!$isAdmin && $tripState != TripState::NEW) || $tripState == TripState::CANCELLED">

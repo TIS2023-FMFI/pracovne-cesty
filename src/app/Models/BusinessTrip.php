@@ -273,6 +273,29 @@ class BusinessTrip extends Model
     }
 
     /**
+     * Check if a given sofia_id already exists in the database.
+     * Allow for duplicates of the value '0000'.
+     *
+     * @param $sofiaId
+     * @param $tripId
+     * @return boolean
+     */
+    public static function isDuplicateSofiaId($sofiaId, $tripId = null)
+    {
+        // Allow multiple '0000' values
+        if ($sofiaId === '0000') {
+            return false;
+        }
+
+        // Check for duplicates, excluding the current trip ID (for updates)
+        return self::where('sofia_id', $sofiaId)
+            ->when($tripId, function ($query, $tripId) {
+                $query->where('id', '!=', $tripId);
+            })
+            ->exists();
+    }
+
+     /**
      * Checks if there is another trip in database with same user id, place, start date and end date
      * that is not cancelled
      *
