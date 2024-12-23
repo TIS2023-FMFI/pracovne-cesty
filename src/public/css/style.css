@@ -30,27 +30,25 @@ form {
     display: none !important;
 }
 
-.hover-icon {
-    position: relative;
+.click-icon i {
+    color: #DC3545;
+    font-size: 30px;
+    cursor: pointer;
+}
+
+.click-icon .text {
+    border: 1px solid #DC3545;
+    padding: 2px 5px;
+    margin-left: 10px;
+    color: #DC3545;
     display: inline-block;
+    vertical-align: middle;
 }
 
-.tooltip {
-    visibility: hidden;
-    width: max-content;
-    background-color: #333;
-    color: red;
-    text-align: center;
-    border-radius: 5px;
-    padding: 5px;
-    position: absolute;
-    bottom: 120%;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 1;
-    white-space: nowrap;
+.click-icon {
+    display: inline-flex;
+    align-items: center;
+    margin-bottom: 10px;
 }
 
-.hover-icon:hover .tooltip {
-    visibility: visible;
-}
+
