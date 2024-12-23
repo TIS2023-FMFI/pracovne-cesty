@@ -295,15 +295,18 @@ class UserController extends Controller
                 $message = "Používateľa sa nepodarilo aktivovať.";
             }
         }
-        return back()->with('message', $message);
+        return redirect()->route('homepage',['inactive'=>$request['inactive'], 'sort'=>$request['sort']])->with('message',$message);
     }
 
     public function deactivateUser(Request $request): RedirectResponse
         {
+            $currentUserId = Auth::user()->id;
             $userId = $request['user'];
             $user = $userId ? User::find($userId) : null;
             if($user == null){
                 $message = "Vybraný používteľ neexistuje.";
+            }else if($userId == $currentUserId){
+                $message = "Nemôžete deaktivovať svoj vlastný účet.";
             }else{
                 if(User::deactivateUserWithId($userId)){
                     $message = "Používateľ bol úspešne deaktivovaný.";
@@ -311,6 +314,6 @@ class UserController extends Controller
                     $message = "Používateľa sa nepodarilo deaktivovať.";
                 }
             }
-            return back()->with('message',$message);
+            return redirect()->route('homepage',['inactive'=>$request['inactive'], 'sort'=>$request['sort']])->with('message',$message);
         }
 }

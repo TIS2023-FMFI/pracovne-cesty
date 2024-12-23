@@ -11,6 +11,8 @@
         <x-content-section>
             <p>Naozaj chcete aktivovať používateľa <b>{{$selectedUserName}}</b>?</p>
             <input type="hidden" name="user" value="{{ request('user') }}">
+            <input type="hidden" name="sort" value="{{ request('sort') }}">
+            <input type="hidden" name="inactive" value="{{ request('inactive') }}">
         </x-content-section>
         <div class="d-flex justify-content-end">
             <x-button>Aktivovať</x-button>
