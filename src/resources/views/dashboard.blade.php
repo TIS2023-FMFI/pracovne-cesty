@@ -49,6 +49,8 @@
 
     @if($isAdmin)
         <x-modals.add-user/>
+        <x-modals.activate-user/>
+        <x-modals.deactivate-user/>
     @endif
 
     <div class="row">
@@ -63,11 +65,22 @@
 
                     @foreach($users as $user)
                         @if($user['status'] == $visibleUsersStatus)
-                        <x-overview-item :ref="route('homepage', ['user' => $user->id, 'sort' => request('sort'), 'inactive' => request('inactive')])">{{ $user->last_name.' '.$user->first_name }}</x-overview-item>
+                        <x-overview-item :ref="route('homepage', ['user' => $user->id, 'sort' => request('sort'), 'inactive' => request('inactive')])">
+                            {{$user->last_name.' '.$user->first_name.' ' }}</x-overview-item>
                         @endif
                     @endforeach
+                    @if(request('user') != null)
+                        <div class="mr-2 btn-group">
+                            @if($selectedUser->status == UserStatus::ACTIVE)
+                                <x-button color="danger" modal="deactivate-user">  Deaktivovať  používateľa {{$selectedUserName}}</x-button>
+                            @else
+                                <x-button color="danger" modal="activate-user">Aktivovať používateľa {{$selectedUserName}}</x-button>
+                            @endif
+                        </div>
+                    @endif
                 </x-content-box>
             </div>
+
         @endif
 
         <div class="{{$isAdmin ? 'col-md-8' : 'col-md'}}">

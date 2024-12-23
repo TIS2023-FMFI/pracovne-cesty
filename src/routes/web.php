@@ -120,6 +120,18 @@ Route::controller(UserController::class)
                     ->middleware('role:admin')
                     ->name('invite');
 
+                //Activate an inactive user
+                //Intended for the activate submit button
+                Route::post('/activateUser',  'activateUser')
+                    ->middleware('role:admin')
+                    ->name('activate');
+
+                //Deactivate an active user
+                //Intended for the deactivate submit button
+                Route::post('/deactivateUser', 'deactivateUser')
+                    ->middleware('role:admin')
+                    ->name('deactivate');
+
                 // Log user out
                 Route::post('/logout', 'logout')
                     ->middleware('role:traveller|admin')

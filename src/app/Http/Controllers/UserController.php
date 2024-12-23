@@ -281,4 +281,36 @@ class UserController extends Controller
             ? redirect()->route('homepage')->with('status', __($status))
             : back()->withErrors(['email' => [__($status)]]);
     }
+
+    public function activateUser(Request $request): RedirectResponse
+    {
+        $userId = $request['user'];
+        $user = $userId ? User::find($userId) : null;
+        if($user == null){
+            $message = "Vybraný používteľ neexistuje.";
+        }else{
+            if(User::activateUserWithId($userId)){
+                $message = "Používateľ bol úspešne aktivovaný.";
+            }else{
+                $message = "Používateľa sa nepodarilo aktivovať.";
+            }
+        }
+        return back()->with('message', $message);
+    }
+
+    public function deactivateUser(Request $request): RedirectResponse
+        {
+            $userId = $request['user'];
+            $user = $userId ? User::find($userId) : null;
+            if($user == null){
+                $message = "Vybraný používteľ neexistuje.";
+            }else{
+                if(User::deactivateUserWithId($userId)){
+                    $message = "Používateľ bol úspešne deaktivovaný.";
+                }else{
+                    $message = "Používateľa sa nepodarilo deaktivovať.";
+                }
+            }
+            return back()->with('message',$message);
+        }
 }
