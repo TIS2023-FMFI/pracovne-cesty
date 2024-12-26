@@ -63,7 +63,7 @@
 
                 <div class="form-row">
                     <div class="col-md-6 col-12">
-                        <x-simple-input name="iban" label="Číslo účtu"/>
+                        <x-simple-input name="iban" label="Číslo účtu" :value="$user->iban ?? ''"/>
                     </div>
                 </div>
             </x-content-section>
