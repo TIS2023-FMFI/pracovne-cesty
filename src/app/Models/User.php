@@ -78,4 +78,10 @@ class User extends Authenticatable
     public static function getSortedByLastName() : Collection {
         return self::orderBy('last_name', 'asc')->get();
     }
+
+    public static function updateIbanOfUserWithId($id, $newIban):bool
+    {
+        $affectedRows = self::where('id', $id)->update(["iban" => $newIban]);
+        return $affectedRows > 0;
+    }
 }
