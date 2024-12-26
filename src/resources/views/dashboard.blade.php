@@ -56,7 +56,7 @@
     <div class="row">
         @if($isAdmin)
             <div class="col-md-4">
-                <x-content-box title="Prehľad">
+                <x-content-box title="Prehľad {{request('inactive') == 'true' ? '(Neaktívni)' : '(Aktívni)'}}">
                     <x-overview-item :ref="route('homepage', ['filter' => 'all', 'sort' => request('sort'), 'inactive' => request('inactive')])"><b>Všetky</b></x-overview-item>
                     <x-overview-item :ref="route('homepage', ['filter' => 'unconfirmed', 'sort' => request('sort'), 'inactive' => request('inactive')])"><b>Nepotvrdené</b></x-overview-item>
                     <x-overview-item :ref="route('homepage', ['filter' => 'unaccounted', 'sort' => request('sort'), 'inactive' => request('inactive')])"><b>Nevyúčtované</b></x-overview-item>
