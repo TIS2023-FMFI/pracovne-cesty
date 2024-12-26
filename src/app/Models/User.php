@@ -31,7 +31,8 @@ class User extends Authenticatable
     protected $fillable = [
         'first_name', 'last_name', 'academic_degrees',
         'personal_id', 'department', 'address',
-        'email', 'username', 'password', 'status'
+        'email', 'username', 'password', 'status',
+        'iban', 'spp_user_type'
     ];
 
     /**
@@ -72,5 +73,9 @@ class User extends Authenticatable
 
     public function fullName(): string {
         return $this->first_name . ' ' . $this->last_name;
+    }
+
+    public static function getSortedByLastName() : Collection {
+        return self::orderBy('last_name', 'asc')->get();
     }
 }

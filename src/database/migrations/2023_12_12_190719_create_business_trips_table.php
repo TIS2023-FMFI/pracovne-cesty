@@ -60,7 +60,13 @@ return new class extends Migration {
 
             $table->foreignIdFor(ConferenceFee::class)->nullable()->unique();
             $table->foreignIdFor(Reimbursement::class)->nullable()->unique();
-            $table->foreignIdFor(SppSymbol::class)->nullable();
+            $table->foreignIdFor(SppSymbol::class, 'spp_symbol_id')->nullable();
+            $table->foreignIdFor(SppSymbol::class, 'spp_symbol_id_2')->nullable();
+            $table->foreignIdFor(SppSymbol::class, 'spp_symbol_id_3')->nullable();
+
+            $table->smallInteger('amount_eur')->nullable();
+            $table->smallInteger('amount_eur_2')->nullable();
+            $table->smallInteger('amount_eur_3')->nullable();
 
             // Cestovne
             $table->foreignIdFor(Expense::class, 'travelling_expense_id')
@@ -108,6 +114,8 @@ return new class extends Migration {
             $table->string('note', 5000)->nullable();
             $table->string('conclusion', 5000)->nullable();
 
+            // Template
+            $table->boolean('is_template')->default(false);
 
             // Timestamp
             $table->timestamps();

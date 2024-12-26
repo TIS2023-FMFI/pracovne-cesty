@@ -79,6 +79,10 @@ Route::controller(BusinessTripController::class)
                 Route::get('/{trip}/attachment', 'getAttachment')
                     ->can('view', 'trip')
                     ->name('attachment');
+
+                // Route to list all the trips (index route)
+                Route::get('/', 'index')
+                    ->name('index');
             });
 
         Route::middleware('role:traveller')
@@ -186,4 +190,12 @@ Route::controller(SPPController::class)
         // Deactivate an SPP symbol
         Route::put('/deactivate', 'deactivate')
             ->name('deactivate');
+
+        // Edit an existing SPP symbol (pre-fill form)
+        Route::get('/{id}/edit', 'edit')
+            ->name('edit');
+
+        // Update an existing SPP symbol
+        Route::put('/{id}', 'update')
+            ->name('update');
     });

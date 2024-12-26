@@ -25,17 +25,19 @@ class BusinessTrip extends Model
         'datetime_border_crossing_start' => 'datetime',
         'datetime_border_crossing_end' => 'datetime',
 
-        'meals_reimbursement' => 'boolean'
+        'meals_reimbursement' => 'boolean',
+        'is_template' => 'boolean'
     ];
 
     protected $fillable = [
         'user_id', 'type', 'country_id', 'transport_id', 'place', 'event_url', 'upload_name', 'sofia_id',
         'state', 'datetime_start', 'datetime_end', 'place_start', 'place_end', 'datetime_border_crossing_start',
         'datetime_border_crossing_end', 'trip_purpose_id', 'purpose_details', 'iban', 'conference_fee_id',
-        'reimbursement_id', 'spp_symbol_id', 'travelling_expense_id', 'accommodation_expense_id',
+        'reimbursement_id', 'spp_symbol_id', 'spp_symbol_id_2', 'spp_symbol_id_3', 'amount_eur', 'amount_eur_2',
+        'amount_eur_3', 'travelling_expense_id', 'accommodation_expense_id',
         'participation_expense_id', 'insurance_expense_id', 'other_expense_id', 'allowance_expense_id',
         'advance_expense_id', 'not_reimbursed_meals', 'meals_reimbursement', 'expense_estimation',
-        'cancellation_reason', 'note', 'conclusion'
+        'cancellation_reason', 'note', 'conclusion', 'is_template'
     ];
 
     // Foreign relationships
@@ -195,29 +197,14 @@ class BusinessTrip extends Model
     // Accessors
 
     /**
-     * Get all business trip records from the database
-     * sorted by the specified key
-     *
-     * @param array|string $columns
-     * @param string $sortBy
-     * @return Builder
-     */
-    public static function sortedAll(array|string $columns = ['*'], string $sortBy = 'created_at'): Builder
-    {
-        return self::orderBy($sortBy, 'DESC')
-            ->select($columns);
-    }
-
-    /**
-     * Get all business trip records sorted
-     * from the newest to the oldest
+     * Get all business trip records
      *
      * @param array|string $columns
      * @return Builder
      */
-    public static function newest(array|string $columns = ['*']): Builder
+    public static function getAll(array|string $columns = ['*']): Builder
     {
-        return self::sortedAll($columns, 'created_at');
+        return self::select($columns);
     }
 
     /**
@@ -290,4 +277,49 @@ class BusinessTrip extends Model
     {
         return self::getByType(TripType::FOREIGN, $columns);
     }
+
+    /**
+     * Check if a given sofia_id already exists in the database.
+     * Allow for duplicates of the value '0000'.
+     *
+     * @param $sofiaId
+     * @param $tripId
+     * @return boolean
+     */
+    public static function isDuplicateSofiaId($sofiaId, $tripId = null)
+    {
+        // Allow multiple '0000' values
+        if ($sofiaId === '0000') {
+            return false;
+        }
+
+        // Check for duplicates, excluding the current trip ID (for updates)
+        return self::where('sofia_id', $sofiaId)
+            ->when($tripId, function ($query, $tripId) {
+                $query->where('id', '!=', $tripId);
+            })
+            ->exists();
+    }
+
+     /**
+     * Checks if there is another trip in database with same user id, place, start date and end date
+     * that is not cancelled
+     *
+     * @param int $user_id
+     * @param string $place
+     * @param string $datetime_start
+     * @param string $datetime_end
+     * @return boolean
+     */
+     public static function isDuplicate(int $user_id, string $place, string $datetime_start, string $datetime_end)
+     {
+         $duplicates = self::select()
+         ->where('user_id', $user_id)
+         ->where('place', $place)
+         ->whereDate('datetime_start', $datetime_start)
+         ->whereDate('datetime_end', $datetime_end)
+         ->where('state', '!=', TripState::CANCELLATION_REQUEST)
+         ->where('state', '!=', TripState::CANCELLED)->get();
+          return count($duplicates) > 0;
+     }
 }

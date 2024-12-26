@@ -11,4 +11,5 @@ enum PritomnostAbsenceType: int
     case OTHER = 5;
     case MATERNITY = 6;
     case PARENTAL = 7;
+    case UNPAID_LEAVE = 8;
 }

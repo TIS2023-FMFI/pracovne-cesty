@@ -16,8 +16,8 @@ class SppSymbol extends Model
     ];
 
     protected $fillable = [
-        'spp_symbol', 'fund', 'functional_region',
-        'financial_centre', 'account', 'grantee', 'status'
+        'spp_symbol',  'functional_region', 'financial_centre',
+        'account', 'grantee', 'status', 'agency', 'acronym'
     ];
 
     /**
