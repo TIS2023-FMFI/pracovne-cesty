@@ -32,9 +32,10 @@ class BusinessTrip extends Model
         'user_id', 'type', 'country_id', 'transport_id', 'place', 'event_url', 'upload_name', 'sofia_id',
         'state', 'datetime_start', 'datetime_end', 'place_start', 'place_end', 'datetime_border_crossing_start',
         'datetime_border_crossing_end', 'trip_purpose_id', 'purpose_details', 'iban', 'conference_fee_id',
-        'reimbursement_id', 'spp_symbol_id', 'accommodation_expense_id', 'travelling_expense_id',
-        'other_expense_id', 'allowance_expense_id', 'not_reimbursed_meals', 'meals_reimbursement', 'advance_expense_id',
-        'expense_estimation', 'cancellation_reason', 'note', 'conclusion'
+        'reimbursement_id', 'spp_symbol_id', 'travelling_expense_id', 'accommodation_expense_id',
+        'participation_expense_id', 'insurance_expense_id', 'other_expense_id', 'allowance_expense_id',
+        'advance_expense_id', 'not_reimbursed_meals', 'meals_reimbursement', 'expense_estimation',
+        'cancellation_reason', 'note', 'conclusion'
     ];
 
     // Foreign relationships
@@ -110,6 +111,16 @@ class BusinessTrip extends Model
     }
 
     /**
+     * Get the travelling expense of the business trip
+     *
+     * @return BelongsTo
+     */
+    public function travellingExpense(): BelongsTo
+    {
+        return $this->belongsTo(Expense::class, 'travelling_expense_id');
+    }
+
+    /**
      * Get the accommodation expense of the business trip
      *
      * @return BelongsTo
@@ -120,13 +131,23 @@ class BusinessTrip extends Model
     }
 
     /**
-     * Get the travelling expense of the business trip
+     * Get the participation fee expense of the business trip
      *
      * @return BelongsTo
      */
-    public function travellingExpense(): BelongsTo
+    public function participationExpense(): BelongsTo
     {
-        return $this->belongsTo(Expense::class, 'travelling_expense_id');
+        return $this->belongsTo(Expense::class, 'participation_expense_id');
+    }
+
+    /**
+     * Get the insurance expense of the business trip
+     *
+     * @return BelongsTo
+     */
+    public function insuranceExpense(): BelongsTo
+    {
+        return $this->belongsTo(Expense::class, 'insurance_expense_id');
     }
 
     /**
@@ -140,16 +161,6 @@ class BusinessTrip extends Model
     }
 
     /**
-     * Get the advance payment expense of the business trip
-     *
-     * @return BelongsTo
-     */
-    public function advanceExpense(): BelongsTo
-    {
-        return $this->belongsTo(Expense::class, 'advance_expense_id');
-    }
-
-    /**
      * Get the allowance expense of the business trip
      *
      * @return BelongsTo
@@ -157,6 +168,16 @@ class BusinessTrip extends Model
     public function allowanceExpense(): BelongsTo
     {
         return $this->belongsTo(Expense::class, 'allowance_expense_id');
+    }
+
+    /**
+     * Get the advance payment expense of the business trip
+     *
+     * @return BelongsTo
+     */
+    public function advanceExpense(): BelongsTo
+    {
+        return $this->belongsTo(Expense::class, 'advance_expense_id');
     }
 
     /**
