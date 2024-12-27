@@ -384,9 +384,14 @@
                     x-data="{mealsTableHide: {{ $doesNotWantMeals ? 'true' : 'false'}} }"
                     :disabled="$tripState == TripState::CANCELLED || (!$isAdmin && $tripState != TripState::CONFIRMED)">
 
-                    <x-tooltip text="Pre jeden druh nákladov (napr. Cestovné) prosím zadávajte sumu tak, aby súčet súm v
-                    EUR a v cudzej mene spolu hradil celý druh nákladov. Napríklad, ak si nárokujete o preplatenie len v EUR,
-                    tak danú sumu už neuvádzajte v cudzej mene." icon="question-circle"></x-tooltip>
+                    @if($tripType == TripType::FOREIGN)
+                        <x-tooltip
+                            text="Pre jeden druh nákladov (napr. Cestovné) prosím zadávajte sumu tak, aby súčet súm v
+                        EUR a v cudzej mene spolu hradil celý druh nákladov. Napríklad, ak si nárokujete o preplatenie len v EUR,
+                        tak danú sumu už neuvádzajte v cudzej mene."
+                            icon="question-circle">
+                        </x-tooltip>
+                    @endif
 
                     <x-slot:description>
                         Ak si preplatenie nejakého druhu nákladov nenárokujete, nezabudnite to, prosím, uviesť.
