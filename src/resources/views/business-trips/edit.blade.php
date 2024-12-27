@@ -385,9 +385,15 @@
 
             @if($tripState->hasTravellerReturned())
                 @php
-                    $expenses = ['travelling' => 'Cestovné', 'accommodation' => 'Ubytovanie', 'advance' => 'Vložné', 'other' => 'Iné'];
+                    $expenses = [
+                        'travelling' => 'Cestovné', 'accommodation' => 'Ubytovanie',
+                        'insurance' => 'Poistenie', 'other' => 'Iné'
+                    ];
+                    if ($trip->conferenceFee === null) {
+                        $expenses = array_merge($expenses, ['participation' => 'Vložné']);
+                    }
                     if($tripType == TripType::FOREIGN) {
-                        $expenses = array_merge($expenses, ['allowance' => 'Záloha za cestu']);
+                        $expenses = array_merge($expenses, ['advance' => 'Záloha za cestu']);
                     }
                     $mealsReimbursement = $trip->meals_reimbursement ?? true;
                     $doesNotWantMeals = old('no_meals_reimbursed', !$mealsReimbursement);

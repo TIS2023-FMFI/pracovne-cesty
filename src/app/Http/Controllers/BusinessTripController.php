@@ -509,10 +509,9 @@ class BusinessTripController extends Controller
         if ($oldTripData['type'] !== $tripData['type']) {
             return true;
         }
-        
+
         return false;
     }
-    
 
     /**
      * Updating state of the trip to cancelled
@@ -1124,9 +1123,12 @@ class BusinessTripController extends Controller
      */
     private static function validateExpensesData(BusinessTrip $trip, Request $request): array
     {
-        $expenses = ['travelling', 'accommodation', 'advance', 'other'];
+        $expenses = ['travelling', 'accommodation', 'insurance', 'other'];
+        if ($trip->conferenceFee === null) {
+            $expenses[] = 'participation';
+        }
         if ($trip->type === TripType::FOREIGN) {
-            $expenses[] = 'allowance';
+            $expenses[] = 'advance';
         }
         $validatedExpensesData = [];
 
