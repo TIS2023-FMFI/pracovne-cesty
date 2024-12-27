@@ -87,6 +87,8 @@ class BusinessTripFactory extends Factory
 
             'accommodation_expense_id' => null,
             'travelling_expense_id' => null,
+            'participation_expense_id' => null,
+            'insurance_expense_id' => null,
             'other_expense_id' => null,
             'advance_expense_id' => null,
             'allowance_expense_id' => null,
