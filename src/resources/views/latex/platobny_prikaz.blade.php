@@ -34,7 +34,7 @@
 \centering
 \begin{tabularx}{\linewidth}{|p{6em}|p{0.5\linewidth}|>{\centering\arraybackslash}X|}
 	\hline
-	\includegraphics[width=\linewidth]{images/uk_logo_square} & {
+	\includegraphics[width=\linewidth]{<?= public_path('images/uk_logo_square.png') ?>} & {
 		\vspace*{-5em}
 		\textbf{Univerzita Komenského v Bratislave}
 

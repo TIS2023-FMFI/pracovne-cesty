@@ -32,7 +32,7 @@
 \begin{table}[h!]
 \centering
 \begin{tabular}{p{0.475\linewidth} p{0.48\linewidth}}
-	\includegraphics[width=0.475\linewidth]{images/uk_logo} & \parbox[t]{\linewidth}{\raggedleft \vspace*{-3.5em} Príloha č. 1 k vnútornému predpisu č. 1/2023} \\
+	\includegraphics[width=0.475\linewidth]{<?= public_path('images/uk_logo.png') ?>} & \parbox[t]{\linewidth}{\raggedleft \vspace*{-3.5em} Príloha č. 1 k vnútornému predpisu č. 1/2023} \\
 \end{tabular}
 \end{table}
 
@@ -55,7 +55,7 @@ na vykonanie základnej finančnej kontroly v zmysle § 7 zákona č. 357/2015 Z
 
 	\textbf{Vecne príslušný organizačný útvar:} \\ \hline
 
-	\textbf{Zamestnanec (meno a priezvisko, podpis):} <podla SPP prvku> \\ \hline
+	\textbf{Zamestnanec (meno a priezvisko, podpis):} \\ \hline
 
 	\begin{tabular}[c]{@{}p{\linewidth}@{}}
 		\textbf{Popis požadovaného tovaru, prác a služieb a zdôvodnenie požiadavky:}
