@@ -17,12 +17,16 @@
 
 \newcommand{\placeholder}[1]{< #1 >}
 
-\newcommand{\amount}{\placeholder{0}}
-\newcommand{\sppSymbol}{\placeholder{000}}
-\newcommand{\source}{\placeholder{000}}
-\newcommand{\functionalRegion}{\placeholder{000}}
-\newcommand{\financialCentre}{\placeholder{000}}
-\newcommand{\purposeDetails}{\placeholder{000}}
+\newcommand{\amount}{@latex($amount)}
+\newcommand{\sppSymbol}{@latex($sppSymbol)}
+\newcommand{\source}{@latex($source)}
+\newcommand{\functionalRegion}{@latex($functionalRegion)}
+\newcommand{\financialCentre}{@latex($financialCentre)}
+\newcommand{\purposeDetails}{@latex($purposeDetails)}
+\newcommand{\daiChair}{@latex($daiChair)}
+\newcommand{\finDirector}{@latex($finDirector)}
+\newcommand{\secretary}{@latex($secretary)}
+\newcommand{\PI}{@latex($pi)}
 
 \begin{document}
 \begin{table}[h!]
@@ -48,43 +52,43 @@ na vykonanie základnej finančnej kontroly v zmysle § 7 zákona č. 357/2015 Z
 \centering
 \begin{tabular}{|p{0.975\linewidth}|}
 	\hline
-	
+
 	\textbf{Vecne príslušný organizačný útvar:} \\ \hline
 
 	\textbf{Zamestnanec (meno a priezvisko, podpis):} <podla SPP prvku> \\ \hline
 
 	\begin{tabular}[c]{@{}p{\linewidth}@{}}
 		\textbf{Popis požadovaného tovaru, prác a služieb a zdôvodnenie požiadavky:}
-		
+
 		\purposeDetails
 		\vspace{2em}
-		
+
 		\textbf{Zdroj/finančné krytie:} \sppSymbol
 	\end{tabular} \\ \hline
-	
+
 	\textbf{Predpokladaná cena vrátane DPH v Eur:} \amount \\ \hline
-	
+
 	\begin{tabular}[c]{@{}p{\linewidth}@{}}
 		\textbf{Dodávateľ tovaru, prác a služieb (názov/meno, adresa, IČO, bankové spojenie), ak je známy:}
 		\vspace*{1em}
 	\end{tabular} \\ \hline
-	
+
 	\begin{tabular}[c]{@{}p{\linewidth}@{}}
 		\textbf{V prípade osobitne určeného zdroja financovania (projekty  EÚ, ostatné projekty, granty...) -- finančná operácia je / nie je}\textsuperscript{*)} \textbf{v súlade s:} \\
 	\end{tabular} \\ \hline
-	
+
 	\begin{tabular}[c]{@{}p{\linewidth}@{}}
 		a) Zmluva o poskytnutí  NFP – názov/ITMS kód:
-		
+
 		b) Iná zmluva/projekt č.:
 
-		\textit{Dátum:} \hspace{2cm} \textit{Meno a priezvisko, podpis zodpovedného riešiteľa/finančného manažéra:} <podla SPP prvku>
+		\textit{Dátum:} \hspace{2cm} \textit{Meno a priezvisko, podpis zodpovedného riešiteľa/finančného manažéra:} \PI
 	\end{tabular} \\ \hline
-	
+
 	\begin{tabular}[c]{@{}p{\linewidth}@{}}
 		\textit{Finančná operácia \textbf{je / nie je}\textsuperscript{*)} v súlade s činnosťou organizačného útvaru a \textbf{je / nie je}\textsuperscript{*)} možné v nej pokračovať. Základnú finančnú kontrolu vykonal:}
-		
-		\textit{Dátum:} \hspace{2cm} \textit{Meno a priezvisko, podpis vedúceho zamestnanca:}
+
+		\textit{Dátum:} \hspace{2cm} \textit{Meno a priezvisko, podpis vedúceho zamestnanca:} \daiChair
 	\end{tabular} \\ \hline
 \end{tabular}
 \end{table}
@@ -101,7 +105,7 @@ na vykonanie základnej finančnej kontroly v zmysle § 7 zákona č. 357/2015 Z
 		\textbf{Číslo zmluvy:} & \textbf{Skupina materiálu:} \\
 	\end{tabular}
 	\textit{Finančná operácia \textbf{je / nie je}\textsuperscript{*)} v súlade so zákonom č. 343/2015 Z. z. o verejnom obstarávaní v znení neskorších predpisov a \textbf{je / nie je}\textsuperscript{*)} možné v nej pokračovať. Základnú finančnú kontrolu vykonal:}
-	
+
 	\textit{Dátum:} \hspace{2cm} \textit{Meno a priezvisko, podpis:} \\
 	\hline
 \end{tabular}
@@ -121,13 +125,13 @@ na vykonanie základnej finančnej kontroly v zmysle § 7 zákona č. 357/2015 Z
 \end{tabularx}
 \begin{tabular}{|p{0.975\linewidth}|}
 	\textit{Finančná operácia \textbf{je / nie je}\textsuperscript{*)} v súlade s rozpočtom organizačnej jednotky UK a \textbf{je / nie je}\textsuperscript{*)} možné v nej pokračovať. Základnú finančnú kontrolu vykonal:}
-	
-	\textit{Dátum:} \hspace{2cm} \textit{Meno a priezvisko, podpis:} \\ \hline
-	
+
+	\textit{Dátum:} \hspace{2cm} \textit{Meno a priezvisko, podpis:} \finDirector \\ \hline
+
 	\textit{\textbf{Účtovné dispozície (nepovinné):}}
-	
+
 	\vspace*{1em}
-	
+
 	\textit{Dátum:} \hspace{2cm} \textit{Meno a priezvisko, podpis:} \\ \hline
 \end{tabular}
 \end{table}
@@ -141,8 +145,8 @@ na vykonanie základnej finančnej kontroly v zmysle § 7 zákona č. 357/2015 Z
 \begin{tabular}{|p{0.975\linewidth}|}
 	\hline
 	\textit{Finančná operácia \textbf{je / nie je}\textsuperscript{*)} v súlade s platnými internými aktmi riadenia na UK a v súlade so zásadami hospodárnosti, efektívnosti, účelnosti a účinnosti pri nakladaní s verejnými prostriedkami a \textbf{je / nie je}\textsuperscript{*)} možné ju vykonať.}
-	
-	\textit{Dátum:} \hspace{2cm} \textit{Meno a priezvisko, podpis:} \\ \hline
+
+	\textit{Dátum:} \hspace{2cm} \textit{Meno a priezvisko, podpis:} \secretary \\ \hline
 \end{tabular}
 \end{table}
 \vspace*{-0.5em}

@@ -20,14 +20,14 @@
 
 \newcommand{\placeholder}[1]{< #1 >}
 
-\newcommand{\amount}{\placeholder{000}}
-\newcommand{\grantee}{\placeholder{000}}
-\newcommand{\address}{\placeholder{000}}
-\newcommand{\source}{\placeholder{000}}
-\newcommand{\functionalRegion}{\placeholder{000}}
-\newcommand{\sppSymbol}{\placeholder{000}}
-\newcommand{\financialCentre}{\placeholder{000}}
-\newcommand{\iban}{\placeholder{000}}
+\newcommand{\amount}{@latex($amount)}
+\newcommand{\grantee}{@latex($grantee)}
+\newcommand{\address}{@latex($address)}
+\newcommand{\source}{@latex($source)}
+\newcommand{\functionalRegion}{@latex($functionalRegion)}
+\newcommand{\sppSymbol}{@latex($sppSymbol)}
+\newcommand{\financialCentre}{@latex($financialCentre)}
+\newcommand{\iban}{@latex($iban)}
 
 \begin{document}
 \begin{table}[h]
@@ -37,9 +37,9 @@
 	\includegraphics[width=\linewidth]{images/uk_logo_square} & {
 		\vspace*{-5em}
 		\textbf{Univerzita Komenského v Bratislave}
-		
+
 		\textbf{Rektorát/Fakulta matematiky, fyziky a informatiky,}
-		
+
 		\textbf{Mlynská dolina, 842 48 Bratislava}
 	} & \vspace*{-3.5em}\textbf{Platobný príkaz} \\ \hline
 \end{tabularx}
@@ -67,11 +67,11 @@ Vystavený organizačným útvarom RUK/fakulty:
 \vspace*{-0.5em}
 \begin{spacing}{1.5}
 	\textbf{Vyplatiť prevodom z účtu / v hotovosti*:}
-	
+
 	\textbf{Na účet / v pokladni * RUK/fakulty:} \iban
-	
+
 	\textbf{Dátum splatnosti:}
-	
+
 	\textbf{Správa pre prijímateľa:}
 \end{spacing}
 
@@ -82,9 +82,9 @@ Vystavený organizačným útvarom RUK/fakulty:
 \begin{tabularx}{\linewidth}{|X|}
 	\hline
 	Finančná operácia \textbf{je / nie je}* v súlade s činnosťou organizačného útvaru a \textbf{je / nie je}* možné v nej pokračovať. Základnú finančnú kontrolu vykonal:
-	
+
 	\vspace*{1em}
-	
+
 	Dátum: \hspace{2cm} Meno a priezvisko ved. zamestnanca: \hspace{3.4cm} Podpis:  	\vspace*{1em}\\ \hline
 \end{tabularx}
 \end{table}
@@ -109,9 +109,9 @@ Vystavený organizačným útvarom RUK/fakulty:
 \def\arraystretch{2}
 \begin{tabularx}{\linewidth}{|X|}
 	Finančná operácia \textbf{je / nie je}* v súlade s rozpočtom organizačnej jednotky/projektu a \textbf{je / nie je}* možné v nej pokračovať. Základnú finančnú kontrolu vykonal:
-	
+
 	\vspace*{1em}
-	
+
 	Dátum: \hspace{2cm} Meno a priezvisko zodpovedného zamestnanca: \hspace{1.95cm} Podpis: \vspace*{2em} \\ \hline
 \end{tabularx}
 \egroup
@@ -127,10 +127,10 @@ Vystavený organizačným útvarom RUK/fakulty:
 \centering
 \begin{tabularx}{\linewidth}{|X|}
 	\hline
-	Finančná operácia \textbf{je / nie je}* v súlade s §7 zákona č. 357/2015 Z.z. o finančnej kontrole a audite a o zmene a doplnení niektorých zákonov v znení neskorších predpisov a \textbf{je / nie je}* možné ju vykonať.	
-	
+	Finančná operácia \textbf{je / nie je}* v súlade s §7 zákona č. 357/2015 Z.z. o finančnej kontrole a audite a o zmene a doplnení niektorých zákonov v znení neskorších predpisov a \textbf{je / nie je}* možné ju vykonať.
+
 	\vspace*{1em}
-	
+
 	Dátum: \hspace{2cm} Meno a priezvisko: \hspace{6.16cm} Podpis: \vspace*{1em}\\ \hline
 \end{tabularx}
 \end{table}

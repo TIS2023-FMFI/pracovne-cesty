@@ -16,36 +16,36 @@
 
 \newcommand{\placeholder}[1]{< #1 >}
 
-\newcommand{\name}{\placeholder{000}}
-\newcommand{\department}{\placeholder{000}}
+\newcommand{\name}{@latex($name)}
+\newcommand{\department}{@latex($department)}
 
-\newcommand{\dateStart}{\placeholder{000}}
-\newcommand{\placeStart}{\placeholder{000}}
-\newcommand{\timeStart}{\placeholder{000}}
+\newcommand{\dateStart}{@latex($dateStart)}
+\newcommand{\placeStart}{@latex($placeStart)}
+\newcommand{\timeStart}{@latex($timeStart)}
 
-\newcommand{\place}{\placeholder{000}}
+\newcommand{\place}{@latex($place)}
 
-\newcommand{\dateEnd}{\placeholder{000}}
-\newcommand{\placeEnd}{\placeholder{000}}
-\newcommand{\timeEnd}{\placeholder{000}}
+\newcommand{\dateEnd}{@latex($dateEnd)}
+\newcommand{\placeEnd}{@latex($placeEnd)}
+\newcommand{\timeEnd}{@latex($timeEnd)}
 
-\newcommand{\sppSymbol}{\placeholder{000}}
-\newcommand{\transportation}{\placeholder{000}}
+\newcommand{\sppSymbol}{@latex($sppSymbol)}
+\newcommand{\transportation}{@latex($transportation)}
 
-\newcommand{\travellingExpense}{\placeholder{000}}
-\newcommand{\accommodationExpense}{\placeholder{000}}
-\newcommand{\mealsReimbursement}{\placeholder{000}}
-\newcommand{\participationExpense}{\placeholder{000}}
-\newcommand{\otherExpenses}{\placeholder{000}}
+\newcommand{\travellingExpense}{@latex($travellingExpense)}
+\newcommand{\accommodationExpense}{@latex($accommodationExpense)}
+\newcommand{\mealsReimbursement}{@latex($mealsReimbursement)}
+\newcommand{\participationExpense}{@latex($participationExpense)}
+\newcommand{\otherExpenses}{@latex($otherExpenses)}
 
-\newcommand{\conclusion}{\placeholder{000}}
-\newcommand{\iban}{\placeholder{000}}
-\newcommand{\address}{\placeholder{000}}
+\newcommand{\conclusion}{@latex($conclusion)}
+\newcommand{\iban}{@latex($iban)}
+\newcommand{\address}{@latex($address)}
 
 
 \begin{document}
 	{\Large\bf SPRÁVA Z TUZEMSKEJ PRACOVNEJ CESTY}
-	
+
 	\def\arraystretch{1.75}
 	\begin{table}[h!]
 		\centering
@@ -59,7 +59,7 @@
 			\textbf{ÚHRADA Z ŠPP:} & \multicolumn{1}{X|}{\sppSymbol} & \multicolumn{1}{l|}{Dopravný prostriedok:} & \transportation \\ \hline
 		\end{tabularx}
 	\end{table}
-	
+
 	{\large\bf VYÚČTOVANIE NÁKLADOV}
 	\vspace*{-0.5em}
 	\begin{table}[h!]
@@ -74,7 +74,7 @@
 			\rule{0pt}{1.6em}{\bf NÁKLADY NA CESTU:}\rule{0pt}{1.6em} & \\ \hline
 		\end{tabularx}
 	\end{table}
-	
+
 	\begin{table}[h!]
 		\begin{tabularx}{\linewidth}{|X|}
 			\hline
@@ -83,24 +83,24 @@
 			\vspace*{2em} \\ \hline
 		\end{tabularx}
 	\end{table}
-	
+
 	\vspace*{-1em}
-	
+
 	\begin{table}[h!]
 		\centering
 		\begin{tabularx}{\linewidth}{|lXXX|}
 			\hline
-			\multicolumn{4}{|l|}{\textbf{PRE iné ÚČTY}} \\ \hline
+			\multicolumn{4}{|l|}{\bf PRE iné ÚČTY} \\ \hline
 			\multicolumn{1}{|l|}{IBAN vašej banky:} & \multicolumn{1}{X|}{} & \multicolumn{1}{l|}{swift:} &  \\ \hline
-			\multicolumn{2}{|l|}{{\underline{\textbf{ADRESA BANKY:}}}} & \multicolumn{2}{l|}{{\underline{\textbf{VAŠA ADRESA:}}}} \\ \hline
+			\multicolumn{2}{|l|}{\underline\bf ADRESA BANKY:} & \multicolumn{2}{l|}{\underline\bf VAŠA ADRESA:} \\ \hline
 			\multicolumn{2}{|l|}{} & \multicolumn{2}{l|}{\address} \\ \hline
-			\multicolumn{4}{|l|}{\textbf{PRE EURO}} \\ \hline
-			\multicolumn{1}{|l|}{\textbf{Číslo vášho účtu -- kód banky:}} & \multicolumn{3}{l|}{\iban} \\ \hline
+			\multicolumn{4}{|l|}{\bf PRE EURO} \\ \hline
+			\multicolumn{1}{|l|}{\bf Číslo vášho účtu -- kód banky:} & \multicolumn{3}{l|}{\iban} \\ \hline
 		\end{tabularx}
 	\end{table}
-	
+
 	\begin{flushright}
 		\textbf{Podpis účastníka:} \hspace*{3em} \makebox[2in]{\hrulefill}
 	\end{flushright}
-	
+
 \end{document}

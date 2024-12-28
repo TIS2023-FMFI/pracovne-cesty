@@ -16,50 +16,50 @@
 
 \newcommand{\placeholder}[1]{< #1 >}
 
-\newcommand{\name}{\placeholder{000}}
-\newcommand{\department}{\placeholder{000}}
+\newcommand{\name}{@latex($name)}
+\newcommand{\department}{@latex($department)}
 
-\newcommand{\datetimeStart}{\placeholder{000}}
-\newcommand{\placeStart}{\placeholder{000}}
-\newcommand{\datetimeBorderCrossingStart}{\placeholder{000}}
+\newcommand{\datetimeStart}{@latex($datetimeStart)}
+\newcommand{\placeStart}{@latex($placeStart)}
+\newcommand{\datetimeBorderCrossingStart}{@latex($datetimeBorderCrossingStart)}
 
-\newcommand{\country}{\placeholder{000}}
-\newcommand{\place}{\placeholder{000}}
+\newcommand{\country}{@latex($country)}
+\newcommand{\place}{@latex($place)}
 
-\newcommand{\datetimeEnd}{\placeholder{000}}
-\newcommand{\placeEnd}{\placeholder{000}}
-\newcommand{\datetimeBorderCrossingEnd}{\placeholder{000}}
+\newcommand{\datetimeEnd}{@latex($datetimeEnd)}
+\newcommand{\placeEnd}{@latex($placeEnd)}
+\newcommand{\datetimeBorderCrossingEnd}{@latex($datetimeBorderCrossingEnd)}
 
-\newcommand{\sppSymbol}{\placeholder{000}}
-\newcommand{\transportation}{\placeholder{000}}
+\newcommand{\sppSymbol}{@latex($sppSymbol)}
+\newcommand{\transportation}{@latex($transportation)}
 
-\newcommand{\travellingExpenseForeign}{\placeholder{000}}
-\newcommand{\travellingExpense}{\placeholder{000}}
+\newcommand{\travellingExpenseForeign}{@latex($travellingExpenseForeign)}
+\newcommand{\travellingExpense}{@latex($travellingExpense)}
 
-\newcommand{\accommodationExpenseForeign}{\placeholder{000}}
-\newcommand{\accommodationExpense}{\placeholder{000}}
+\newcommand{\accommodationExpenseForeign}{@latex($accommodationExpenseForeign)}
+\newcommand{\accommodationExpense}{@latex($accommodationExpense)}
 
-\newcommand{\mealsReimbursementForeign}{\placeholder{000}}
-\newcommand{\mealsReimbursement}{\placeholder{000}}
+\newcommand{\mealsReimbursementForeign}{@latex($mealsReimbursementForeign)}
+\newcommand{\mealsReimbursement}{@latex($mealsReimbursement)}
 
-\newcommand{\participationExpenseForeign}{\placeholder{000}}
-\newcommand{\participationExpense}{\placeholder{000}}
+\newcommand{\participationExpenseForeign}{@latex($participationExpenseForeign)}
+\newcommand{\participationExpense}{@latex($participationExpense)}
 
-\newcommand{\insuranceExpenseForeign}{\placeholder{000}}
-\newcommand{\insuranceExpense}{\placeholder{000}}
+\newcommand{\insuranceExpenseForeign}{@latex($insuranceExpenseForeign)}
+\newcommand{\insuranceExpense}{@latex($insuranceExpense)}
 
-\newcommand{\otherExpensesForeign}{\placeholder{000}}
-\newcommand{\otherExpenses}{\placeholder{000}}
+\newcommand{\otherExpensesForeign}{@latex($otherExpensesForeign)}
+\newcommand{\otherExpenses}{@latex($otherExpenses)}
 
-\newcommand{\allowanceForeign}{\placeholder{000}}
-\newcommand{\allowance}{\placeholder{000}}
+\newcommand{\allowanceForeign}{@latex($allowanceForeign)}
+\newcommand{\allowance}{@latex($allowance)}
 
-\newcommand{\advanceExpenseForeign}{\placeholder{000}}
-\newcommand{\advanceExpense}{\placeholder{000}}
+\newcommand{\advanceExpenseForeign}{@latex($advanceExpenseForeign)}
+\newcommand{\advanceExpense}{@latex($advanceExpense)}
 
-\newcommand{\invitationCaseCharges}{\placeholder{000}}
-\newcommand{\conclusion}{\placeholder{000}}
-\newcommand{\iban}{\placeholder{000}}
+\newcommand{\invitationCaseCharges}{@latex($invitationCaseCharges)}
+\newcommand{\conclusion}{@latex($conclusion)}
+\newcommand{\iban}{@latex($iban)}
 
 
 \begin{document}

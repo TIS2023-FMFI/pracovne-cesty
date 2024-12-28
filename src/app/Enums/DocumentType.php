@@ -14,12 +14,12 @@ enum DocumentType: int
     public function fileName(): string
     {
         return match ($this) {
-            self::FOREIGN_TRIP_AFFIDAVIT => 'cestne_vyhlasenie_k_zahranicnej_pc.pdf',
-            self::COMPENSATION_AGREEMENT => 'dohoda_o_poskytnuti_cestovnych_nahrad.pdf',
-            self::CONTROL_SHEET => 'kontrolny_list.pdf',
-            self::PAYMENT_ORDER => 'platobny_prikaz.pdf',
-            self::DOMESTIC_REPORT => 'sprava_z_tuzemskej_pc.pdf',
-            self::FOREIGN_REPORT => 'sprava_zo_zahranicnej_pc.pdf',
+            self::FOREIGN_TRIP_AFFIDAVIT => 'cestne_vyhlasenie_k_zahranicnej_pc',
+            self::COMPENSATION_AGREEMENT => 'dohoda_o_poskytnuti_cestovnych_nahrad',
+            self::CONTROL_SHEET => 'kontrolny_list',
+            self::PAYMENT_ORDER => 'platobny_prikaz',
+            self::DOMESTIC_REPORT => 'sprava_z_tuzemskej_pc',
+            self::FOREIGN_REPORT => 'sprava_zo_zahranicnej_pc',
         };
     }
 }

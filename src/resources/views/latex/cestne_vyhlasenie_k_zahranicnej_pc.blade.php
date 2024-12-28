@@ -14,10 +14,10 @@
 
 \newcommand{\placeholder}[1]{< #1 >}
 
-\newcommand{\orderNumber}{\placeholder{000}}
-\newcommand{\tripDuration}{\placeholder{0 dní}}
-\newcommand{\address}{\placeholder{XYZ}}
-\newcommand{\name}{\placeholder{ABC XYZ}}
+\newcommand{\orderNumber}{@latex($orderNumber)}
+\newcommand{\tripDuration}{@latex($tripDuration)}
+\newcommand{\address}{@latex($address)}
+\newcommand{\name}{@latex($name)}
 
 
 \begin{document}
@@ -45,9 +45,13 @@
 
 {\setstretch{1.5}
 
-Ja dolu podpísaný {\bf čestne vyhlasujem}, že {\bf odmietam, aby mi zamestnávateľ vyplatil} zákonný nárok preddavkov na zahraničnú pracovnú cestu, ktorý je mi povinný poskytnúť zamestnávateľ Univerzita Komenského v Bratislave, Fakulta matematiky, \linebreak fyziky a informatiky, v zmysle § 36 ods. 1 zákona č. 40/2009 Z.z. (zákon o cestovných náhradách).
+Ja dolu podpísaný {\bf čestne vyhlasujem}, že {\bf odmietam, aby mi zamestnávateľ vyplatil} zákonný nárok preddavkov
+na zahraničnú pracovnú cestu, ktorý je mi povinný poskytnúť zamestnávateľ Univerzita Komenského v Bratislave,
+Fakulta matematiky, \linebreak fyziky a informatiky, v zmysle § 36 ods. 1 zákona č. 40/2009 Z.z.
+(zákon o cestovných náhradách).
 
-Písomné doklady potrebné k vyúčtovaniu náhrad predložím zamestnávateľovi \linebreak v lehotách stanovených v § 36 ods. 7 citovaného zákona.
+Písomné doklady potrebné k vyúčtovaniu náhrad predložím zamestnávateľovi \linebreak
+v lehotách stanovených v § 36 ods. 7 citovaného zákona.
 
 }
 
@@ -58,6 +62,6 @@ V Bratislave dňa
 \vspace*{1cm}
 
 \par\hfill\noindent\makebox[2.5in]{\hrulefill}
-\par\hfill\noindent\makebox[2.5in][c]{podpis zamestnanca}  
+\par\hfill\noindent\makebox[2.5in][c]{podpis zamestnanca}
 
 \end{document}

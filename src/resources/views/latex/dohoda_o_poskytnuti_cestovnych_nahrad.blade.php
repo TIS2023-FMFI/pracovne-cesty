@@ -19,39 +19,39 @@
 
 \newcommand{\placeholder}[1]{< #1 >}
 
-\newcommand{\firstName}{\placeholder{000}}
-\newcommand{\lastName}{\placeholder{000}}
-\newcommand{\academicDegree}{\placeholder{000}}
-\newcommand{\address}{\placeholder{000}}
-\newcommand{\contributionA}{\placeholder{000}}
-\newcommand{\contributionB}{\placeholder{000}}
-\newcommand{\contributionC}{\placeholder{000}}
-\newcommand{\department}{\placeholder{000}}
-\newcommand{\place}{\placeholder{000}}
-\newcommand{\datetimeStart}{\placeholder{000}}
-\newcommand{\datetimeEnd}{\placeholder{000}}
-\newcommand{\transportation}{\placeholder{000}}
-\newcommand{\tripPurpose}{\placeholder{000}}
-\newcommand{\fund}{\placeholder{000}}
-\newcommand{\functionalRegion}{\placeholder{000}}
-\newcommand{\financialCentre}{\placeholder{000}}
-\newcommand{\sppSymbol}{\placeholder{000}}
-\newcommand{\account}{\placeholder{000}}
-\newcommand{\grantee}{\placeholder{000}}
-\newcommand{\iban}{\placeholder{000}}
-\newcommand{\incumbentNameA}{\placeholder{000}}
-\newcommand{\incumbentNameB}{\placeholder{000}}
-\newcommand{\positionNameA}{\placeholder{000}}
-\newcommand{\positionNameB}{\placeholder{000}}
-\newcommand{\contributionAText}{\placeholder{000}}
-\newcommand{\contributionBText}{\placeholder{000}}
-\newcommand{\contributionCText}{\placeholder{000}}
+\newcommand{\firstName}{@latex($firstName)}
+\newcommand{\lastName}{@latex($lastName)}
+\newcommand{\academicDegree}{@latex($academicDegree)}
+\newcommand{\address}{@latex($address)}
+\newcommand{\contributionA}{@latex($contributionA)}
+\newcommand{\contributionB}{@latex($contributionB)}
+\newcommand{\contributionC}{@latex($contributionC)}
+\newcommand{\department}{@latex($department)}
+\newcommand{\place}{@latex($place)}
+\newcommand{\datetimeStart}{@latex($datetimeStart)}
+\newcommand{\datetimeEnd}{@latex($datetimeEnd)}
+\newcommand{\transportation}{@latex($transportation)}
+\newcommand{\tripPurpose}{@latex($tripPurpose)}
+\newcommand{\fund}{@latex($fund)}
+\newcommand{\functionalRegion}{@latex($functionalRegion)}
+\newcommand{\financialCentre}{@latex($financialCentre)}
+\newcommand{\sppSymbol}{@latex($sppSymbol)}
+\newcommand{\account}{@latex($account)}
+\newcommand{\grantee}{@latex($grantee)}
+\newcommand{\iban}{@latex($iban)}
+\newcommand{\incumbentNameA}{@latex($incumbentNameA)}
+\newcommand{\incumbentNameB}{@latex($incumbentNameB)}
+\newcommand{\positionNameA}{@latex($positionNameA)}
+\newcommand{\positionNameB}{@latex($positionNameB)}
+\newcommand{\contributionAText}{@latex($contributionAText)}
+\newcommand{\contributionBText}{@latex($contributionBText)}
+\newcommand{\contributionCText}{@latex($contributionCText)}
 
 \begin{document}
 \begin{center}
 	{\LARGE\bf Dohoda o poskytnutí cestovných náhrad}
 	\vspace*{1em}
-	
+
 	uzatvorená podľa § 51 Občianskeho zákonníka a zákona o cestovných náhradách
 \end{center}
 
@@ -68,9 +68,9 @@ Mlynská dolina
 842 48 Bratislava
 
 \vspace*{1em}
-\textbf{zastúpená:} \incumbentNameA -- \positionNameA
+\textbf{zastúpená:} \incumbentNameA \; -- \; \positionNameA
 
-\textbf{v zmluvných veciach koná:} \incumbentNameB -- \positionNameB
+\textbf{v zmluvných veciach koná:} \incumbentNameB \; -- \; \positionNameB
 
 \vspace*{-1em}
 \begin{center}
@@ -111,11 +111,11 @@ Mlynská dolina
 	\multicolumn{1}{|p{0.224\linewidth}|}{\multirow{3}{*}{
 		\begin{tabular}[c]{@{}>{\centering\arraybackslash}p{\linewidth}@{}}
 			\textbf{Prínos pre pracovisko fakulty, poznatky sa využijú:}
-			
+
 			(označiť skutočný prínos)
 		\end{tabular}
-	}} & \multicolumn{1}{p{0.35\linewidth}|}{pre vedecký výskum} & \contributionA \contributionAText \\ \cline{2-3} 
-	\multicolumn{1}{|c|}{} & \multicolumn{1}{p{0.35\linewidth}|}{na pedagogickú činnosť} & \contributionB \contributionBText \\ \cline{2-3} 
+	}} & \multicolumn{1}{p{0.35\linewidth}|}{pre vedecký výskum} & \contributionA \contributionAText \\ \cline{2-3}
+	\multicolumn{1}{|c|}{} & \multicolumn{1}{p{0.35\linewidth}|}{na pedagogickú činnosť} & \contributionB \contributionBText \\ \cline{2-3}
 	\multicolumn{1}{|c|}{} & \multicolumn{1}{p{0.35\linewidth}|}{na prezentáciu \vspace*{1em}} & \contributionC \contributionCText \\ \hline
 \end{tabular}
 \end{table}
@@ -148,7 +148,10 @@ Mlynská dolina
 \end{table}
 \vspace*{-0.5em}
 
-Príjemca náhrady \textbf{je povinný do 10 dní od uskutočnenia pracovnej cesty} predložiť (zaslať) poskytovateľovi náhrady originály dokladov preukazujúcich výšku opodstatnených nákladov, ktoré sú predmetom cestovných náhrad v zmysle tejto dohody, inak nebudú náhrady preplatené. \textbf{Dohoda musí byť uzavretá pred nástupom na pracovnú cestu. Dohodu je potrebné priložiť pri odovzdávaní cestovného príkazu.}
+Príjemca náhrady \textbf{je povinný do 10 dní od uskutočnenia pracovnej cesty} predložiť (zaslať) poskytovateľovi
+náhrady originály dokladov preukazujúcich výšku opodstatnených nákladov, ktoré sú predmetom cestovných náhrad
+v zmysle tejto dohody, inak nebudú náhrady preplatené. \textbf{Dohoda musí byť uzavretá pred nástupom
+na pracovnú cestu. Dohodu je potrebné priložiť pri odovzdávaní cestovného príkazu.}
 
 \vspace*{1em}
 
