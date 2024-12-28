@@ -22,4 +22,16 @@ enum DocumentType: int
             self::FOREIGN_REPORT => 'sprava_zo_zahranicnej_pc',
         };
     }
+
+    public function inSlovak(): string
+    {
+        return match ($this) {
+            self::FOREIGN_TRIP_AFFIDAVIT => 'Čestné vyhlásenie k zahraničnej pracovnej ceste',
+            self::COMPENSATION_AGREEMENT => 'Dohoda o poskytnutí cestovných náhrad',
+            self::CONTROL_SHEET => 'Kontrolný list',
+            self::PAYMENT_ORDER => 'Platobný príkaz',
+            self::DOMESTIC_REPORT => 'Správa z tuzemskej pracovnej cesty',
+            self::FOREIGN_REPORT => 'Správa zo zahraničnej pracovnej cesty',
+        };
+    }
 }
