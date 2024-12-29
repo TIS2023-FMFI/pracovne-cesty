@@ -737,7 +737,7 @@ class BusinessTripController extends Controller
                     return response()->json(['error' => 'Document not applicable for domestic trips.'], 403);
                 }
                 $tripDurationFormatted = $trip->datetime_start->format('d.m.Y')
-                    . ' - '
+                    . ' -- '
                     . $trip->datetime_end->format('d.m.Y');
 
                 $name = ($trip->user->academic_degrees ?? '')
@@ -765,9 +765,9 @@ class BusinessTripController extends Controller
                     'lastName' => $trip->user->last_name,
                     'academicDegree' => $trip->user->academic_degrees,
                     'address' => $trip->user->address,
-                    'contributionA' => $contributions->contains('id', 1) ? 'yes1' : null,
-                    'contributionB' => $contributions->contains('id', 2) ? 'yes2' : null,
-                    'contributionC' => $contributions->contains('id', 3) ? 'yes3' : null,
+                    'contributionA' => $contributions->contains('id', 1) ? '\checkmark\ ' : '',
+                    'contributionB' => $contributions->contains('id', 2) ? '\checkmark\ ' : '',
+                    'contributionC' => $contributions->contains('id', 3) ? '\checkmark\ ' : '',
                     'department' => $trip->user->department,
                     'place' => $trip->country->name . ', ' . $trip->place,
                     'datetimeStart' => $trip->datetime_start->format('d.m.Y'),
@@ -775,7 +775,7 @@ class BusinessTripController extends Controller
                     'transportation' => $trip->transport->name,
                     'tripPurpose' => $trip
                             ->tripPurpose
-                            ->name . (isset($trip->purpose_details) ? ' - ' . $trip->purpose_details : ''),
+                            ->name . (isset($trip->purpose_details) ? ' -- ' . $trip->purpose_details : ''),
                     'fund' => "",
                     'functionalRegion' => $trip->sppSymbol->functional_region ?? "",
                     'financialCentre' => $trip->sppSymbol->financial_centre ?? "",

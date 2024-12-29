@@ -70,12 +70,12 @@
 \centering
 \begin{tabularx}{\linewidth}{|p{0.3\linewidth}|XXX|}
 	\hline
-	Meno a priezvisko zamestnanca: & \multicolumn{3}{l|}{\name} \\ \hline
-	Pracovisko -- skratka katedry: & \multicolumn{3}{l|}{\department} \\ \hline
-	Začiatok cesty (čas odchodu,\par dátum): & \multicolumn{1}{l|}{\datetimeStart, \placeStart} & \multicolumn{1}{l|}{Čas prekročenia hraníc:} & \datetimeBorderCrossingStart \\ \hline
-	Navštívený štát: & \multicolumn{1}{X|}{\country} & \multicolumn{2}{l|}{Miesto: \place} \\ \hline
-	Koniec cesty (čas príchodu,\par dátum): & \multicolumn{1}{l|}{\datetimeEnd, \placeEnd} & \multicolumn{1}{l|}{Čas prekročenia hraníc späť:} & \datetimeBorderCrossingEnd \\ \hline
-	\textbf{ÚHRADA Z FONDU:} & \multicolumn{1}{X|}{\sppSymbol} & \multicolumn{1}{l|}{Dopravný prostriedok:} & \transportation \\ \hline
+	Meno a priezvisko zamestnanca: & \multicolumn{3}{p{0.64\linewidth}|}{\name} \\ \hline
+	Pracovisko -- skratka katedry: & \multicolumn{3}{p{0.64\linewidth}|}{\department} \\ \hline
+	Začiatok cesty (čas odchodu,\par dátum): & \multicolumn{1}{p{0.2\linewidth}|}{\datetimeStart, \placeStart} & \multicolumn{1}{l|}{Čas prekročenia hraníc:} & \multicolumn{1}{p{0.135\linewidth}|}{\datetimeBorderCrossingStart} \\ \hline
+	Navštívený štát: & \multicolumn{1}{X|}{\country} & \multicolumn{2}{p{0.4\linewidth}|}{Miesto: \place} \\ \hline
+	Koniec cesty (čas príchodu,\par dátum): & \multicolumn{1}{p{0.2\linewidth}|}{\datetimeEnd, \placeEnd} & \multicolumn{1}{l|}{Čas prekročenia hraníc späť:} & \multicolumn{1}{p{0.135\linewidth}|}{\datetimeBorderCrossingEnd} \\ \hline
+	\textbf{ÚHRADA Z FONDU:} & \multicolumn{1}{X|}{\sppSymbol} & \multicolumn{1}{l|}{Dopravný prostriedok:} & \multicolumn{1}{p{0.135\linewidth}|}{\transportation} \\ \hline
 \end{tabularx}
 \end{table}
 

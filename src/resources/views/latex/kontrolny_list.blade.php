@@ -82,12 +82,16 @@ na vykonanie základnej finančnej kontroly v zmysle § 7 zákona č. 357/2015 Z
 
 		b) Iná zmluva/projekt č.:
 
+        \hangindent=0.822\linewidth
+        \hangafter=1
 		\textit{Dátum:} \hspace{2cm} \textit{Meno a priezvisko, podpis zodpovedného riešiteľa/finančného manažéra:} \PI
 	\end{tabular} \\ \hline
 
 	\begin{tabular}[c]{@{}p{\linewidth}@{}}
 		\textit{Finančná operácia \textbf{je / nie je}\textsuperscript{*)} v súlade s činnosťou organizačného útvaru a \textbf{je / nie je}\textsuperscript{*)} možné v nej pokračovať. Základnú finančnú kontrolu vykonal:}
 
+        \hangindent=0.625\linewidth
+        \hangafter=1
 		\textit{Dátum:} \hspace{2cm} \textit{Meno a priezvisko, podpis vedúceho zamestnanca:} \daiChair
 	\end{tabular} \\ \hline
 \end{tabular}

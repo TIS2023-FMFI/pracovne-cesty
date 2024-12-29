@@ -4,6 +4,7 @@
 \usepackage[T1]{fontenc}
 \usepackage{geometry}
 \usepackage{lmodern}
+\usepackage{amssymb}
 \usepackage{array}
 \usepackage{tabularx}
 \usepackage{multirow}
@@ -23,9 +24,9 @@
 \newcommand{\lastName}{@latex($lastName)}
 \newcommand{\academicDegree}{@latex($academicDegree)}
 \newcommand{\address}{@latex($address)}
-\newcommand{\contributionA}{@latex($contributionA)}
-\newcommand{\contributionB}{@latex($contributionB)}
-\newcommand{\contributionC}{@latex($contributionC)}
+\newcommand{\contributionA}{{!! $contributionA !!}}
+\newcommand{\contributionB}{{!! $contributionB !!}}
+\newcommand{\contributionC}{{!! $contributionC !!}}
 \newcommand{\department}{@latex($department)}
 \newcommand{\place}{@latex($place)}
 \newcommand{\datetimeStart}{@latex($datetimeStart)}
@@ -86,7 +87,7 @@ Mlynská dolina
 \centering
 \begin{tabular}{|p{0.224\linewidth}|p{0.724\linewidth}|}
 	\hline
-	Meno, priezvisko, titul: & \firstName \lastName, \academicDegree \\ \hline
+	Meno, priezvisko, titul: & \firstName \ \lastName, \academicDegree \\ \hline
 	Adresa: & \address \\
 	\hline
 \end{tabular}
@@ -104,10 +105,10 @@ Mlynská dolina
 \begin{tabular}{|p{0.224\linewidth}|p{0.35\linewidth}|p{0.35\linewidth}|}
 	\hline
 	\textbf{Katedra:} & \multicolumn{2}{l|}{\department} \\ \hline
-	\textbf{Štát a miesto služobnej cesty:} & \multicolumn{2}{l|}{\place} \\ \hline
+	\textbf{Štát a miesto služobnej cesty:} & \multicolumn{2}{p{0.7\linewidth}|}{\place} \\ \hline
 	\textbf{Dátum služobnej cesty:} & \multicolumn{1}{l|}{Začiatok: \datetimeStart} & Koniec: \datetimeEnd \\ \hline
 	\textbf{Dopravný prostriedok:} & \multicolumn{2}{l|}{\transportation} \\ \hline
-	\textbf{Účel pracovnej cesty:} & \multicolumn{2}{l|}{\tripPurpose} \\ \hline
+	\textbf{Účel pracovnej cesty:} & \multicolumn{2}{p{0.7\linewidth}|}{\tripPurpose} \\ \hline
 	\multicolumn{1}{|p{0.224\linewidth}|}{\multirow{3}{*}{
 		\begin{tabular}[c]{@{}>{\centering\arraybackslash}p{\linewidth}@{}}
 			\textbf{Prínos pre pracovisko fakulty, poznatky sa využijú:}
