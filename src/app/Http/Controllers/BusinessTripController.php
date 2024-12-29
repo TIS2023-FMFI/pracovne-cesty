@@ -889,6 +889,11 @@ class BusinessTripController extends Controller
                     'conclusion' => $trip->conclusion,
                     'iban' => $trip->iban,
                     'address' => $trip->user->address,
+
+                    'mealsReimbursementBool' => $trip->meals_reimbursement,
+                    'mealsStart' => $trip->datetime_start,
+                    'days' => self::getTripDurationInDays($trip),
+                    'notReimbursedMeals' => $trip->not_reimbursed_meals
                 ];
                 break;
 
@@ -966,6 +971,11 @@ class BusinessTripController extends Controller
                     'invitationCaseCharges' => $trip->expense_estimation,
                     'conclusion' => $trip->conclusion,
                     'iban' => $trip->iban,
+
+                    'mealsReimbursementBool' => $trip->meals_reimbursement,
+                    'mealsStart' => $trip->datetime_start,
+                    'days' => self::getTripDurationInDays($trip),
+                    'notReimbursedMeals' => $trip->not_reimbursed_meals
                 ];
                 break;
 

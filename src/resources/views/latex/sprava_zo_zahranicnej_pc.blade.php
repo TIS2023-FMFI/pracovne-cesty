@@ -7,9 +7,15 @@
 \usepackage{tabularx}
 \usepackage{setspace}
 \usepackage{xcolor}
+\usepackage{amssymb}
 
 \geometry{a4paper,left=20mm,right=20mm,top=20mm,bottom=20mm}
 \setlength\parindent{0pt}
+
+\newcommand{\PreserveBackslash}[1]{\let\temp=\\#1\let\\=\temp}
+\newcolumntype{C}[1]{>{\PreserveBackslash\centering}p{#1}}
+\newcolumntype{R}[1]{>{\PreserveBackslash\raggedleft}p{#1}}
+\newcolumntype{L}[1]{>{\PreserveBackslash\raggedright}p{#1}}
 
 \renewcommand{\familydefault}{cmr}
 \pagenumbering{gobble}
@@ -131,5 +137,36 @@
 \begin{center}
 	\textbf{Podpis účastníka:}
 \end{center}
+
+\pagebreak
+
+@if($mealsReimbursementBool && $notReimbursedMeals !== null && $notReimbursedMeals != '')
+
+{\large\bf Zrážky zo stravného}
+
+Vyberte, prosím, ktoré jedlá si \textbf{nežiadate} preplatiť.
+
+@php
+    $meals = $notReimbursedMeals;
+    $currentDate = $mealsStart;
+@endphp
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{|C{5em}|C{5em}|C{5em}|C{5em}|}
+\hline
+\bf Dátum & \bf Raňajky & \bf Obed & \bf Večera \\
+\hline
+@for ($i = 0; $i < $days; $i++)
+    @latex($currentDate->format('d.m.'))
+        & {!! ($meals[$i * 3] === '1') ? '\checkmark' : '' !!}
+        & {!! ($meals[$i * 3 + 1] === '1') ? '\checkmark' : '' !!}
+        & {!! ($meals[$i * 3 + 2] === '1') ? '\checkmark' : '' !!} \\ \hline
+    @php $currentDate->modify('+1 day'); @endphp
+@endfor
+\end{tabular}
+\end{table}
+
+@endif
 
 \end{document}

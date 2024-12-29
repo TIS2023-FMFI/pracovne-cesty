@@ -103,4 +103,35 @@
 		\textbf{Podpis účastníka:} \hspace*{3em} \makebox[2in]{\hrulefill}
 	\end{flushright}
 
+    \pagebreak
+
+    @if($mealsReimbursementBool && $notReimbursedMeals !== null && $notReimbursedMeals != '')
+
+    {\large\bf Zrážky zo stravného}
+
+    Vyberte, prosím, ktoré jedlá si \textbf{nežiadate} preplatiť.
+
+    @php
+        $meals = $notReimbursedMeals;
+        $currentDate = $mealsStart;
+    @endphp
+
+    \begin{table}[h!]
+    \centering
+    \begin{tabular}{|C{5em}|C{5em}|C{5em}|C{5em}|}
+    \hline
+    \bf Dátum & \bf Raňajky & \bf Obed & \bf Večera \\
+    \hline
+    @for ($i = 0; $i < $days; $i++)
+        @latex($currentDate->format('d.m.'))
+            & {!! ($meals[$i * 3] === '1') ? '\checkmark' : '' !!}
+            & {!! ($meals[$i * 3 + 1] === '1') ? '\checkmark' : '' !!}
+            & {!! ($meals[$i * 3 + 2] === '1') ? '\checkmark' : '' !!} \\ \hline
+        @php $currentDate->modify('+1 day'); @endphp
+    @endfor
+    \end{tabular}
+    \end{table}
+
+    @endif
+
 \end{document}
