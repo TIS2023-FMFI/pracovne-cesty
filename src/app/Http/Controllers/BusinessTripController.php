@@ -855,6 +855,8 @@ class BusinessTripController extends Controller
                     ?? ($trip->participationExpense->amount_eur ?? "Nenárokujem si");
 
                 $data = [
+                    'sofiaID' => $trip->sofia_id,
+
                     'name' => $name,
                     'department' => $trip->user->department,
 
@@ -919,6 +921,8 @@ class BusinessTripController extends Controller
                     ?? ($trip->participationExpense->amount_foreign ?? "Nenárokujem si");
 
                 $data = [
+                    'sofiaID' => $trip->sofia_id,
+
                     'name' => $trip->user->first_name . ' ' . $trip->user->last_name,
                     'department' => $trip->user->department,
 

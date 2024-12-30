@@ -22,6 +22,7 @@
 
 \newcommand{\placeholder}[1]{< #1 >}
 
+\newcommand{\sofiaID}{@latex($sofiaID)}
 \newcommand{\name}{@latex($name)}
 \newcommand{\department}{@latex($department)}
 
@@ -69,7 +70,7 @@
 
 
 \begin{document}
-{\Large\bf SPRÁVA ZO ZAHRANIČNEJ PRACOVNEJ CESTY}
+{\Large\bf SPRÁVA ZO ZAHRANIČNEJ PRACOVNEJ CESTY} \hfill {\large [\sofiaID]}
 
 \def\arraystretch{1.25}
 \begin{table}[h!]
