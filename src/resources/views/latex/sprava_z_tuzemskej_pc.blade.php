@@ -11,6 +11,11 @@
 \geometry{a4paper,left=20mm,right=20mm,top=20mm,bottom=20mm}
 \setlength\parindent{0pt}
 
+\newcommand{\PreserveBackslash}[1]{\let\temp=\\#1\let\\=\temp}
+\newcolumntype{C}[1]{>{\PreserveBackslash\centering}p{#1}}
+\newcolumntype{R}[1]{>{\PreserveBackslash\raggedleft}p{#1}}
+\newcolumntype{L}[1]{>{\PreserveBackslash\raggedright}p{#1}}
+
 \renewcommand{\familydefault}{cmr}
 \pagenumbering{gobble}
 
@@ -51,12 +56,12 @@
 		\centering
 		\begin{tabularx}{\linewidth}{|p{0.3\linewidth}|XXX|}
 			\hline
-			Meno a priezvisko zamestnanca: & \multicolumn{3}{l|}{\name} \\ \hline
-			Pracovisko -- skratka katedry: & \multicolumn{3}{l|}{\department} \\ \hline
-			Začiatok cesty, dátum: & \multicolumn{1}{l|}{\dateStart, \placeStart} & \multicolumn{1}{l|}{Čas:} & \timeStart \\ \hline
-			Miesto: & \multicolumn{3}{l|}{\place} \\ \hline
-			Koniec cesty, dátum: & \multicolumn{1}{l|}{\dateEnd, \placeEnd} & \multicolumn{1}{l|}{Čas:} & \timeEnd \\ \hline
-			\textbf{ÚHRADA Z ŠPP:} & \multicolumn{1}{X|}{\sppSymbol} & \multicolumn{1}{l|}{Dopravný prostriedok:} & \transportation \\ \hline
+			Meno a priezvisko zamestnanca: & \multicolumn{3}{L{0.64\linewidth}|}{\name} \\ \hline
+			Pracovisko -- skratka katedry: & \multicolumn{3}{L{0.64\linewidth}|}{\department} \\ \hline
+			Začiatok cesty, dátum: & \multicolumn{1}{L{0.255\linewidth}|}{\dateStart, \placeStart} & \multicolumn{1}{l|}{Čas:} & \timeStart \\ \hline
+			Miesto: & \multicolumn{3}{L{0.64\linewidth}|}{\place} \\ \hline
+			Koniec cesty, dátum: & \multicolumn{1}{L{0.255\linewidth}|}{\dateEnd, \placeEnd} & \multicolumn{1}{l|}{Čas:} & \timeEnd \\ \hline
+			\textbf{ÚHRADA Z ŠPP:} & \multicolumn{1}{L{0.255\linewidth}|}{\sppSymbol} & \multicolumn{1}{l|}{Dopravný prostriedok:} & \multicolumn{1}{L{0.135\linewidth}|}{\transportation} \\ \hline
 		\end{tabularx}
 	\end{table}
 
@@ -93,7 +98,7 @@
 			\multicolumn{4}{|l|}{\bf PRE iné ÚČTY} \\ \hline
 			\multicolumn{1}{|l|}{IBAN vašej banky:} & \multicolumn{1}{X|}{} & \multicolumn{1}{l|}{swift:} &  \\ \hline
 			\multicolumn{2}{|l|}{\underline\bf ADRESA BANKY:} & \multicolumn{2}{l|}{\underline\bf VAŠA ADRESA:} \\ \hline
-			\multicolumn{2}{|l|}{} & \multicolumn{2}{l|}{\address} \\ \hline
+			\multicolumn{2}{|l|}{} & \multicolumn{2}{L{0.4\linewidth}|}{\address} \\ \hline
 			\multicolumn{4}{|l|}{\bf PRE EURO} \\ \hline
 			\multicolumn{1}{|l|}{\bf Číslo vášho účtu -- kód banky:} & \multicolumn{3}{l|}{\iban} \\ \hline
 		\end{tabularx}
