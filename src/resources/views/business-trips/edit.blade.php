@@ -541,7 +541,7 @@
                                                 type="checkbox"
                                                 name="{{ 'b'.$i }}"
                                                 x-init="$el.checked = {{$shouldCheckBreakfast}}"
-                                                x-bind:checked="checkBreakfast"
+                                                x-bind:checked="checkBreakfast || ({{ $shouldCheckBreakfast }} && {{ ($isFirstDay || $isLastDay) ? 'true' : 'false' }})"
                                                 x-bind:disabled="{{ ($isFirstDay || $isLastDay) && $shouldCheckBreakfast === 'true' }}">
                                         </td>
                                         <td>
@@ -549,7 +549,7 @@
                                                 type="checkbox"
                                                 name="{{ 'l'.$i }}"
                                                 x-init="$el.checked = {{$shouldCheckLunch}}"
-                                                x-bind:checked="checkLunch"
+                                                x-bind:checked="checkLunch || ({{ $shouldCheckLunch }} && {{ ($isFirstDay || $isLastDay) ? 'true' : 'false' }})"
                                                 x-bind:disabled="{{ ($isFirstDay || $isLastDay) && $shouldCheckLunch === 'true' }}">
                                         </td>
                                         <td>
@@ -557,7 +557,7 @@
                                                 type="checkbox"
                                                 name="{{ 'd'.$i }}"
                                                 x-init="$el.checked = {{$shouldCheckDinner}}"
-                                                x-bind:checked="checkDinner"
+                                                x-bind:checked="checkDinner || ({{ $shouldCheckDinner }} && {{ ($isFirstDay || $isLastDay) ? 'true' : 'false' }})"
                                                 x-bind:disabled="{{ ($isFirstDay || $isLastDay) && $shouldCheckDinner === 'true' }}">
                                         </td>
 
