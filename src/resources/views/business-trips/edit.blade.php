@@ -542,7 +542,8 @@
                                                 name="{{ 'b'.$i }}"
                                                 x-init="$el.checked = {{$shouldCheckBreakfast}}"
                                                 x-bind:checked="checkBreakfast || ({{ $shouldCheckBreakfast }} && {{ ($isFirstDay || $isLastDay) ? 'true' : 'false' }})"
-                                                x-bind:disabled="{{ ($isFirstDay || $isLastDay) && $shouldCheckBreakfast === 'true' }}">
+                                                :class="({{ $isFirstDay || $isLastDay }}) ? 'disabled-checkbox' : ''"
+                                                x-bind:readonly="false">
                                         </td>
                                         <td>
                                             <input
@@ -550,7 +551,8 @@
                                                 name="{{ 'l'.$i }}"
                                                 x-init="$el.checked = {{$shouldCheckLunch}}"
                                                 x-bind:checked="checkLunch || ({{ $shouldCheckLunch }} && {{ ($isFirstDay || $isLastDay) ? 'true' : 'false' }})"
-                                                x-bind:disabled="{{ ($isFirstDay || $isLastDay) && $shouldCheckLunch === 'true' }}">
+                                                :class="({{ $isFirstDay || $isLastDay }}) ? 'disabled-checkbox' : ''"
+                                                x-bind:readonly="false">
                                         </td>
                                         <td>
                                             <input
@@ -558,8 +560,19 @@
                                                 name="{{ 'd'.$i }}"
                                                 x-init="$el.checked = {{$shouldCheckDinner}}"
                                                 x-bind:checked="checkDinner || ({{ $shouldCheckDinner }} && {{ ($isFirstDay || $isLastDay) ? 'true' : 'false' }})"
-                                                x-bind:disabled="{{ ($isFirstDay || $isLastDay) && $shouldCheckDinner === 'true' }}">
+                                                :class="({{ $isFirstDay || $isLastDay }}) ? 'disabled-checkbox' : ''"
+                                                x-bind:readonly="false">
                                         </td>
+
+                                        <style>
+                                            .disabled-checkbox {
+                                                pointer-events: none;
+                                                background-color: #e0e0e0;
+                                                opacity: 0.6;
+                                                cursor: not-allowed;
+                                            }
+                                        </style>
+
 
                                     </tr>
 
