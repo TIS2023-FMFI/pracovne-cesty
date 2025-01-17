@@ -198,6 +198,11 @@ class BusinessTripController extends Controller
         DB::beginTransaction();
 
         try {
+            // Logic to store iban
+            if(isset($request->storeIban)){
+                User::updateIbanOfUserWithId($targetUserId,$request->iban);
+            }
+
             // Logic to store the trip based on the validated data
             $trip = BusinessTrip::create($validatedTripData);
             if ($isReimbursement) {
@@ -509,10 +514,10 @@ class BusinessTripController extends Controller
         if ($oldTripData['type'] !== $tripData['type']) {
             return true;
         }
-        
+
         return false;
     }
-    
+
 
     /**
      * Updating state of the trip to cancelled

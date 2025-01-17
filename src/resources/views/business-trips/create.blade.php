@@ -63,7 +63,10 @@
 
                 <div class="form-row">
                     <div class="col-md-6 col-12">
-                        <x-simple-input name="iban" label="Číslo účtu"/>
+                        <x-simple-input name="iban" label="Číslo účtu" :value="$user->iban ?? ''"/>
+                    </div>
+                    <div class="mr-2 ml-2 mt-5">
+                        <input type = 'checkbox' name='storeIban'> Uložiť číslo účtu?
                     </div>
                 </div>
             </x-content-section>
