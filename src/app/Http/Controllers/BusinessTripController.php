@@ -436,6 +436,8 @@ class BusinessTripController extends Controller
                     $validatedMealsData = self::validateMealsData($days, $request);
                     $validatedTripData['not_reimbursed_meals'] = $validatedMealsData;
 
+                    self::correctNotReimbursedMeals($trip);
+
                     $validatedTripData = array_merge($validatedTripData, $request->validate(
                         ['conclusion' => 'required|max:5000']));
 
@@ -1045,7 +1047,7 @@ class BusinessTripController extends Controller
             'datetime_end' => 'required|date|after:datetime_start',
             'datetime_border_crossing_start' => 'sometimes|required|date',
             'datetime_border_crossing_end' => 'sometimes|required|date',
-            'concluscion' => 'sometimes|required|string|max:5000',
+            'conclusion' => 'sometimes|required|string|max:5000',
             'sofia_id' => 'string|max:40'
         ];
 
