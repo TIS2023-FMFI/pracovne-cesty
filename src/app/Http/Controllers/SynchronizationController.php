@@ -132,7 +132,7 @@ class SynchronizationController extends Controller
                         'date_time' => $date->format('Y-m-d'),
                         'from_time' => $fromTime,
                         'to_time' => $toTime,
-                        'description' => $businessTrip->type->inSlovak() . ' pracovná cesta',
+                        'description' => $businessTrip->type->inSlovak() . ' pracovná cesta ' . $businessTrip->place,
                         'type' => PritomnostAbsenceType::BUSINESS_TRIP,
                         'cesty_id' => $businessTripId
                         // Other values are not defined
