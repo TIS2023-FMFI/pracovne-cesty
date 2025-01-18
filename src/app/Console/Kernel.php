@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Mail;
 
 class Kernel extends ConsoleKernel
 {
-    private const REPORT_REMINDER_TIME = '21:00';
+    private const REPORT_REMINDER_TIME = '01:00';
 
     /**
      * Define the application's command schedule.
