@@ -524,6 +524,10 @@
                                             $shouldCheckLunch = 'false';
                                             $shouldCheckDinner = 'false';
 
+                                            $startCheckBreakfast = ($meals[$i * 3] === '1') ? 'true' : 'false';
+                                            $startCheckLunch = ($meals[$i * 3 + 1] === '1') ? 'true' : 'false';
+                                            $startCheckDinner = ($meals[$i * 3 + 2] === '1') ? 'true' : 'false';
+
                                             if ($isFirstDay) {
                                                 if (strtotime($currentTime) > strtotime('16:00')) {
                                                     $shouldCheckBreakfast = 'true';
@@ -543,32 +547,47 @@
                                                 $shouldCheckLunch = ($meals[$i * 3 + 1] === '1') ? 'true' : 'false';
                                                 $shouldCheckDinner = ($meals[$i * 3 + 2] === '1') ? 'true' : 'false';
                                             }
+
+
                                         @endphp
 
                                         <td>
                                             <input
                                                 type="checkbox"
                                                 name="{{ 'b'.$i }}"
-                                                x-init="$el.checked = {{$shouldCheckBreakfast}}"
+                                                x-init="$el.checked = {{$shouldCheckBreakfast}} || {{$startCheckBreakfast}}"
                                                 x-bind:checked="checkBreakfast"
-                                                x-bind:disabled="{{ ($isFirstDay || $isLastDay) && $shouldCheckBreakfast === 'true' }}">
+                                                :class="({{ $shouldCheckBreakfast }} && {{ ($isFirstDay || $isLastDay) ? 'true' : 'false' }}) ? 'disabled-checkbox' : ''"
+                                                x-bind:readonly="false">
                                         </td>
                                         <td>
                                             <input
                                                 type="checkbox"
                                                 name="{{ 'l'.$i }}"
-                                                x-init="$el.checked = {{$shouldCheckLunch}}"
+                                                x-init="$el.checked = {{$shouldCheckLunch}} || {{$startCheckLunch}}"
                                                 x-bind:checked="checkLunch"
-                                                x-bind:disabled="{{ ($isFirstDay || $isLastDay) && $shouldCheckLunch === 'true' }}">
+                                                :class="({{ $shouldCheckLunch }} && {{ ($isFirstDay || $isLastDay) ? 'true' : 'false' }}) ? 'disabled-checkbox' : ''"
+                                                x-bind:readonly="false">
                                         </td>
                                         <td>
                                             <input
                                                 type="checkbox"
                                                 name="{{ 'd'.$i }}"
-                                                x-init="$el.checked = {{$shouldCheckDinner}}"
+                                                x-init="$el.checked = {{$shouldCheckDinner}} || {{$startCheckDinner}}"
                                                 x-bind:checked="checkDinner"
-                                                x-bind:disabled="{{ ($isFirstDay || $isLastDay) && $shouldCheckDinner === 'true' }}">
+                                                :class="({{ $shouldCheckDinner }} && {{ ($isFirstDay || $isLastDay) ? 'true' : 'false' }}) ? 'disabled-checkbox' : ''"
+                                                x-bind:readonly="false">
                                         </td>
+
+                                        <style>
+                                            .disabled-checkbox {
+                                                pointer-events: none;
+                                                background-color: #e0e0e0;
+                                                opacity: 0.6;
+                                                cursor: not-allowed;
+                                            }
+                                        </style>
+
 
                                     </tr>
 
