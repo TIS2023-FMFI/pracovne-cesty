@@ -605,7 +605,7 @@ class BusinessTripController extends Controller
         . ' naplánovaná na ' . $trip->datetime_start
         . ' s miestom konania ' . $trip->place
         . ' bola úspešne spracovaná administrátorom a bol jej pridelený identifikátor. Prosíme Vás, aby ste sa dostavili na podpísanie cestovného príkazu.';
-        $viewTemplate = 'emails.tmp';
+        $viewTemplate = 'emails.sign_request_user';
 
         // Create an instance of the SimpleMail class
         $email = new SimpleMail($message, $recipient, $viewTemplate, 'Pracovné cesty - pridelenie identifikátora');
