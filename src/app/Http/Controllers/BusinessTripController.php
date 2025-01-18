@@ -642,6 +642,19 @@ class BusinessTripController extends Controller
         //Close the trip
         $trip->update(['state' => TripState::CLOSED]);
 
+        $recipient = $trip->user->email;
+        $message = 'Vaša pracovná cesta '
+        . ' ukončená ' . $trip->datetime_end
+        . ' s miestom konania ' . $trip->place
+        . ' bola vyúčtovaná administrátorom. Prosíme Vás, aby ste sa so všetkými potrebnými dokladmi dostavili na podpísanie vyúčtovania pracovnej cesty.';
+        $viewTemplate = 'emails.accounting_sign_request_user';
+
+        // Create an instance of the SimpleMail class
+        $email = new SimpleMail($message, $recipient, $viewTemplate, 'Pracovné cesty - vyúčtovanie cesty');
+
+        // Send the email
+        Mail::to($recipient)->send($email);
+
         return redirect()->route('trip.edit', $trip)
             ->with('message', 'Stav cesty bol zmenený na Spracovaná. Na ceste už nie je možné vykonať žiadne zmeny.');
     }
