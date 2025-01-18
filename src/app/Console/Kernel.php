@@ -12,6 +12,8 @@ use Illuminate\Support\Facades\Mail;
 
 class Kernel extends ConsoleKernel
 {
+    private const REPORT_REMINDER_TIME = '21:00';
+
     /**
      * Define the application's command schedule.
      */
@@ -23,6 +25,7 @@ class Kernel extends ConsoleKernel
             $completedTrips = BusinessTrip::whereDate('datetime_end', '=', Carbon::yesterday())
                 ->where('state', '=', TripState::COMPLETED)
                 ->get();
+
             foreach ($completedTrips as $trip) {
                 $recipient = $trip->user->email;
                 $message = 'Vaša pracovná cesta na miesto ' . $trip->place
@@ -34,9 +37,24 @@ class Kernel extends ConsoleKernel
 
                 Mail::to($recipient)->send($email);
             }
-        })->daily()->at('20:02');
+        })->daily()->at(self::REPORT_REMINDER_TIME);
 
+        $schedule->call(function () {
+            $completedTrips = BusinessTrip::whereDate('datetime_end', '=', Carbon::now()->subDays(4))
+                ->where('state', '=', TripState::COMPLETED)
+                ->get();
 
+            foreach ($completedTrips as $trip) {
+                $recipient = $trip->user->email;
+                $message = 'Upozorňujeme Vás, že o 3 dni uplynie termín na podanie správy z pracovnej cesty ukončenej '
+                . $trip->datetime_end . ' na mieste ' . $trip->place . ' .';
+                $viewTemplate = 'emails.trip_report_reminder_user';
+
+                $email = new SimpleMail($message, $recipient, $viewTemplate, 'Pracovné cesty - blížiaci sa termín na podanie správy');
+
+                Mail::to($recipient)->send($email);
+            }
+        })->daily()->at(self::REPORT_REMINDER_TIME);
     }
 
     /**
