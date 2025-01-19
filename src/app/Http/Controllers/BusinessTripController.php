@@ -198,6 +198,11 @@ class BusinessTripController extends Controller
         DB::beginTransaction();
 
         try {
+            // Logic to store iban
+            if(isset($request->storeIban)){
+                User::updateIbanOfUserWithId($targetUserId,$request->iban);
+            }
+
             // Logic to store the trip based on the validated data
             $trip = BusinessTrip::create($validatedTripData);
             if ($isReimbursement) {
@@ -431,6 +436,8 @@ class BusinessTripController extends Controller
                     $validatedMealsData = self::validateMealsData($days, $request);
                     $validatedTripData['not_reimbursed_meals'] = $validatedMealsData;
 
+                    self::correctNotReimbursedMeals($trip);
+
                     $validatedTripData = array_merge($validatedTripData, $request->validate(
                         ['conclusion' => 'required|max:5000']));
 
@@ -513,6 +520,7 @@ class BusinessTripController extends Controller
         return false;
     }
 
+
     /**
      * Updating state of the trip to cancelled
      * Adding cancellation reason
@@ -592,6 +600,19 @@ class BusinessTripController extends Controller
             'sofia_id' => $validatedData['sofia_id']
         ]);
 
+        $recipient = $trip->user->email;
+        $message = 'Vaša pracovná cesta '
+        . ' naplánovaná na ' . $trip->datetime_start
+        . ' s miestom konania ' . $trip->place
+        . ' bola úspešne spracovaná administrátorom a bol jej pridelený identifikátor. Prosíme Vás, aby ste sa dostavili na podpísanie cestovného príkazu.';
+        $viewTemplate = 'emails.sign_request_user';
+
+        // Create an instance of the SimpleMail class
+        $email = new SimpleMail($message, $recipient, $viewTemplate, 'Pracovné cesty - pridelenie identifikátora');
+
+        // Send the email
+        Mail::to($recipient)->send($email);
+
         if ($trip->user->pritomnostUser()->first()) {
             $status = SynchronizationController::createSingleBusinessTrip($trip->id);
 
@@ -620,6 +641,19 @@ class BusinessTripController extends Controller
 
         //Close the trip
         $trip->update(['state' => TripState::CLOSED]);
+
+        $recipient = $trip->user->email;
+        $message = 'Vaša pracovná cesta '
+        . ' ukončená ' . $trip->datetime_end
+        . ' s miestom konania ' . $trip->place
+        . ' bola vyúčtovaná administrátorom. Prosíme Vás, aby ste sa so všetkými potrebnými dokladmi dostavili na podpísanie vyúčtovania pracovnej cesty.';
+        $viewTemplate = 'emails.accounting_sign_request_user';
+
+        // Create an instance of the SimpleMail class
+        $email = new SimpleMail($message, $recipient, $viewTemplate, 'Pracovné cesty - vyúčtovanie cesty');
+
+        // Send the email
+        Mail::to($recipient)->send($email);
 
         return redirect()->route('trip.edit', $trip)
             ->with('message', 'Stav cesty bol zmenený na Spracovaná. Na ceste už nie je možné vykonať žiadne zmeny.');
@@ -1064,7 +1098,7 @@ class BusinessTripController extends Controller
             'datetime_end' => 'required|date|after:datetime_start',
             'datetime_border_crossing_start' => 'sometimes|required|date',
             'datetime_border_crossing_end' => 'sometimes|required|date',
-            'concluscion' => 'sometimes|required|string|max:5000',
+            'conclusion' => 'sometimes|required|string|max:5000',
             'sofia_id' => 'string|max:40'
         ];
 
