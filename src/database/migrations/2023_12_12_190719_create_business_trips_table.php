@@ -68,19 +68,38 @@ return new class extends Migration {
             $table->smallInteger('amount_eur_2')->nullable();
             $table->smallInteger('amount_eur_3')->nullable();
 
-            $table->foreignIdFor(Expense::class, 'accommodation_expense_id')
-                ->nullable()
-                ->unique();
+            // Cestovne
             $table->foreignIdFor(Expense::class, 'travelling_expense_id')
                 ->nullable()
                 ->unique();
+
+            // Ubytovanie
+            $table->foreignIdFor(Expense::class, 'accommodation_expense_id')
+                ->nullable()
+                ->unique();
+
+            // Vlozne
+            $table->foreignIdFor(Expense::class, 'participation_expense_id')
+                ->nullable()
+                ->unique();
+
+            // Poistenie
+            $table->foreignIdFor(Expense::class, 'insurance_expense_id')
+                ->nullable()
+                ->unique();
+
+            // Ine vydavky
             $table->foreignIdFor(Expense::class, 'other_expense_id')
                 ->nullable()
                 ->unique();
-            $table->foreignIdFor(Expense::class, 'advance_expense_id')
+
+            // Vreckove
+            $table->foreignIdFor(Expense::class, 'allowance_expense_id')
                 ->nullable()
                 ->unique();
-            $table->foreignIdFor(Expense::class, 'allowance_expense_id')
+
+            // Zaloha
+            $table->foreignIdFor(Expense::class, 'advance_expense_id')
                 ->nullable()
                 ->unique();
 
