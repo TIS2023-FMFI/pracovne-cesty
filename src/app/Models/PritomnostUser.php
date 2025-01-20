@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class PritomnostUser extends Model
 {
-    private const REQUEST_VALIDATOR_ID = 844;   # Udaj z PritomnostNaPracovisku/Aplikácia/include/config.php
+    private const REQUEST_VALIDATOR_ID = 822;   # Udaj z PritomnostNaPracovisku/Aplikácia/include/config.php
     protected $connection = 'dochadzka';
     protected $table = 'users';
 
