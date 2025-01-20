@@ -6,7 +6,6 @@ use App\Enums\DocumentType;
 use App\Enums\PositionTitle;
 use App\Enums\TripState;
 use App\Enums\TripType;
-use App\Enums\PritomnostConfirmedStatus;
 use App\Mail\SimpleMail;
 use App\Models\BusinessTrip;
 use App\Models\ConferenceFee;
@@ -34,6 +33,7 @@ use Illuminate\Validation\ValidationException;
 use Ismaelw\LaraTeX\LaraTeX;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use App\Enums\PritomnostAbsenceConfirmedStatus;
 
 
 class BusinessTripController extends Controller
@@ -617,7 +617,7 @@ class BusinessTripController extends Controller
         Mail::to($recipient)->send($email);
 
         if ($trip->user->pritomnostUser()->first()) {
-            $status = SynchronizationController::createSingleBusinessTrip($trip->id, PritomnostConfirmedStatus::UNCONFIRMED);
+            $status = SynchronizationController::createSingleBusinessTrip($trip->id, PritomnostAbsenceConfirmedStatus::UNCONFIRMED);
 
             if (!$status) {
                 return redirect()

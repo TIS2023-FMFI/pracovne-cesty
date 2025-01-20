@@ -2,7 +2,7 @@
 
 namespace App\Enums;
 
-enum PritomnostConfirmedStatus: int
+enum PritomnostAbsenceConfirmedStatus: int
 {
     case UNCONFIRMED = 0;
     case CONFIRMED = 1;
