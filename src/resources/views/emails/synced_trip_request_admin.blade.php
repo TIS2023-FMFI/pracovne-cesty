@@ -7,7 +7,7 @@
 <body>
 <div class="email-container">
     <div class="content">
-        {{ $messageText }}
+        {!! nl2br(e($messageText)) !!}
     </div>
 </div>
 </body>

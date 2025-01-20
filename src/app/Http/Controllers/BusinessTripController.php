@@ -628,12 +628,12 @@ class BusinessTripController extends Controller
 
             // Duplicitny mail z Aplikácia/class/day.php
             $subjectLine = 'Žiadosť o schválenie neprítomnosti (' . $trip->datetime_start->format('d.m.Y') . ')';
-            $message = 'Nová žiadosť na schválenie '
-            . 'Žiadateľ*ka: ' . $trip->user->pritomnostUser->name . ' ' . $trip->user->pritomnostUser->surname
-            . 'Typ neprítomnosti: ' . $trip->type->inSlovak()
-            . 'Dátum: ' . $trip->datetime_start->format('d.m.Y')
+            $message = 'Nová žiadosť na schválenie ' . PHP_EOL
+            . 'Žiadateľ*ka: ' . $trip->user->pritomnostUser->name . ' ' . $trip->user->pritomnostUser->surname . PHP_EOL
+            . 'Typ neprítomnosti: ' . $trip->type->inSlovak() . PHP_EOL
+            . 'Dátum: ' . $trip->datetime_start->format('d.m.Y') . PHP_EOL
             . 'Pre schválenie pokračujte do systému Prítomnosť na Pracovisku.';
-            $viewTemplate = 'emails.synced_business_trip_request_admin';
+            $viewTemplate = 'emails.synced_trip_request_admin';
 
             foreach (PritomnostUser::getRequestValidators() as $requestValidator) {
                 $recipient = $requestValidator->email;
