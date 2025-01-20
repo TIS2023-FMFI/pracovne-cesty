@@ -13,8 +13,6 @@ use Exception;
 use Illuminate\Support\Facades\DB;
 use Throwable;
 use App\Enums\PritomnostAbsenceConfirmedStatus;
-use App\Mail\SimpleMail;
-use Illuminate\Support\Facades\Mail;
 
 class SynchronizationController extends Controller
 {
@@ -145,24 +143,6 @@ class SynchronizationController extends Controller
             }
 
             DB::connection('dochadzka')->commit();
-
-            // Duplicitny mail z Aplikácia/class/day.php
-            if ($confirmed == PritomnostAbsenceConfirmedStatus::UNCONFIRMED) {
-                $subjectLine = 'Žiadosť o schválenie neprítomnosti (' . $businessTrip->datetime_start->format('d.m.Y') . ')';
-                $message = 'Nová žiadosť na schválenie '
-                . 'Žiadateľ*ka: ' . $pritomnostUser->name . ' ' . $pritomnostUser->surname
-                . 'Typ neprítomnosti: ' . $businessTrip->type->inSlovak()
-                . 'Dátum: ' . $businessTrip->datetime_start->format('d.m.Y')
-                . 'Pre schválenie pokračujte do systému Prítomnosť na Pracovisku.';
-                $viewTemplate = 'emails.synced_business_trip_request_admin';
-
-                foreach (PritomnostUser::getRequestValidators() as $requestValidator) {
-                    $recipient = $requestValidator->email;
-                    $email = new SimpleMail($message, $recipient, $viewTemplate, $subjectLine);
-                    Mail::to($recipient)->send($email);
-                }
-            }
-
         } catch (Exception $e) {
             DB::connection('dochadzka')->rollBack();
             return false;

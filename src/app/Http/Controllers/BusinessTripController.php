@@ -34,6 +34,7 @@ use Ismaelw\LaraTeX\LaraTeX;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use App\Enums\PritomnostAbsenceConfirmedStatus;
+use App\Models\PritomnostUser;
 
 
 class BusinessTripController extends Controller
@@ -623,6 +624,21 @@ class BusinessTripController extends Controller
                 return redirect()
                     ->route('trip.edit', ['trip' => $trip])
                     ->with('message', 'Cestu sa nepodarilo zosynchronizovať s dochádzkovým systémom.');
+            }
+
+            // Duplicitny mail z Aplikácia/class/day.php
+            $subjectLine = 'Žiadosť o schválenie neprítomnosti (' . $trip->datetime_start->format('d.m.Y') . ')';
+            $message = 'Nová žiadosť na schválenie '
+            . 'Žiadateľ*ka: ' . $trip->user->pritomnostUser->name . ' ' . $trip->user->pritomnostUser->surname
+            . 'Typ neprítomnosti: ' . $trip->type->inSlovak()
+            . 'Dátum: ' . $trip->datetime_start->format('d.m.Y')
+            . 'Pre schválenie pokračujte do systému Prítomnosť na Pracovisku.';
+            $viewTemplate = 'emails.synced_business_trip_request_admin';
+
+            foreach (PritomnostUser::getRequestValidators() as $requestValidator) {
+                $recipient = $requestValidator->email;
+                $email = new SimpleMail($message, $recipient, $viewTemplate, $subjectLine);
+                Mail::to($recipient)->send($email);
             }
         }
 
