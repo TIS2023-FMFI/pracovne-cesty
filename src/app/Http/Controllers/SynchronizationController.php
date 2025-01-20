@@ -12,6 +12,7 @@ use Carbon\CarbonPeriod;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Throwable;
+use App\Enums\PritomnostAbsenceConfirmedStatus;
 
 class SynchronizationController extends Controller
 {
@@ -86,20 +87,20 @@ class SynchronizationController extends Controller
      * @return bool true if the sync has been successful, false otherwise
      * @throws Exception|Throwable If there is an issue with DateTime or DB connection
      */
-    public static function createSingleBusinessTrip($businessTripId): bool
+    public static function createSingleBusinessTrip($businessTripId, $confirmed): bool
     {
         // Fetch the specific business trip
         $businessTrip = BusinessTrip::find($businessTripId);
 
         if (!$businessTrip) {
-            throw new Exception();
+            return false;
         }
 
         // Get the Pritomnost user_id
         $pritomnostUser = $businessTrip->user->pritomnostUser()->first();
 
         if (!$pritomnostUser) {
-            throw new Exception();
+            return false;
         }
 
         $pritomnostUserId = $pritomnostUser->id;
@@ -134,6 +135,7 @@ class SynchronizationController extends Controller
                         'to_time' => $toTime,
                         'description' => $businessTrip->type->inSlovak() . ' pracovná cesta ' . $businessTrip->place,
                         'type' => PritomnostAbsenceType::BUSINESS_TRIP,
+                        'confirmation' => $confirmed,
                         'cesty_id' => $businessTripId
                         // Other values are not defined
                     ]);
@@ -141,7 +143,6 @@ class SynchronizationController extends Controller
             }
 
             DB::connection('dochadzka')->commit();
-
         } catch (Exception $e) {
             DB::connection('dochadzka')->rollBack();
             return false;
@@ -160,13 +161,13 @@ class SynchronizationController extends Controller
         $businessTrip = BusinessTrip::find($businessTripId);
 
         if (!$businessTrip) {
-            throw new Exception();
+            return false;
         }
 
         $pritomnostUser = $businessTrip->user->pritomnostUser()->first();
 
         if (!$pritomnostUser) {
-            throw new Exception();
+            return false;
         }
 
         DB::connection('dochadzka')->beginTransaction();
@@ -194,10 +195,32 @@ class SynchronizationController extends Controller
      * @return bool Returns true if the business trip was successfully updated, false otherwise.
      */
     public static function updateSingleBusinessTrip($businessTripId) : bool {
+        
+        $businessTrip = BusinessTrip::find($businessTripId);
+        if (!$businessTrip) {
+            return false;
+        }
+        
+        $pritomnostUser = $businessTrip->user->pritomnostUser()->first();
+        if (!$pritomnostUser) {
+            return false;
+        }
+        
+        $existingAbsence = PritomnostAbsence::where([
+            'user_id' => $pritomnostUser->id,
+            'cesty_id' => $businessTripId
+        ])->first();
+        
+        $originalConfirmation = $existingAbsence ? $existingAbsence->confirmation : false;
+        $confirmed = PritomnostAbsenceConfirmedStatus::UNCONFIRMED;
+        if ($originalConfirmation) {
+            $confirmed = PritomnostAbsenceConfirmedStatus::CONFIRMED;
+        }
+
         if (!self::deleteCancelledBusinessTrip($businessTripId)) {
             return false;
         }
 
-        return self::createSingleBusinessTrip($businessTripId);
+        return self::createSingleBusinessTrip($businessTripId, $confirmed);
     }
 }

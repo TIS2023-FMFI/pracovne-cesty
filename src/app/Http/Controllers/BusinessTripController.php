@@ -33,6 +33,8 @@ use Illuminate\Validation\ValidationException;
 use Ismaelw\LaraTeX\LaraTeX;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use App\Enums\PritomnostAbsenceConfirmedStatus;
+use App\Models\PritomnostUser;
 
 
 class BusinessTripController extends Controller
@@ -246,7 +248,8 @@ class BusinessTripController extends Controller
         }
 
         // Sending mails
-        $message ='ID pridanej cesty: ' . $trip->sofia_id
+        $sofiaID = $trip->sofia_id ?? '0000';
+        $message ='ID pridanej cesty: ' . $sofiaID
             . ' Meno a priezvisko cestujúceho: ' . $trip->user->fullName();
 
         foreach (User::getAdminEmails() as $recipient) {
@@ -546,7 +549,8 @@ class BusinessTripController extends Controller
 
         // Retrieve user's email associated with the trip
         $recipient = $trip->user->email;
-        $message = 'Chceme vás informovať, že vaša pracovná cesta s ID ' .  $trip->sofia_id
+        $sofiaID = $trip->sofia_id ?? '0000';
+        $message = 'Chceme vás informovať, že vaša pracovná cesta s ID ' .  $sofiaID
         . ' naplánovaná na ' . $trip->datetime_start
         . ' s miestom konania ' . $trip->place . ' bola stornovaná.';
         $viewTemplate = 'emails.cancellation_user';
@@ -614,12 +618,27 @@ class BusinessTripController extends Controller
         Mail::to($recipient)->send($email);
 
         if ($trip->user->pritomnostUser()->first()) {
-            $status = SynchronizationController::createSingleBusinessTrip($trip->id);
+            $status = SynchronizationController::createSingleBusinessTrip($trip->id, PritomnostAbsenceConfirmedStatus::UNCONFIRMED);
 
             if (!$status) {
                 return redirect()
                     ->route('trip.edit', ['trip' => $trip])
                     ->with('message', 'Cestu sa nepodarilo zosynchronizovať s dochádzkovým systémom.');
+            }
+
+            // Duplicitny mail z Aplikácia/class/day.php
+            $subjectLine = 'Žiadosť o schválenie neprítomnosti (' . $trip->datetime_start->format('d.m.Y') . ')';
+            $message = 'Nová žiadosť na schválenie ' . PHP_EOL
+            . 'Žiadateľ*ka: ' . $trip->user->pritomnostUser->name . ' ' . $trip->user->pritomnostUser->surname . PHP_EOL
+            . 'Typ neprítomnosti: ' . $trip->type->inSlovak() . PHP_EOL
+            . 'Dátum: ' . $trip->datetime_start->format('d.m.Y') . PHP_EOL
+            . 'Pre schválenie pokračujte do systému Prítomnosť na Pracovisku.';
+            $viewTemplate = 'emails.synced_trip_request_admin';
+
+            foreach (PritomnostUser::getRequestValidators() as $requestValidator) {
+                $recipient = $requestValidator->email;
+                $email = new SimpleMail($message, $recipient, $viewTemplate, $subjectLine);
+                Mail::to($recipient)->send($email);
             }
         }
 
@@ -677,7 +696,9 @@ class BusinessTripController extends Controller
             $trip->update($validatedData);
 
             // Send email notification to the admin
-            $message = 'ID pracovnej cesty: ' . $trip->sofia_id
+            
+            $sofiaID = $trip->sofia_id ?? '0000';
+            $message = 'ID pracovnej cesty: ' . $sofiaID
                 . ' Meno a priezvisko cestujúceho: ' . $trip->user->fullName();
 
             foreach (User::getAdminEmails() as $recipient) {
@@ -714,7 +735,8 @@ class BusinessTripController extends Controller
         $trip->update($validatedData);
 
         // Send email notification to the
-        $message = 'ID Cesty ku ktorej bola pridaná poznámka: ' . $trip->sofia_id
+        $sofiaID = $trip->sofia_id ?? '0000';
+        $message = 'ID Cesty ku ktorej bola pridaná poznámka: ' . $sofiaID
             . ' Meno a priezvisko cestujúceho: ' . $trip->user->fullName();
 
         foreach (User::getAdminEmails() as $recipient) {
