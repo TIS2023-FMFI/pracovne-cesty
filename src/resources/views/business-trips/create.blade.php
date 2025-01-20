@@ -62,6 +62,14 @@
                 </div>
 
                 <div class="form-row">
+                    <x-tooltip
+                        text="Číslo účtu je podľa možností už predvyplnené na základe údajov z profilu cestujúceho /
+                        predchádzajúcej pracovnej cesty. Ak si želáte použiť dané čislo účtu, nemusíte robiť nič.
+                        Pre použitie iného čísla účtu len pre túto pracovnú cestu stačí, keď dané číslo zadáte do
+                        príslušného poľa. Ak si však želáte, aby sa toto nové číslo účtu zobrazovalo ako prednastavené
+                        pre budúce pracovné cesty, zaškrtnite prosím aj príslušné okienko na jeho uloženie."
+                        icon="question-circle">
+                    </x-tooltip>
                     <div class="col-md-6 col-12">
                         <x-simple-input name="iban" label="Číslo účtu" :value="$user->iban ?? ''"/>
                     </div>
