@@ -93,14 +93,14 @@ class SynchronizationController extends Controller
         $businessTrip = BusinessTrip::find($businessTripId);
 
         if (!$businessTrip) {
-            throw new Exception();
+            return false;
         }
 
         // Get the Pritomnost user_id
         $pritomnostUser = $businessTrip->user->pritomnostUser()->first();
 
         if (!$pritomnostUser) {
-            throw new Exception();
+            return false;
         }
 
         $pritomnostUserId = $pritomnostUser->id;
@@ -161,13 +161,13 @@ class SynchronizationController extends Controller
         $businessTrip = BusinessTrip::find($businessTripId);
 
         if (!$businessTrip) {
-            throw new Exception();
+            return false;
         }
 
         $pritomnostUser = $businessTrip->user->pritomnostUser()->first();
 
         if (!$pritomnostUser) {
-            throw new Exception();
+            return false;
         }
 
         DB::connection('dochadzka')->beginTransaction();
@@ -195,10 +195,32 @@ class SynchronizationController extends Controller
      * @return bool Returns true if the business trip was successfully updated, false otherwise.
      */
     public static function updateSingleBusinessTrip($businessTripId) : bool {
+        
+        $businessTrip = BusinessTrip::find($businessTripId);
+        if (!$businessTrip) {
+            return false;
+        }
+        
+        $pritomnostUser = $businessTrip->user->pritomnostUser()->first();
+        if (!$pritomnostUser) {
+            return false;
+        }
+        
+        $existingAbsence = PritomnostAbsence::where([
+            'user_id' => $pritomnostUser->id,
+            'cesty_id' => $businessTripId
+        ])->first();
+        
+        $originalConfirmation = $existingAbsence ? $existingAbsence->confirmation : false;
+        $confirmed = PritomnostAbsenceConfirmedStatus::UNCONFIRMED;
+        if ($originalConfirmation) {
+            $confirmed = PritomnostAbsenceConfirmedStatus::CONFIRMED;
+        }
+
         if (!self::deleteCancelledBusinessTrip($businessTripId)) {
             return false;
         }
 
-        return self::createSingleBusinessTrip($businessTripId, PritomnostAbsenceConfirmedStatus::CONFIRMED);
+        return self::createSingleBusinessTrip($businessTripId, $confirmed);
     }
 }
