@@ -247,7 +247,8 @@ class BusinessTripController extends Controller
         }
 
         // Sending mails
-        $message ='ID pridanej cesty: ' . $trip->sofia_id
+        $sofiaID = $trip->sofia_id ?? '0000';
+        $message ='ID pridanej cesty: ' . $sofiaID
             . ' Meno a priezvisko cestujúceho: ' . $trip->user->fullName();
 
         foreach (User::getAdminEmails() as $recipient) {
@@ -547,7 +548,8 @@ class BusinessTripController extends Controller
 
         // Retrieve user's email associated with the trip
         $recipient = $trip->user->email;
-        $message = 'Chceme vás informovať, že vaša pracovná cesta s ID ' .  $trip->sofia_id
+        $sofiaID = $trip->sofia_id ?? '0000';
+        $message = 'Chceme vás informovať, že vaša pracovná cesta s ID ' .  $sofiaID
         . ' naplánovaná na ' . $trip->datetime_start
         . ' s miestom konania ' . $trip->place . ' bola stornovaná.';
         $viewTemplate = 'emails.cancellation_user';
@@ -678,7 +680,9 @@ class BusinessTripController extends Controller
             $trip->update($validatedData);
 
             // Send email notification to the admin
-            $message = 'ID pracovnej cesty: ' . $trip->sofia_id
+            
+            $sofiaID = $trip->sofia_id ?? '0000';
+            $message = 'ID pracovnej cesty: ' . $sofiaID
                 . ' Meno a priezvisko cestujúceho: ' . $trip->user->fullName();
 
             foreach (User::getAdminEmails() as $recipient) {
@@ -715,7 +719,8 @@ class BusinessTripController extends Controller
         $trip->update($validatedData);
 
         // Send email notification to the
-        $message = 'ID Cesty ku ktorej bola pridaná poznámka: ' . $trip->sofia_id
+        $sofiaID = $trip->sofia_id ?? '0000';
+        $message = 'ID Cesty ku ktorej bola pridaná poznámka: ' . $sofiaID
             . ' Meno a priezvisko cestujúceho: ' . $trip->user->fullName();
 
         foreach (User::getAdminEmails() as $recipient) {
