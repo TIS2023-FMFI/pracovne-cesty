@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Enums\PritomnostAbsenceType;
 use App\Enums\UserType;
+use App\Enums\PritomnostConfirmedStatus;
 use App\Models\BusinessTrip;
 use App\Models\PritomnostAbsence;
 use App\Models\PritomnostUser;
@@ -86,7 +87,7 @@ class SynchronizationController extends Controller
      * @return bool true if the sync has been successful, false otherwise
      * @throws Exception|Throwable If there is an issue with DateTime or DB connection
      */
-    public static function createSingleBusinessTrip($businessTripId): bool
+    public static function createSingleBusinessTrip($businessTripId, $confirmed): bool
     {
         // Fetch the specific business trip
         $businessTrip = BusinessTrip::find($businessTripId);
@@ -134,7 +135,7 @@ class SynchronizationController extends Controller
                         'to_time' => $toTime,
                         'description' => $businessTrip->type->inSlovak() . ' pracovná cesta ' . $businessTrip->place,
                         'type' => PritomnostAbsenceType::BUSINESS_TRIP,
-                        'confirmation' => 0,
+                        'confirmation' => $confirmed,
                         'cesty_id' => $businessTripId
                         // Other values are not defined
                     ]);
@@ -199,6 +200,6 @@ class SynchronizationController extends Controller
             return false;
         }
 
-        return self::createSingleBusinessTrip($businessTripId);
+        return self::createSingleBusinessTrip($businessTripId, PritomnostConfirmedStatus::CONFIRMED);
     }
 }
