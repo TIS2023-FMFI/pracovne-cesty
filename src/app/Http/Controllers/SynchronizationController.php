@@ -134,6 +134,7 @@ class SynchronizationController extends Controller
                         'to_time' => $toTime,
                         'description' => $businessTrip->type->inSlovak() . ' pracovná cesta ' . $businessTrip->place,
                         'type' => PritomnostAbsenceType::BUSINESS_TRIP,
+                        'confirmation' => 0,
                         'cesty_id' => $businessTripId
                         // Other values are not defined
                     ]);
