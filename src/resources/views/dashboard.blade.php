@@ -45,6 +45,12 @@
             </div>
 
         @endif
+
+        <div class="mr-2 btn-group">
+            <x-link-button color="danger"
+                href="{{route('instruction') }}">Návod
+            </x-link-button>
+        </div>
     </div>
 
     @if($isAdmin)
