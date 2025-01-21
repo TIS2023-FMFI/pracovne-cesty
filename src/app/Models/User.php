@@ -53,6 +53,9 @@ class User extends Authenticatable
      */
     public function pritomnostUser(): HasOne
     {
+        if ($this->user_type === UserType::PHD_STUDENT) {
+            return $this->hasOne(PritomnostUser::class, 'personal_id', 'personal_id_dochadzka');
+        }
         return $this->hasOne(PritomnostUser::class, 'personal_id', 'personal_id');
     }
 

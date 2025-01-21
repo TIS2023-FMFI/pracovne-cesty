@@ -110,7 +110,6 @@ class SynchronizationController extends Controller
         $endDate = $businessTrip->datetime_end;
         $dateRange = CarbonPeriod::create($startDate->copy()->startOfDay(), '1 day', $endDate->copy()->startOfDay());
 
-
         // Start DB transaction
         DB::connection('dochadzka')->beginTransaction();
 
