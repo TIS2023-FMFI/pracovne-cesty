@@ -88,6 +88,15 @@
                         <x-simple-input name="datetime_start" type="datetime-local" label="Dátum a čas"/>
                     </x-content-section>
 
+                    <x-tooltip
+                        text='Pod pojmom "Koniec cesty" sa rozumie konkrétne miesto, kde sa vaša cesta skutočne ukončí
+                        (napríklad návrat domov), a nie miesto, kam primárne cestujete za účelom pracovnej cesty.
+                        Príklad: "vyrážam z Bratislavy na konferenciu do Viedne, odkiaľ sa potom vrátim priamo domov
+                        do Trnavy". Koniec cesty je v tomto prípade Trnava, zataľ čo Viedeň je "Cieľ cesty", ktorý sa
+                        vypĺňa nižšie.'
+                        icon="question-circle">
+                    </x-tooltip>
+
                     <x-content-section
                         title="Koniec cesty"
                         class="col-md col-12">
