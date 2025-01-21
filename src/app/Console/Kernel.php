@@ -16,7 +16,7 @@ class Kernel extends ConsoleKernel
     {
         $schedule->command('invitation-links:cleanup')->hourly();
         $schedule->command('trip-reports:send-reminders')->daily()->at(self::REPORT_REMINDER_TIME);
-        $schedule->command('trip-reports:deadline-reminders')->daily()->at(self::REPORT_REMINDER_TIME);
+        $schedule->command('trip-reports:send-deadline-reminders')->daily()->at(self::REPORT_REMINDER_TIME);
     }
 
     /**

@@ -16,7 +16,7 @@ class TripReportDeadlineReminder extends Command
      *
      * @var string
      */
-    protected $signature = 'trip-reports:deadline-reminders';
+    protected $signature = 'trip-reports:send-deadline-reminders';
 
     /**
      * The console command description.
