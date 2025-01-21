@@ -18,7 +18,10 @@ class SPPController extends Controller
     public function manage() {
         return view('spp.manage', ['spp_symbols' =>
             SppSymbol::where('status', SppStatus::ACTIVE)
-                ->pluck('spp_symbol', 'id')]);
+                ->pluck('spp_symbol', 'id'),
+                'deactivated_symbols' =>
+                SppSymbol::where('status', SppStatus::DEACTIVATED)
+                    ->pluck('spp_symbol', 'id')]);
     }
 
     /**
@@ -71,6 +74,8 @@ class SPPController extends Controller
         return view('spp.manage', [
             'spp_symbols' => SppSymbol::where('status', SppStatus::ACTIVE)
                 ->pluck('spp_symbol', 'id'),
+            'deactivated_symbols' => SppSymbol::where('status', SppStatus::DEACTIVATED)
+                            ->pluck('spp_symbol', 'id'),
             'editing_spp' => $sppSymbol // Pass selected SPP Symbol for editing
         ]);
     }
@@ -120,5 +125,17 @@ class SPPController extends Controller
         SppSymbol::find($validatedData['spp'])->update(['status' => SppStatus::DEACTIVATED]);
 
         return redirect()->route('spp.manage')->with('message', 'ŠPP prvok bol deaktivovaný.');
+    }
+
+    /**
+     * Input parameter of type Request and the spp symbol
+     * Updating the spp symbols state to activated
+     */
+    public function activate(Request $request): RedirectResponse
+    {
+        $validatedData = $request->validate(['spp' => 'required|exists:spp_symbols,id']);
+        SppSymbol::find($validatedData['spp'])->update(['status' => SppStatus::ACTIVE]);
+
+        return redirect()->route('spp.manage')->with('message', 'ŠPP prvok bol aktivovaný.');
     }
 }
