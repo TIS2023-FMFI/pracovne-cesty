@@ -53,8 +53,8 @@ class SPPController extends Controller
             'functional_region' => 'required|string|max:10',
             'financial_centre' => 'required|string|max:10',
             'grantee' => 'required|string|max:100',
-            'agency' => 'required|string|max:100',
-            'acronym' => 'required|string|max:10',
+            'agency' => 'max:100',
+            'acronym' => 'max:10',
             ],$customMessages, $customAttributes);
 
         SppSymbol::create($validatedData);
@@ -102,8 +102,8 @@ class SPPController extends Controller
             'functional_region' => 'required|string|max:10',
             'financial_centre' => 'required|string|max:10',
             'grantee' => 'required|string|max:100',
-            'agency' => 'required|string|max:100',
-            'acronym' => 'required|string|max:10',
+            'agency' => 'max:100',
+            'acronym' => 'max:10',
         ], $customMessages, $customAttributes);
 
         // Retrieve and update the SPP symbol
