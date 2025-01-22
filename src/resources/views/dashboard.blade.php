@@ -48,7 +48,7 @@
 
         <div class="mr-2 btn-group">
             <x-link-button color="danger"
-                href="{{route('instruction') }}">Návod
+                href="{{route('instructions') }}">Návod
             </x-link-button>
         </div>
     </div>
