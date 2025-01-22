@@ -27,6 +27,28 @@ $isEditMode = isset($editing_spp);
             </form>
         </div>
 
+        {{-- Activation Form --}}
+        <div>
+            <form action="{{ route('spp.activate') }}" method="POST">
+                @csrf
+                @method('PUT')
+                <x-content-section title="Aktivácia">
+                    <div class="form-row">
+                        <div class="col-md-6 col-12">
+                            <x-dropdown-input name="spp" :values="$deactivated_symbols" label="ŠPP prvok:"></x-dropdown-input>
+                        </div>
+                        <div class="col-md-6 col-12">
+                            <div class="d-flex justify-content-md-start justify-content-end h-100">
+                                <div class="form-group align-self-end">
+                                    <x-button color="danger">Aktivovať</x-button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </x-content-section>
+            </form>
+        </div>
+
         {{-- New or Edit Form --}}
         <form action="{{ $isEditMode ? route('spp.update', $editing_spp->id) : route('spp.store') }}" method="POST">
             @csrf

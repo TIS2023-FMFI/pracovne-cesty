@@ -208,6 +208,10 @@ Route::controller(SPPController::class)
         Route::put('/deactivate', 'deactivate')
             ->name('deactivate');
 
+        // Activate an SPP symbol
+        Route::put('/activate', 'activate')
+            ->name('activate');
+
         // Edit an existing SPP symbol (pre-fill form)
         Route::get('/{id}/edit', 'edit')
             ->name('edit');
