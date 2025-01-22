@@ -380,6 +380,7 @@ class BusinessTripController extends Controller
 
             try {
                 if ($tripState->hasTravellerReturned()) {
+                    Log::info('Data passed to createOrUpdateExpenses:', $validatedExpensesData);
                     self::createOrUpdateExpenses($validatedExpensesData, $trip);
                 }
 
@@ -1192,27 +1193,26 @@ class BusinessTripController extends Controller
         $validatedExpensesData = [];
 
         foreach ($expenses as $expenseName) {
-            $validatedExpenseData = $request->validate([
+            $rules = [
                 $expenseName . '_expense_eur' => 'nullable|string|max:20',
-                $expenseName . '_expense_not_reimburse' => 'nullable'
-            ]);
+                $expenseName . '_expense_not_reimburse' => 'nullable',
+            ];
 
             if ($trip->type === TripType::FOREIGN) {
-                $validatedExpenseData = array_merge(
-                    $validatedExpenseData,
-                    $request->validate([$expenseName . '_expense_foreign' => 'nullable|string:max:20'])
-                );
+                $rules[$expenseName . '_expense_foreign'] = 'nullable|string|max:20';
             }
+            $validatedExpenseData = $request->validate($rules);
 
-            $validatedExpensesData[$expenseName] = $validatedExpenseData;
+            $validatedExpensesData[$expenseName] = array_merge([
+                $expenseName . '_expense_eur' => null,
+                $expenseName . '_expense_not_reimburse' => null,
+            ], $validatedExpenseData);
         }
-
         $validatedExpensesData = array_merge(
             $validatedExpensesData,
-            $request->validate(['expense_estimation' => 'nullable|string|max:20'])
+            $request->validate(['expense_estimation' => 'nullable|string|max:20']),
+            ['no_meals_reimbursed' => $request->has('no_meals_reimbursed')]
         );
-
-        $validatedExpensesData['no_meals_reimbursed'] = $request->has('no_meals_reimbursed');
         return $validatedExpensesData;
     }
 
