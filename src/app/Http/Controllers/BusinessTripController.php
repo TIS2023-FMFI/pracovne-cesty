@@ -430,6 +430,16 @@ class BusinessTripController extends Controller
             // Validate based on trip state
             switch ($tripState) {
                 case TripState::NEW:
+                    $validatedUserData = self::validateUserData($request);
+                    $validatedTripData = self::validateUpdatableTripData($request) + self::validateFixedTripData($request);
+                    $validatedTripData = array_merge($validatedTripData,
+                    $request->validate([
+                        'event_url' => 'nullable|url|max:200',
+                        'spp_symbol_id' => 'required'
+                    ]));
+
+                    break;
+
                 case TripState::CONFIRMED:
                     $validatedTripData = self::validateUpdatableTripData($request);
 
@@ -467,6 +477,11 @@ class BusinessTripController extends Controller
 
                 // Update the trip with the provided data
                 $trip->update($validatedTripData);
+
+                if($tripState === TripState::NEW){
+                    $authUser = Auth::user();
+                    $authUser->update($validatedUserData);
+                }
 
                 DB::commit();
 
@@ -696,7 +711,7 @@ class BusinessTripController extends Controller
             $trip->update($validatedData);
 
             // Send email notification to the admin
-            
+
             $sofiaID = $trip->sofia_id ?? '0000';
             $message = 'ID pracovnej cesty: ' . $sofiaID
                 . ' Meno a priezvisko cestujúceho: ' . $trip->user->fullName();
