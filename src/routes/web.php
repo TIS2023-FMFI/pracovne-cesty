@@ -36,10 +36,10 @@ Route::get('/home', static function (Request $request) {
     ->name('homepage');
 
 //Instruction
-Route::get('/instruction', static function(){
-    return view('instruction');
+Route::get('/instructions', static function(){
+    return view('instructions');
 })
-    ->name('instruction');
+    ->name('instructions');
 
 // Business trip management
 Route::controller(BusinessTripController::class)

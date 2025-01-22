@@ -32,6 +32,11 @@
         </ol>
           <p></p>
           <p>V stavoch <strong>NOVÁ</strong><x-state-icon :state=TripState::NEW/> alebo <strong>POTVRDENÁ</strong><x-state-icon :state=TripState::CONFIRMED/> môže cestujúci požiadať o stornovanie cesty (cesta prejde do stavu <strong>ŽIADOSŤ O STORNO</strong><x-state-icon :state=TripState::CANCELLATION_REQUEST/>). Pani sekretárka vie cestu stornovať v stave <strong>NOVÁ</strong><x-state-icon :state=TripState::NEW/> alebo na žiadosť cestujúceho, ktorú urobil v stave <strong>NOVÁ</strong><x-state-icon :state=TripState::NEW/> alebo <strong>POTVRDENÁ</strong><x-state-icon :state=TripState::CONFIRMED/>. Stornovaná cesta sa zmaže z Prítomnosti na pracovisku a v systéme Pracovné cesty zostane evidovaná v stave <strong>STORNOVANÁ</strong><x-state-icon :state=TripState::CANCELLED/>.</p>
+          <p></p>
+          <x-content-section title="Nápoveda">
+          <p>Pri vypĺňaní formulára na tvorbu a editáciu pracovnej cesty môžu používatelia natrafiť na červené otázniky. Po kliknutí na otáznik sa zobrazí nápoveda, ktorá používateľovi podrobnejšie vysvetlí, ako má dané políčko vyplniť.</p>
+          <x-tooltip text="Otvorili ste ukážkovú nápovedu. Opätovným kliknutím na otáznik nápovedu zavriete." icon="question-circle"></x-tooltip>
+          </x-content-section>
     </x-content-box>
 
     @if($isAdmin)
@@ -40,7 +45,8 @@
             <il>
                 <li>Po kliknutí na tlačidlo "<strong>ŠPP prvky</strong>" sa vám zobrazí stránka na prácu s ŠPP prvkami.</li>
                 <li>Prvý formulár slúži na deaktiváciu existujúcich prvkov. Vyberiete prvok, ktorý chcete deaktivovať a stlačíte tlačidlo "<strong>Deaktivovať</strong>".</li>
-                <li>Druhý formulár je na vytváranie nových prvkov a editáciu existujúcich. V ponuke "<strong>Výber ŠPP prvku</strong>" si zvolíte prvok, ktorý chcete editovať. Do formulára sa načítajú údaje tohto prvku a môžete ich editovať. Keď ste s úpravami spokojný/á, stlačíte tlačidlo "<strong>Uložiť zmeny</strong>".</li>
+                <li>Druhý formulár slúži na aktiváciu neaktívnych prvkov. Vyberiete prvok, ktorý chcete aktivovať a stlačíte tlačidlo "<strong>Aktivovať</strong>".</li>
+                <li>Posledný formulár je na vytváranie nových prvkov a editáciu existujúcich. V ponuke "<strong>Výber ŠPP prvku</strong>" si zvolíte prvok, ktorý chcete editovať. Do formulára sa načítajú údaje tohto prvku a môžete ich upravovať. Keď ste s úpravami spokojný/á, stlačíte tlačidlo "<strong>Uložiť zmeny</strong>".</li>
                 <li>V prípade, že ste v ponuke "<strong>Výber ŠPP prvku</strong>" zvolili možnosť "<strong>Nový prvok</strong>", formulár ostane prázdny. Vyplňte ho a stačte "<strong>Pridať ŠPP prvok</strong>" na uloženie nového prvku.</li>
             </il>
         </x-content-section>
