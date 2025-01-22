@@ -8,6 +8,7 @@
     use App\Enums\TripState;
     use App\Enums\DocumentType;
     use App\Enums\SppStatus;
+    use App\Enums\UserType;
     use Illuminate\Support\Facades\Auth;
 
     $isAdmin = Auth::user()->hasRole('admin');
@@ -663,9 +664,22 @@
                     @csrf
                     @method('PUT')
                     <div class="form-row align-items-end">
-                        <div class="col-9">
-                            <x-simple-input name="sofia_id" label="Identifikátor"></x-simple-input>
-                        </div>
+                        @if($trip->user->user_type != UserType::EMPLOYEE)
+                            <div class="col-4">
+                                <x-simple-input name="sofia_id" label="Identifikátor"></x-simple-input>
+                            </div>
+                            <div class="col-4">
+                                <x-simple-input name="dochadzka_id" label="Osobné číslo cestujúceho v systéme Dochádzky" :value="$trip->user->personal_id_dochadzka ?? ''"></x-simple-input>
+                            </div>
+                            <x-tooltip
+                                text='Do poľa "Osobné číslo cestujúceho v systéme Dochádzky" zadajte osobné číslo, ktoré patrí cestujúcemu v systéme Prítomnosť na Pracovisku. Dôkladne ho skontrolujte, keďže chybne zadané číslo znemožní správne zapísanie cesty do systému Prítomnosť.'
+                                icon="question-circle">
+                            </x-tooltip>
+                        @else
+                            <div class="col-9">
+                                <x-simple-input name="sofia_id" label="Identifikátor"></x-simple-input>
+                            </div>
+                        @endif
                         <div class="col-3 my-3 ">
                             <x-button>Potvrdiť cestu</x-button>
                         </div>
