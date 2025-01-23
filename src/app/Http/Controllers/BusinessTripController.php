@@ -6,6 +6,7 @@ use App\Enums\DocumentType;
 use App\Enums\PositionTitle;
 use App\Enums\TripState;
 use App\Enums\TripType;
+use App\Enums\UserType;
 use App\Mail\SimpleMail;
 use App\Models\BusinessTrip;
 use App\Models\ConferenceFee;
@@ -601,9 +602,19 @@ class BusinessTripController extends Controller
             throw ValidationException::withMessages(['state' => 'Invalid state for confirmation.']);
         }
 
+        // Get the authenticated user's ID
+        $targetUser = $trip->user;
+
+        // Check if dochadzka_id is required
+        $rule = '';
+        if($targetUser->user_type != UserType::EMPLOYEE){
+            $rule ='required|int';
+        }
+
         // Validate the sofia_id
         $validatedData = $request->validate([
             'sofia_id' => 'required|string|max:40',
+            'dochadzka_id' => $rule,
         ]);
 
         // Check if the sofia_id is a duplicate
@@ -619,6 +630,13 @@ class BusinessTripController extends Controller
             'state' => TripState::CONFIRMED,
             'sofia_id' => $validatedData['sofia_id']
         ]);
+
+        //record dochadzka_id
+        if($targetUser->user_type != UserType::EMPLOYEE){
+            $targetUser->update([
+                'personal_id_dochadzka' => $validatedData['dochadzka_id']
+            ]);
+        }
 
         $recipient = $trip->user->email;
         $message = 'Vaša pracovná cesta '

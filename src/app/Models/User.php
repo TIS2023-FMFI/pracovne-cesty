@@ -32,7 +32,7 @@ class User extends Authenticatable
         'first_name', 'last_name', 'academic_degrees',
         'personal_id', 'department', 'address',
         'email', 'username', 'password', 'status',
-        'iban', 'spp_user_type'
+        'iban', 'spp_user_type', 'personal_id_dochadzka'
     ];
 
     /**
@@ -53,6 +53,9 @@ class User extends Authenticatable
      */
     public function pritomnostUser(): HasOne
     {
+        if ($this->user_type !== UserType::EMPLOYEE) {
+            return $this->hasOne(PritomnostUser::class, 'personal_id', 'personal_id_dochadzka');
+        }
         return $this->hasOne(PritomnostUser::class, 'personal_id', 'personal_id');
     }
 
