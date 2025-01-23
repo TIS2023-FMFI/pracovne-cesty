@@ -81,6 +81,7 @@
             @csrf
             @method('PUT')
 
+            @if($tripState!=TripState::NEW)
             <x-content-section
                 title="Identifikátor"
                 :disabled="!$isAdmin || $tripState == TripState::CANCELLED">
@@ -91,6 +92,7 @@
                     </div>
                 </div>
             </x-content-section>
+            @endif
 
             <x-content-section
                 title="Osobné údaje"
@@ -669,10 +671,10 @@
                                 <x-simple-input name="sofia_id" label="Identifikátor"></x-simple-input>
                             </div>
                             <div class="col-4">
-                                <x-simple-input name="dochadzka_id" label="Osobné číslo cestujúceho v systéme Dochádzky" :value="$trip->user->personal_id_dochadzka ?? ''"></x-simple-input>
+                                <x-simple-input name="dochadzka_id" label="Osobné č. cestujúceho v systéme Dochádzky" :value="$trip->user->personal_id_dochadzka ?? ''"></x-simple-input>
                             </div>
                             <x-tooltip
-                                text='Do poľa "Osobné číslo cestujúceho v systéme Dochádzky" zadajte osobné číslo, ktoré patrí cestujúcemu v systéme Prítomnosť na Pracovisku. Dôkladne ho skontrolujte, keďže chybne zadané číslo znemožní správne zapísanie cesty do systému Prítomnosť.'
+                                text='Do poľa "Osobné č. cestujúceho v systéme Dochádzky" zadajte osobné číslo, ktoré patrí cestujúcemu v systéme Prítomnosť na Pracovisku. Dôkladne ho skontrolujte, keďže chybne zadané číslo znemožní správne zapísanie cesty do systému Prítomnosť.'
                                 icon="question-circle">
                             </x-tooltip>
                         @else
