@@ -6,6 +6,7 @@
 \usepackage{array}
 \usepackage{tabularx}
 \usepackage{setspace}
+\usepackage{amssymb}
 
 \geometry{a4paper,left=25mm,right=25mm,top=25mm,bottom=25mm}
 
