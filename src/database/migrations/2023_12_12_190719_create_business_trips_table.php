@@ -60,21 +60,46 @@ return new class extends Migration {
 
             $table->foreignIdFor(ConferenceFee::class)->nullable()->unique();
             $table->foreignIdFor(Reimbursement::class)->nullable()->unique();
-            $table->foreignIdFor(SppSymbol::class)->nullable();
+            $table->foreignIdFor(SppSymbol::class, 'spp_symbol_id')->nullable();
+            $table->foreignIdFor(SppSymbol::class, 'spp_symbol_id_2')->nullable();
+            $table->foreignIdFor(SppSymbol::class, 'spp_symbol_id_3')->nullable();
 
-            $table->foreignIdFor(Expense::class, 'accommodation_expense_id')
-                ->nullable()
-                ->unique();
+            $table->smallInteger('amount_eur')->nullable();
+            $table->smallInteger('amount_eur_2')->nullable();
+            $table->smallInteger('amount_eur_3')->nullable();
+
+            // Cestovne
             $table->foreignIdFor(Expense::class, 'travelling_expense_id')
                 ->nullable()
                 ->unique();
+
+            // Ubytovanie
+            $table->foreignIdFor(Expense::class, 'accommodation_expense_id')
+                ->nullable()
+                ->unique();
+
+            // Vlozne
+            $table->foreignIdFor(Expense::class, 'participation_expense_id')
+                ->nullable()
+                ->unique();
+
+            // Poistenie
+            $table->foreignIdFor(Expense::class, 'insurance_expense_id')
+                ->nullable()
+                ->unique();
+
+            // Ine vydavky
             $table->foreignIdFor(Expense::class, 'other_expense_id')
                 ->nullable()
                 ->unique();
-            $table->foreignIdFor(Expense::class, 'advance_expense_id')
+
+            // Vreckove
+            $table->foreignIdFor(Expense::class, 'allowance_expense_id')
                 ->nullable()
                 ->unique();
-            $table->foreignIdFor(Expense::class, 'allowance_expense_id')
+
+            // Zaloha
+            $table->foreignIdFor(Expense::class, 'advance_expense_id')
                 ->nullable()
                 ->unique();
 
@@ -89,6 +114,8 @@ return new class extends Migration {
             $table->string('note', 5000)->nullable();
             $table->string('conclusion', 5000)->nullable();
 
+            // Template
+            $table->boolean('is_template')->default(false);
 
             // Timestamp
             $table->timestamps();

@@ -49,7 +49,10 @@ class UserFactory extends Factory
             'password' => Hash::make('password'),
 
             'status' => fake()->randomElement(UserStatus::cases()),
-            'last_login' => fake()->dateTimeThisDecade()
+            'last_login' => fake()->dateTimeThisDecade(),
+
+            'iban' => fake()->iban('SK'),
+            'spp_user_type' => fake()->numberBetween(1, 10)
         ];
     }
 }

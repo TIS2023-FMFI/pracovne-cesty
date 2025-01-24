@@ -128,14 +128,15 @@ class UserController extends Controller
     {
         $credentials = $request->only('username', 'password');
         $synced = SynchronizationController::syncSingleUser($credentials['username']);
-        $user = User::where('username', $credentials['username'])->first();
+        $user = User::where('username', $credentials['username'])
+                ->where('status', 1)->first();
 
         if ($user && Auth::attempt($credentials)) {
             $request->session()->regenerate();
             return redirect()->route('homepage')->with('message', 'Boli ste úspešne prihlásená/ný.');
         }
 
-        return back()->with('message', 'Zadané meno alebo heslo nie sú správne.');
+        return back()->with('message', 'Zadané meno alebo heslo nie sú správne, alebo je váš účet deaktivovaný.');
     }
 
     /** Translate URL from local to one that can be accessed from Internet, example:
@@ -280,4 +281,39 @@ class UserController extends Controller
             ? redirect()->route('homepage')->with('status', __($status))
             : back()->withErrors(['email' => [__($status)]]);
     }
+
+    public function activateUser(Request $request): RedirectResponse
+    {
+        $userId = $request['user'];
+        $user = $userId ? User::find($userId) : null;
+        if($user == null){
+            $message = "Vybraný používteľ neexistuje.";
+        }else{
+            if(User::activateUserWithId($userId)){
+                $message = "Používateľ bol úspešne aktivovaný.";
+            }else{
+                $message = "Používateľa sa nepodarilo aktivovať.";
+            }
+        }
+        return redirect()->route('homepage',['inactive'=>$request['inactive'], 'sort'=>$request['sort']])->with('message',$message);
+    }
+
+    public function deactivateUser(Request $request): RedirectResponse
+        {
+            $currentUserId = Auth::user()->id;
+            $userId = $request['user'];
+            $user = $userId ? User::find($userId) : null;
+            if($user == null){
+                $message = "Vybraný používteľ neexistuje.";
+            }else if($userId == $currentUserId){
+                $message = "Nemôžete deaktivovať svoj vlastný účet.";
+            }else{
+                if(User::deactivateUserWithId($userId)){
+                    $message = "Používateľ bol úspešne deaktivovaný.";
+                }else{
+                    $message = "Používateľa sa nepodarilo deaktivovať.";
+                }
+            }
+            return redirect()->route('homepage',['inactive'=>$request['inactive'], 'sort'=>$request['sort']])->with('message',$message);
+        }
 }

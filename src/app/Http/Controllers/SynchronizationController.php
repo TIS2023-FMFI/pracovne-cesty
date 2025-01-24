@@ -12,6 +12,7 @@ use Carbon\CarbonPeriod;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Throwable;
+use App\Enums\PritomnostAbsenceConfirmedStatus;
 
 class SynchronizationController extends Controller
 {
@@ -24,14 +25,17 @@ class SynchronizationController extends Controller
      */
     public static function syncSingleUser(string $username): bool
     {
+        $cestyDatabase = config('database.connections.cesty.database');
+        $dochadzkaDatabase = config('database.connections.dochadzka.database');
+
         // Use LEFT JOIN to check if the user exists in the Cesty database
         $userToSync = PritomnostUser::leftJoin(
-            'cesty.users',
-            'cesty.users.personal_id', '=', 'dochadzka.users.personal_id'
+            "{$cestyDatabase}.users",
+            "{$cestyDatabase}.users.personal_id", '=', "{$dochadzkaDatabase}.users.personal_id"
         )
-            ->where('dochadzka.users.username', $username)
-            ->where('dochadzka.users.personal_id', "<", 10790002)
-            ->select('dochadzka.users.*', 'cesty.users.id as cesty_user_id')
+            ->where("{$dochadzkaDatabase}.users.username", $username)
+            ->where("{$dochadzkaDatabase}.users.personal_id", "<", 10790002)
+            ->select("{$dochadzkaDatabase}.users.*", "{$cestyDatabase}.users.id as {$cestyDatabase}_user_id")
             ->first();
 
         // Update user details in the Cesty database based on the Pritomnost database
@@ -83,28 +87,20 @@ class SynchronizationController extends Controller
      * @return bool true if the sync has been successful, false otherwise
      * @throws Exception|Throwable If there is an issue with DateTime or DB connection
      */
-    public static function syncSingleBusinessTrip($businessTripId): bool
+    public static function createSingleBusinessTrip($businessTripId, $confirmed): bool
     {
-        // Handbrake to temporarily disable trip sync with Pritomnost
-        // since we are a bit afraid to write to the Pritomnost DB
-        $sync = false;
-        if (!$sync) {
-            // Pass this method
-            return true;
-        }
-
         // Fetch the specific business trip
         $businessTrip = BusinessTrip::find($businessTripId);
 
         if (!$businessTrip) {
-            throw new Exception();
+            return false;
         }
 
         // Get the Pritomnost user_id
         $pritomnostUser = $businessTrip->user->pritomnostUser()->first();
 
         if (!$pritomnostUser) {
-            throw new Exception();
+            return false;
         }
 
         $pritomnostUserId = $pritomnostUser->id;
@@ -112,7 +108,7 @@ class SynchronizationController extends Controller
         // Calculate the number of days in the business trip
         $startDate = $businessTrip->datetime_start;
         $endDate = $businessTrip->datetime_end;
-        $dateRange = new CarbonPeriod($startDate, '1 day', $endDate);
+        $dateRange = CarbonPeriod::create($startDate->copy()->startOfDay(), '1 day', $endDate->copy()->startOfDay());
 
         // Start DB transaction
         DB::connection('dochadzka')->beginTransaction();
@@ -126,23 +122,67 @@ class SynchronizationController extends Controller
                 // Check if the absence already exists in the Pritomnost database for this day
                 $existingAbsence = PritomnostAbsence::where([
                     'user_id' => $pritomnostUserId,
-                    'date_time' => $date->format('Y-m-d')
+                    'date_time' => $date->format('Y-m-d'),
                 ])->first();
 
-                if (!$existingAbsence) {
+                $exists = $existingAbsence ? true : false;
+
+                if ($exists && $existingAbsence->type == PritomnostAbsenceType::VACATION) {
+                    $existingAbsence->delete();
+                    $exists = false;
+                }
+
+                if (!$exists) {
                     // Create absence record in the Pritomnost database
                     PritomnostAbsence::create([
                         'user_id' => $pritomnostUserId,
                         'date_time' => $date->format('Y-m-d'),
                         'from_time' => $fromTime,
                         'to_time' => $toTime,
+                        'description' => $businessTrip->type->inSlovak() . ' pracovná cesta ' . $businessTrip->place,
                         'type' => PritomnostAbsenceType::BUSINESS_TRIP,
-                        'description' => $businessTrip->type->inSlovak() . ' pracovná cesta',
-                        'confirmation' => false
+                        'confirmation' => $confirmed,
+                        'cesty_id' => $businessTripId
                         // Other values are not defined
                     ]);
                 }
             }
+
+            DB::connection('dochadzka')->commit();
+        } catch (Exception $e) {
+            DB::connection('dochadzka')->rollBack();
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Deletes a cancelled business trip from the Pritomnost database.
+     *
+     * @param int $businessTripId The ID of the business trip to be deleted.
+     * @return bool Returns true if the business trip was successfully deleted, false otherwise.
+     */
+    public static function deleteCancelledBusinessTrip($businessTripId) : bool {
+        $businessTrip = BusinessTrip::find($businessTripId);
+
+        if (!$businessTrip) {
+            return false;
+        }
+
+        $pritomnostUser = $businessTrip->user->pritomnostUser()->first();
+
+        if (!$pritomnostUser) {
+            return false;
+        }
+
+        DB::connection('dochadzka')->beginTransaction();
+
+        try {
+            PritomnostAbsence::where('user_id', $pritomnostUser->id)
+                ->whereNotNull('cesty_id')
+                ->where('cesty_id', $businessTripId)
+                ->delete();
 
             DB::connection('dochadzka')->commit();
 
@@ -152,5 +192,41 @@ class SynchronizationController extends Controller
         }
 
         return true;
+    }
+
+    /**
+     * Updates a single business trip by first deleting it from the Prtiomnost system's database and then creating it again with the updated data.
+     *
+     * @param int $businessTripId The ID of the business trip to update.
+     * @return bool Returns true if the business trip was successfully updated, false otherwise.
+     */
+    public static function updateSingleBusinessTrip($businessTripId) : bool {
+        
+        $businessTrip = BusinessTrip::find($businessTripId);
+        if (!$businessTrip) {
+            return false;
+        }
+        
+        $pritomnostUser = $businessTrip->user->pritomnostUser()->first();
+        if (!$pritomnostUser) {
+            return false;
+        }
+        
+        $existingAbsence = PritomnostAbsence::where([
+            'user_id' => $pritomnostUser->id,
+            'cesty_id' => $businessTripId
+        ])->first();
+        
+        $originalConfirmation = $existingAbsence ? $existingAbsence->confirmation : false;
+        $confirmed = PritomnostAbsenceConfirmedStatus::UNCONFIRMED;
+        if ($originalConfirmation) {
+            $confirmed = PritomnostAbsenceConfirmedStatus::CONFIRMED;
+        }
+
+        if (!self::deleteCancelledBusinessTrip($businessTripId)) {
+            return false;
+        }
+
+        return self::createSingleBusinessTrip($businessTripId, $confirmed);
     }
 }

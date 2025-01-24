@@ -13,6 +13,7 @@ return new class extends Migration {
         Schema::create('countries', static function (Blueprint $table) {
             $table->id();
             $table->string('name', 100)->unique();
+            $table->unsignedBigInteger('trips_count')->default(0);
         });
     }
 

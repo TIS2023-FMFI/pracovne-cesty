@@ -22,8 +22,20 @@ class StaffSeeder extends Seeder
 
         Staff::create([
             'position' => PositionTitle::SECRETARY,
-            'position_name' => 'tajomníčka fakulty',
-            'incumbent_name' => 'PaedDr. Martina Chovancová, PhD.'
+            'position_name' => 'tajomník fakulty',
+            'incumbent_name' => 'Mgr. Daniel Vozár'
+        ]);
+
+        Staff::create([
+            'position' => PositionTitle::DAI_CHAIR,
+            'position_name' => 'vedúca KAI',
+            'incumbent_name' => 'doc. RNDr. Tatiana Jajcayová, PhD.'
+        ]);
+
+        Staff::create([
+            'position' => PositionTitle::FINANCIAL_DIRECTOR,
+            'position_name' => 'vedúca ekonomického oddelenia',
+            'incumbent_name' => 'Ing. Katarína Rusnáková'
         ]);
     }
 }

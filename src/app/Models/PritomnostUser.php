@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class PritomnostUser extends Model
 {
+    private const REQUEST_VALIDATOR_ID = 822;   # Udaj z PritomnostNaPracovisku/Aplikácia/include/config.php
     protected $connection = 'dochadzka';
     protected $table = 'users';
 
@@ -38,6 +39,15 @@ class PritomnostUser extends Model
      */
     public function cestyUser(): HasOne
     {
-        return $this->hasOne(User::class, 'personal_id', 'personal_id');
+        $relationship = $this->hasOne(User::class, 'personal_id', 'personal_id');
+        if ($relationship !== null) {
+            return $relationship;
+        }
+        
+        return $this->hasOne(User::class, 'personal_id_dochadzka', 'personal_id');
+    }
+
+    public static function getRequestValidators() {
+        return self::where('personal_id', self::REQUEST_VALIDATOR_ID)->get();
     }
 }

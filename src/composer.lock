@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "39ddcc554f8f4c2fbfb7a9b275eb532e",
+    "content-hash": "e0418e65ce309c6619838ba3e4dc021f",
     "packages": [
         {
             "name": "brick/math",
@@ -1109,6 +1109,71 @@
             "time": "2023-12-03T19:50:20+00:00"
         },
         {
+            "name": "ismaelw/laratex",
+            "version": "v1.2.5",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/ismaelw/laratex.git",
+                "reference": "221ac0aa15faf8c9659b0427a3d5f79045102dd5"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/ismaelw/laratex/zipball/221ac0aa15faf8c9659b0427a3d5f79045102dd5",
+                "reference": "221ac0aa15faf8c9659b0427a3d5f79045102dd5",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/filesystem": "^6.0|^7.0|^8.0|^9.0|^10.0|^11.0",
+                "illuminate/support": "^6.0|^7.0|^8.0|^9.0|^10.0|^11.0",
+                "php": "^7.4|^8.0",
+                "symfony/process": "^3.0|^4.0|^5.0|^6.0|^7.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "aliases": {
+                        "LaraTeX": "Ismaelw\\LaraTeX\\LaraTeXFacade"
+                    },
+                    "providers": [
+                        "Ismaelw\\LaraTeX\\LaraTeXServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Ismaelw\\LaraTeX\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Ismael Wismann",
+                    "email": "wismann.ismael@gmail.com",
+                    "role": "Developer"
+                }
+            ],
+            "description": "A package for creating PDFs in Laravel using LaTeX",
+            "homepage": "https://github.com/ismaelw/laratex",
+            "keywords": [
+                "ismaelw",
+                "laratex"
+            ],
+            "support": {
+                "issues": "https://github.com/ismaelw/laratex/issues",
+                "source": "https://github.com/ismaelw/laratex/tree/v1.2.5"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/ismaelw",
+                    "type": "github"
+                }
+            ],
+            "time": "2024-10-22T07:33:25+00:00"
+        },
+        {
             "name": "laravel/framework",
             "version": "v10.44.0",
             "source": {
@@ -1956,145 +2021,6 @@
                 }
             ],
             "time": "2024-01-28T23:22:08+00:00"
-        },
-        {
-            "name": "mikehaertl/php-pdftk",
-            "version": "0.13.1",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/mikehaertl/php-pdftk.git",
-                "reference": "3851b08c1027489e48387d7c14c27bc295d98239"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/mikehaertl/php-pdftk/zipball/3851b08c1027489e48387d7c14c27bc295d98239",
-                "reference": "3851b08c1027489e48387d7c14c27bc295d98239",
-                "shasum": ""
-            },
-            "require": {
-                "mikehaertl/php-shellcommand": "^1.6.3",
-                "mikehaertl/php-tmpfile": "^1.1.0",
-                "php": ">=5.3.0"
-            },
-            "require-dev": {
-                "phpunit/phpunit": ">4.0 <9.4"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "mikehaertl\\pdftk\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Michael Haertl",
-                    "email": "haertl.mike@gmail.com"
-                }
-            ],
-            "description": "A PDF conversion and form utility based on pdftk.",
-            "keywords": [
-                "pdf",
-                "pdftk"
-            ],
-            "support": {
-                "issues": "https://github.com/mikehaertl/php-pdftk/issues",
-                "source": "https://github.com/mikehaertl/php-pdftk/tree/0.13.1"
-            },
-            "time": "2023-11-03T16:06:08+00:00"
-        },
-        {
-            "name": "mikehaertl/php-shellcommand",
-            "version": "1.7.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/mikehaertl/php-shellcommand.git",
-                "reference": "e79ea528be155ffdec6f3bf1a4a46307bb49e545"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/mikehaertl/php-shellcommand/zipball/e79ea528be155ffdec6f3bf1a4a46307bb49e545",
-                "reference": "e79ea528be155ffdec6f3bf1a4a46307bb49e545",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">= 5.3.0"
-            },
-            "require-dev": {
-                "phpunit/phpunit": ">4.0 <=9.4"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "mikehaertl\\shellcommand\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Michael Härtl",
-                    "email": "haertl.mike@gmail.com"
-                }
-            ],
-            "description": "An object oriented interface to shell commands",
-            "keywords": [
-                "shell"
-            ],
-            "support": {
-                "issues": "https://github.com/mikehaertl/php-shellcommand/issues",
-                "source": "https://github.com/mikehaertl/php-shellcommand/tree/1.7.0"
-            },
-            "time": "2023-04-19T08:25:22+00:00"
-        },
-        {
-            "name": "mikehaertl/php-tmpfile",
-            "version": "1.2.1",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/mikehaertl/php-tmpfile.git",
-                "reference": "70a5b70b17bc0d9666388e6a551ecc93d0b40a10"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/mikehaertl/php-tmpfile/zipball/70a5b70b17bc0d9666388e6a551ecc93d0b40a10",
-                "reference": "70a5b70b17bc0d9666388e6a551ecc93d0b40a10",
-                "shasum": ""
-            },
-            "require-dev": {
-                "php": ">=5.3.0",
-                "phpunit/phpunit": ">4.0 <=9.4"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "mikehaertl\\tmp\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Michael Härtl",
-                    "email": "haertl.mike@gmail.com"
-                }
-            ],
-            "description": "A convenience class for temporary files",
-            "keywords": [
-                "files"
-            ],
-            "support": {
-                "issues": "https://github.com/mikehaertl/php-tmpfile/issues",
-                "source": "https://github.com/mikehaertl/php-tmpfile/tree/1.2.1"
-            },
-            "time": "2021-03-01T18:26:25+00:00"
         },
         {
             "name": "monolog/monolog",
@@ -9621,5 +9547,5 @@
         "php": "^8.1"
     },
     "platform-dev": [],
-    "plugin-api-version": "2.2.0"
+    "plugin-api-version": "2.6.0"
 }

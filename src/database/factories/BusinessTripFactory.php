@@ -78,9 +78,17 @@ class BusinessTripFactory extends Factory
             'conference_fee_id' => null,
             'reimbursement_id' => null,
             'spp_symbol_id' => SppSymbol::all()->random()->id,
+            'spp_symbol_id_2' => SppSymbol::all()->random()->id,
+            'spp_symbol_id_3' => SppSymbol::all()->random()->id,
+
+            'amount_eur' => fake()->optional()->numberBetween(2, 20),
+            'amount_eur_2' => fake()->optional()->numberBetween(0, 10),
+            'amount_eur_3' => fake()->optional()->numberBetween(0, 10),
 
             'accommodation_expense_id' => null,
             'travelling_expense_id' => null,
+            'participation_expense_id' => null,
+            'insurance_expense_id' => null,
             'other_expense_id' => null,
             'advance_expense_id' => null,
             'allowance_expense_id' => null,
@@ -96,6 +104,8 @@ class BusinessTripFactory extends Factory
             'cancellation_reason' => '',
             'note' => fake()->optional()->realText(100),
             'conclusion' => fake()->optional()->realText(100),
+
+            'is_template' => fake()->boolean(false),
         ];
     }
 }

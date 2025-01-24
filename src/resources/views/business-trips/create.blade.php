@@ -12,12 +12,17 @@
     $old_spp_symbol_id = old("spp_symbol_id");
     $old_reimbursement_spp_symbol_id = old("reimbursement_spp_symbol_id");
 
-    $countries = Country::all()->pluck('name', 'id');
+    $sortedCountries = Country::getSortedByTripsCount();
+    $countries = Country::makeSlovakiaFirst($sortedCountries)->pluck('name', 'id');
     $transports = Transport::where('user_visible', 1)->pluck('name', 'id');
     $purposes = TripPurpose::all()->pluck('name', 'id');
     $contributions = Contribution::all()->pluck('name', 'id');
-    $spp_symbols = SppSymbol::where('status', SppStatus::ACTIVE)->orderBy('spp_symbol', 'ASC')
-        ->pluck('spp_symbol', 'id');
+
+    $sppSymbolsQuery = SppSymbol::where('status', SppStatus::ACTIVE)->orderBy('spp_symbol', 'ASC');
+
+    $spp_symbols = $sppSymbolsQuery
+        ->get()
+        ->mapWithKeys(fn ($spp) => [$spp->id => $spp->spp_symbol . ' - ' . $spp->agency. ', ' . $spp->acronym . ', ' . $spp->grantee ]);
 
     $user = $selectedUser ?? Auth::user();
     $userType = $user->user_type;
@@ -26,6 +31,9 @@
 
 <x-layout>
     <x-content-box title="Nová pracovná cesta">
+        @error('duplicate')
+        <p><span style="color: red;">{{ $message }}</span></p>
+        @enderror
         <form method="POST" action="{{ route('trip.store') }}" enctype="multipart/form-data">
             @csrf
             <x-simple-input name="target_user" :value="$user->id" hidden/>
@@ -54,8 +62,19 @@
                 </div>
 
                 <div class="form-row">
+                    <x-tooltip
+                        text="Číslo účtu je podľa možností už predvyplnené na základe údajov z profilu cestujúceho /
+                        predchádzajúcej pracovnej cesty. Ak si želáte použiť dané čislo účtu, nemusíte robiť nič.
+                        Pre použitie iného čísla účtu len pre túto pracovnú cestu stačí, keď dané číslo zadáte do
+                        príslušného poľa. Ak si však želáte, aby sa toto nové číslo účtu zobrazovalo ako prednastavené
+                        pre budúce pracovné cesty, zaškrtnite prosím aj príslušné okienko na jeho uloženie."
+                        icon="question-circle">
+                    </x-tooltip>
                     <div class="col-md-6 col-12">
-                        <x-simple-input name="iban" label="Číslo účtu"/>
+                        <x-simple-input name="iban" label="Číslo účtu" :value="$user->iban ?? ''"/>
+                    </div>
+                    <div class="mr-2 ml-2 mt-5">
+                        <input type = 'checkbox' name='storeIban'> Uložiť číslo účtu?
                     </div>
                 </div>
             </x-content-section>
@@ -69,6 +88,15 @@
                         <x-simple-input name="datetime_start" type="datetime-local" label="Dátum a čas"/>
                     </x-content-section>
 
+                    <x-tooltip
+                        text='Pod pojmom "Koniec cesty" sa rozumie konkrétne miesto, kde sa vaša cesta skutočne ukončí
+                        (napríklad návrat domov), a nie miesto, kam primárne cestujete za účelom pracovnej cesty.
+                        Príklad: "vyrážam z Bratislavy na konferenciu do Viedne, odkiaľ sa potom vrátim priamo domov
+                        do Trnavy". Koniec cesty je v tomto prípade Trnava, zataľ čo Viedeň je "Cieľ cesty", ktorý sa
+                        vypĺňa nižšie.'
+                        icon="question-circle">
+                    </x-tooltip>
+
                     <x-content-section
                         title="Koniec cesty"
                         class="col-md col-12">
@@ -79,7 +107,7 @@
 
                 <div class="form-row">
                     <div class="col-md-6 col-12">
-			<x-dropdown-input name="transport_id" label="Dopravný prostriedok" :values="$transports" 
+			<x-dropdown-input name="transport_id" label="Dopravný prostriedok" :values="$transports"
                              :selected="$old_transport_id" />
                     </div>
                 </div>
@@ -91,8 +119,8 @@
                     <div class="col-md col-12">
                         <x-simple-input name="place" label="Miesto"/>
                     </div>
-		    <div class="col-md col-12"> 
-                        <x-dropdown-input name="country_id" label="Štát" :values="$countries" 
+		    <div class="col-md col-12">
+                        <x-dropdown-input name="country_id" label="Štát" :values="$countries"
 			          :selected="$old_country_id" />
                     </div>
 
@@ -151,7 +179,7 @@
                     <div class="col-md col-12">
                         <x-dropdown-input name="spp_symbol_id" label="ŠPP prvok 1 (vyberte prázdny, ak sa doplní ručne):" :values="$spp_symbols"
                            :selected="$old_spp_symbol_id" />
- 
+
                     </div>
                     <div class="col-md col-12">
                         <x-checkbox name="reimbursement" label="Refundovať" control="reimbursementShow"></x-checkbox>

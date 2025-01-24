@@ -31,7 +31,8 @@ class User extends Authenticatable
     protected $fillable = [
         'first_name', 'last_name', 'academic_degrees',
         'personal_id', 'department', 'address',
-        'email', 'username', 'password', 'status'
+        'email', 'username', 'password', 'status',
+        'iban', 'spp_user_type', 'personal_id_dochadzka'
     ];
 
     /**
@@ -52,6 +53,9 @@ class User extends Authenticatable
      */
     public function pritomnostUser(): HasOne
     {
+        if ($this->user_type !== UserType::EMPLOYEE) {
+            return $this->hasOne(PritomnostUser::class, 'personal_id', 'personal_id_dochadzka');
+        }
         return $this->hasOne(PritomnostUser::class, 'personal_id', 'personal_id');
     }
 
@@ -72,5 +76,28 @@ class User extends Authenticatable
 
     public function fullName(): string {
         return $this->first_name . ' ' . $this->last_name;
+    }
+
+    public static function getSortedByLastName() : Collection {
+        return self::orderBy('last_name', 'asc')->get();
+    }
+
+
+    public static function updateIbanOfUserWithId($id, $newIban):bool
+    {
+        $affectedRows = self::where('id', $id)->update(["iban" => $newIban]);
+        return $affectedRows > 0;
+    }
+
+    public static function activateUserWithId($id):bool
+    {
+        $affectedRows = self::where("id", $id)->update(["status" => UserStatus::ACTIVE]);
+        return $affectedRows > 0;
+    }
+
+    public static function deactivateUserWithId($id):bool
+    {
+        $affectedRows = self::where("id", $id)->update(["status" => UserStatus::INACTIVE]);
+        return $affectedRows > 0;
     }
 }

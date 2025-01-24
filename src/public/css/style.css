@@ -29,3 +29,26 @@ form {
 [x-cloak] {
     display: none !important;
 }
+
+.click-icon i {
+    color: #DC3545;
+    font-size: 30px;
+    cursor: pointer;
+}
+
+.click-icon .text {
+    border: 1px solid #DC3545;
+    padding: 2px 5px;
+    margin-left: 10px;
+    color: #DC3545;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.click-icon {
+    display: inline-flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+

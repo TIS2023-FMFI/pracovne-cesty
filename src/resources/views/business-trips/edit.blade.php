@@ -8,11 +8,13 @@
     use App\Enums\TripState;
     use App\Enums\DocumentType;
     use App\Enums\SppStatus;
+    use App\Enums\UserType;
     use Illuminate\Support\Facades\Auth;
 
     $isAdmin = Auth::user()->hasRole('admin');
 
-    $countries = Country::all()->pluck('name', 'id');
+    $sortedCountries = Country::getSortedByTripsCount();
+    $countries = Country::makeSlovakiaFirst($sortedCountries)->pluck('name', 'id');
 
     $transportQuery = $isAdmin ?
         Transport::all() :
@@ -33,7 +35,9 @@
     }
 
     $spp_symbols = $sppSymbolsQuery
-        ->pluck('spp_symbol', 'id');
+        ->get()
+        ->mapWithKeys(fn ($spp) => [$spp->id => $spp->spp_symbol . ' - ' . $spp->agency. ', ' . $spp->acronym . ', ' . $spp->grantee ]);
+
 
     $tripType = $trip->type;
     $tripState = $trip->state;
@@ -48,6 +52,8 @@
     $old_spp_symbol_id = old('spp_symbol_id');
     if (is_null($old_spp_symbol_id)) $old_spp_symbol_id = $trip->spp_symbol_id;
 
+    $old_sofia_id = old('sofia_id');
+    if (is_null($old_sofia_id)) $old_sofia_id = $trip->sofia_id;
 @endphp
 
 <x-layout>
@@ -74,9 +80,23 @@
         <form method="POST" action="{{ route('trip.update', ['trip' => $trip->id]) }}" enctype="multipart/form-data">
             @csrf
             @method('PUT')
+
+            @if($tripState!=TripState::NEW)
+            <x-content-section
+                title="Identifikátor"
+                :disabled="!$isAdmin || $tripState == TripState::CANCELLED">
+
+                <div class="form-row">
+                    <div class="col-md col-12">
+                        <x-simple-input name="sofia_id" label="Identifikátor" :value="old('sofia_id', $trip->sofia_id)"/>
+                    </div>
+                </div>
+            </x-content-section>
+            @endif
+
             <x-content-section
                 title="Osobné údaje"
-                :disabled="!$isAdmin || $tripState == TripState::CANCELLED">
+                :disabled="(!$isAdmin && $tripState != TripState::NEW) || $tripState == TripState::CANCELLED">
 
                 <div class="form-row">
                     <div class="col-md col-12">
@@ -99,7 +119,7 @@
 
                 <div class="form-row">
                     <div class="col-md col-12">
-                        <x-simple-input name="personal_id" label="Osobné číslo"
+                        <x-simple-input name="personal_id" label="Osobné číslo" :readonly="!$isAdmin"
                                         :value="$trip->user->personal_id ?? ''"/>
                     </div>
                     <div class="col-md col-12">
@@ -114,7 +134,7 @@
             </x-content-section>
 
             <x-content-section
-                :disabled="$tripState == TripState::CANCELLED || (!$isAdmin && $tripState != TripState::CONFIRMED)">
+                :disabled="$tripState == TripState::CANCELLED || (!$isAdmin && $tripState != TripState::CONFIRMED && $tripState != TripState::NEW)">
                 <div class="form-row">
                     <x-content-section
                         class="col-md col-12"
@@ -181,7 +201,7 @@
 
             <x-content-section
                 title="Cieľ cesty"
-                :disabled="!$isAdmin || $tripState == TripState::CANCELLED">
+                :disabled="(!$isAdmin && $tripState != TripState::NEW) || $tripState == TripState::CANCELLED">
 
                 <div class="form-row">
                     <div class="col-md col-12">
@@ -230,7 +250,7 @@
             @if($tripUserType->isExternal())
                 <x-content-section
                     title="Prínos pre fakultu"
-                    :disabled="!$isAdmin || $tripState == TripState::CANCELLED">
+                    :disabled="(!$isAdmin && $tripState != TripState::NEW) || $tripState == TripState::CANCELLED">
 
                     @foreach($contributions as $id => $name)
                         @php
@@ -277,7 +297,7 @@
             <x-content-section
                 title="Financovanie"
                 x-data="{reimbursementShow: {{ old('reimbursement', $isReimbursed) ? 'true' : 'false' }} }"
-                :disabled="!$isAdmin || $tripState == TripState::CANCELLED">
+                :disabled="(!$isAdmin && $tripState != TripState::NEW) || $tripState == TripState::CANCELLED">
 
                 <x-slot:description>
                     V prípade refundácie, prosím, vyberte ako <b>ŠPP prvok 2</b> ten prvok, z ktorého budú peniaze
@@ -324,7 +344,7 @@
             <x-content-section
                 title="Úhrada konferenčného poplatku"
                 x-data="{conferenceFeeShow: {{ $wantsConferenceFee ? 'true' : 'false' }} }"
-                :disabled="!$isAdmin || $tripState == TripState::CANCELLED">
+                :disabled="(!$isAdmin && $tripState != TripState::NEW) || $tripState == TripState::CANCELLED">
 
                 <div class="form-row">
                     <div class="col-md col-12">
@@ -368,10 +388,18 @@
 
             @if($tripState->hasTravellerReturned())
                 @php
-                    $expenses = ['travelling' => 'Cestovné', 'accommodation' => 'Ubytovanie', 'advance' => 'Vložné', 'other' => 'Iné'];
-                    if($tripType == TripType::FOREIGN) {
-                        $expenses = array_merge($expenses, ['allowance' => 'Záloha za cestu']);
+                    $expenses = ['travelling' => 'Cestovné', 'accommodation' => 'Ubytovanie'];
+
+                    if ($trip->conferenceFee === null) {
+                        $expenses['participation'] = 'Vložné';
                     }
+
+                    if($tripType === TripType::FOREIGN) {
+                        $expenses = array_merge($expenses, ['insurance' => 'Poistenie', 'advance' => 'Záloha za cestu']);
+                    }
+
+                    $expenses['other'] = 'Iné';
+
                     $mealsReimbursement = $trip->meals_reimbursement ?? true;
                     $doesNotWantMeals = old('no_meals_reimbursed', !$mealsReimbursement);
                 @endphp
@@ -379,7 +407,16 @@
                 <x-content-section
                     title="Náklady"
                     x-data="{mealsTableHide: {{ $doesNotWantMeals ? 'true' : 'false'}} }"
-                    :disabled="$tripState == TripState::CANCELLED || (!$isAdmin && $tripState != TripState::UPDATED)">
+                    :disabled="$tripState == TripState::CANCELLED || (!$isAdmin && $tripState != TripState::CONFIRMED)">
+
+                    @if($tripType == TripType::FOREIGN)
+                        <x-tooltip
+                            text="Pre jeden druh nákladov (napr. Cestovné) prosím zadávajte sumu tak, aby súčet súm v
+                        EUR a v cudzej mene spolu hradil celý druh nákladov. Napríklad, ak si nárokujete o preplatenie len v EUR,
+                        tak danú sumu už neuvádzajte v cudzej mene."
+                            icon="question-circle">
+                        </x-tooltip>
+                    @endif
 
                     <x-slot:description>
                         Ak si preplatenie nejakého druhu nákladov nenárokujete, nezabudnite to, prosím, uviesť.
@@ -482,31 +519,87 @@
                                     $meals = $trip->not_reimbursed_meals;
                                     $meals = ($meals == null || $meals == '') ? str_repeat('0', $days*3) : $meals;
                                     $currentDate = clone $trip->datetime_start;
+                                    $endDate = clone $trip->datetime_end;
                                 @endphp
                                 @for ($i = 0; $i < $days; $i++)
                                     <tr>
                                         <td>{{ $currentDate->format('d.m.') }}</td>
+
+                                        @php
+                                            $isFirstDay = $i == 0;
+                                            $isLastDay = $i == $days - 1;
+                                            $currentTime = $currentDate->format('H:i');
+                                            $endTime = $endDate->format('H:i');
+
+                                            $shouldCheckBreakfast = 'false';
+                                            $shouldCheckLunch = 'false';
+                                            $shouldCheckDinner = 'false';
+
+                                            $startCheckBreakfast = ($meals[$i * 3] === '1') ? 'true' : 'false';
+                                            $startCheckLunch = ($meals[$i * 3 + 1] === '1') ? 'true' : 'false';
+                                            $startCheckDinner = ($meals[$i * 3 + 2] === '1') ? 'true' : 'false';
+
+                                            if ($isFirstDay) {
+                                                if (strtotime($currentTime) > strtotime('16:00')) {
+                                                    $shouldCheckBreakfast = 'true';
+                                                    $shouldCheckLunch = 'true';
+                                                } elseif (strtotime($currentTime) > strtotime('12:00')) {
+                                                    $shouldCheckBreakfast = 'true';
+                                                }
+                                            } elseif ($isLastDay) {
+                                                if (strtotime($endTime) < strtotime('11:00')) {
+                                                    $shouldCheckLunch = 'true';
+                                                    $shouldCheckDinner = 'true';
+                                                } elseif (strtotime($endTime) < strtotime('17:00')) {
+                                                    $shouldCheckDinner = 'true';
+                                                }
+                                            } else {
+                                                $shouldCheckBreakfast = ($meals[$i * 3] === '1') ? 'true' : 'false';
+                                                $shouldCheckLunch = ($meals[$i * 3 + 1] === '1') ? 'true' : 'false';
+                                                $shouldCheckDinner = ($meals[$i * 3 + 2] === '1') ? 'true' : 'false';
+                                            }
+
+
+                                        @endphp
+
                                         <td>
                                             <input
                                                 type="checkbox"
                                                 name="{{ 'b'.$i }}"
-                                                x-init="$el.checked = {{$meals[$i * 3 ] === '1' ? 'true' : 'false'}}"
-                                                x-bind:checked="checkBreakfast">
+                                                x-init="$el.checked = {{$shouldCheckBreakfast}} || {{$startCheckBreakfast}}"
+                                                x-bind:checked="checkBreakfast"
+                                                :class="({{ $shouldCheckBreakfast }} && {{ ($isFirstDay || $isLastDay) ? 'true' : 'false' }}) ? 'disabled-checkbox' : ''"
+                                                x-bind:readonly="false">
                                         </td>
                                         <td>
                                             <input
                                                 type="checkbox"
                                                 name="{{ 'l'.$i }}"
-                                                x-init="$el.checked = {{$meals[$i * 3 + 1] === '1' ? 'true' : 'false'}}"
-                                                x-bind:checked="checkLunch">
+                                                x-init="$el.checked = {{$shouldCheckLunch}} || {{$startCheckLunch}}"
+                                                x-bind:checked="checkLunch"
+                                                :class="({{ $shouldCheckLunch }} && {{ ($isFirstDay || $isLastDay) ? 'true' : 'false' }}) ? 'disabled-checkbox' : ''"
+                                                x-bind:readonly="false">
                                         </td>
                                         <td>
                                             <input
                                                 type="checkbox"
                                                 name="{{ 'd'.$i }}"
-                                                x-init="$el.checked = {{$meals[$i * 3 + 2] === '1' ? 'true' : 'false'}}"
-                                                x-bind:checked="checkDinner">
+                                                x-init="$el.checked = {{$shouldCheckDinner}} || {{$startCheckDinner}}"
+                                                x-bind:checked="checkDinner"
+                                                :class="({{ $shouldCheckDinner }} && {{ ($isFirstDay || $isLastDay) ? 'true' : 'false' }}) ? 'disabled-checkbox' : ''"
+                                                x-bind:readonly="false">
                                         </td>
+
+                                        <style>
+                                            .disabled-checkbox {
+                                                pointer-events: none;
+                                                background-color: #e0e0e0;
+                                                opacity: 0.6;
+                                                cursor: not-allowed;
+                                            }
+                                        </style>
+
+
                                     </tr>
 
                                     @php $currentDate->modify('+1 day'); @endphp
@@ -520,7 +613,7 @@
 
                 <x-content-section
                     title="Správa"
-                    :disabled="$tripState == TripState::CANCELLED || (!$isAdmin && $tripState != TripState::UPDATED)">
+                    :disabled="$tripState == TripState::CANCELLED || (!$isAdmin && $tripState != TripState::CONFIRMED)">
 
                     <x-textarea name="conclusion" label="Výsledky cesty" :value="$trip->conclusion ?? ''"
                                 rows="10"></x-textarea>
@@ -573,9 +666,22 @@
                     @csrf
                     @method('PUT')
                     <div class="form-row align-items-end">
-                        <div class="col-9">
-                            <x-simple-input name="sofia_id" label="Identifikátor"></x-simple-input>
-                        </div>
+                        @if($trip->user->user_type != UserType::EMPLOYEE)
+                            <div class="col-4">
+                                <x-simple-input name="sofia_id" label="Identifikátor"></x-simple-input>
+                            </div>
+                            <div class="col-4">
+                                <x-simple-input name="dochadzka_id" label="Osobné č. cestujúceho v systéme Dochádzky" :value="$trip->user->personal_id_dochadzka ?? ''"></x-simple-input>
+                            </div>
+                            <x-tooltip
+                                text='Do poľa "Osobné č. cestujúceho v systéme Dochádzky" zadajte osobné číslo, ktoré patrí cestujúcemu v systéme Prítomnosť na Pracovisku. Dôkladne ho skontrolujte, keďže chybne zadané číslo znemožní správne zapísanie cesty do systému Prítomnosť.'
+                                icon="question-circle">
+                            </x-tooltip>
+                        @else
+                            <div class="col-9">
+                                <x-simple-input name="sofia_id" label="Identifikátor"></x-simple-input>
+                            </div>
+                        @endif
                         <div class="col-3 my-3 ">
                             <x-button>Potvrdiť cestu</x-button>
                         </div>

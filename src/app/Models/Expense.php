@@ -18,7 +18,7 @@ class Expense extends Model
     protected $fillable = ['amount_eur', 'amount_foreign', 'reimburse'];
 
     /**
-     * Get the business trips where the expense acts as an accommodation expense
+     * Get the business trips where the expense acts as an accommodation expense (ubytovanie)
      *
      * @return HasOne
      */
@@ -28,7 +28,7 @@ class Expense extends Model
     }
 
     /**
-     * Get the business trips where the expense acts as a travelling expense
+     * Get the business trips where the expense acts as a travelling expense (cestovne)
      *
      * @return HasOne
      */
@@ -39,7 +39,7 @@ class Expense extends Model
 
 
     /**
-     * Get the business trips where the expense acts as other expense
+     * Get the business trips where the expense acts as other expense (ine vydavky)
      *
      * @return HasOne
      */
@@ -49,7 +49,7 @@ class Expense extends Model
     }
 
     /**
-     * Get the business trips where the expense acts as advance payment expense
+     * Get the business trips where the expense acts as advance payment expense (zaloha)
      *
      * @return HasOne
      */
@@ -59,13 +59,33 @@ class Expense extends Model
     }
 
     /**
-     * Get the business trips where the expense acts as an allowance
+     * Get the business trips where the expense acts as an allowance (vreckove)
      *
      * @return HasOne
      */
     public function allowance(): HasOne
     {
         return $this->hasOne(BusinessTrip::class, 'allowance_expense_id');
+    }
+
+    /**
+     * Get the business trips where the expense acts as a participation fee (vlozne)
+     *
+     * @return HasOne
+     */
+    public function participation(): HasOne
+    {
+        return $this->hasOne(BusinessTrip::class, 'participation_expense_id');
+    }
+
+    /**
+     * Get the business trips where the expense acts as an insurance (poistenie)
+     *
+     * @return HasOne
+     */
+    public function insurance(): HasOne
+    {
+        return $this->hasOne(BusinessTrip::class, 'insurance_expense_id');
     }
 
     /**
@@ -77,7 +97,12 @@ class Expense extends Model
     {
         $trips = new Collection([]);
 
-        foreach ([$this->accommodation(), $this->travelling(), $this->other(), $this->allowance()] as $trip) {
+        foreach (
+            [
+                $this->accommodation(), $this->travelling(), $this->other(), $this->advance(),
+                $this->allowance(), $this->participation(), $this->insurance()
+            ] as $trip
+        ) {
             $trips = $trips->merge($trip->get());
         }
 

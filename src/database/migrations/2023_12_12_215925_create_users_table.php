@@ -32,6 +32,10 @@ return new class extends Migration {
             $table->dateTime('last_login')->nullable();
 
             $table->rememberToken();
+
+            $table->string('iban', 34)->nullable();
+            $table->unsignedSmallInteger('spp_user_type')->nullable();
+
             $table->timestamps();
         });
     }

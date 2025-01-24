@@ -35,6 +35,11 @@ Route::get('/home', static function (Request $request) {
 })
     ->name('homepage');
 
+//Instruction
+Route::get('/instructions', static function(){
+    return view('instructions');
+})
+    ->name('instructions');
 
 // Business trip management
 Route::controller(BusinessTripController::class)
@@ -79,6 +84,10 @@ Route::controller(BusinessTripController::class)
                 Route::get('/{trip}/attachment', 'getAttachment')
                     ->can('view', 'trip')
                     ->name('attachment');
+
+                // Route to list all the trips (index route)
+                Route::get('/', 'index')
+                    ->name('index');
             });
 
         Route::middleware('role:traveller')
@@ -115,6 +124,18 @@ Route::controller(UserController::class)
                 Route::post('/invite', 'invite')
                     ->middleware('role:admin')
                     ->name('invite');
+
+                //Activate an inactive user
+                //Intended for the activate submit button
+                Route::post('/activateUser',  'activateUser')
+                    ->middleware('role:admin')
+                    ->name('activate');
+
+                //Deactivate an active user
+                //Intended for the deactivate submit button
+                Route::post('/deactivateUser', 'deactivateUser')
+                    ->middleware('role:admin')
+                    ->name('deactivate');
 
                 // Log user out
                 Route::post('/logout', 'logout')
@@ -186,4 +207,16 @@ Route::controller(SPPController::class)
         // Deactivate an SPP symbol
         Route::put('/deactivate', 'deactivate')
             ->name('deactivate');
+
+        // Activate an SPP symbol
+        Route::put('/activate', 'activate')
+            ->name('activate');
+
+        // Edit an existing SPP symbol (pre-fill form)
+        Route::get('/{id}/edit', 'edit')
+            ->name('edit');
+
+        // Update an existing SPP symbol
+        Route::put('/{id}', 'update')
+            ->name('update');
     });
