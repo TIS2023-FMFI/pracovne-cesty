@@ -48,7 +48,6 @@ class SynchronizationController extends Controller
                     'first_name' => $userToSync->name,
                     'last_name' => $userToSync->surname,
                     'email' => $userToSync->email,
-                    'status' => $userToSync->status,
                     'last_login' => $userToSync->last_login,
                     // Other values are not defined
                 ]);
@@ -61,7 +60,7 @@ class SynchronizationController extends Controller
                     'first_name' => $userToSync->name,
                     'last_name' => $userToSync->surname,
                     'email' => $userToSync->email,
-                    'status' => $userToSync->status,
+                    'status' => (($userToSync->status > 0)?1:0),
                     'last_login' => $userToSync->last_login,
                     // Other values are not defined
                 ]);
