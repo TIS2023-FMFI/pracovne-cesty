@@ -89,7 +89,7 @@
 
     <footer class="mt-auto bg-dark">
         <div class="container">
-            <p class="my-3 text-white">Projekt tímu z Tvorby informačných systémov pre Katedru aplikovanej informatiky FMFI, 2023</p>
+            <p class="my-3 text-white">Projekt tímov z Tvorby informačných systémov pre Katedru aplikovanej informatiky FMFI UK, 2023/2024 a 2024/2025</p>
         </div>
     </footer>
 
