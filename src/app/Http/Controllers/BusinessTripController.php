@@ -493,20 +493,6 @@ class BusinessTripController extends Controller
                     ->route('trip.edit', ['trip' => $trip])
                     ->with('message', 'Údaje o ceste neboli kvôli chybe aktualizované. Skúste to neskôr, prosím.');
             }
-
-            // Sending mails
-            foreach (User::getAdminEmails() as $recipient) {
-                // Create an instance of the SimpleMail class
-                $email = new SimpleMail(
-                    '',
-                    $recipient,
-                    'emails.new_trip_admin',
-                    'Pracovné cesty - pridaná nová cesta'
-                );
-
-                // Send the email
-                Mail::to($recipient)->send($email);
-            }
         }
 
         if (self::isSyncRequired($oldTripData, $trip->getAttributes())) {
