@@ -8,8 +8,8 @@
 <div class="email-container">
     <div class="content">
         Vážený admin, <br>
-        bola podaná žiadosť o storno cesty. Prosím, skontrolujte a spracujte žiadosť.
-        {{ $messageText }}
+        bola podaná žiadosť o storno cesty. Prosím, skontrolujte a spracujte žiadosť. <br>
+        {!! nl2br(e($messageText)) !!}
     </div>
     <div class="footer">
         S pozdravom,<br>

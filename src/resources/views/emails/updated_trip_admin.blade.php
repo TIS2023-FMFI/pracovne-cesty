@@ -8,8 +8,8 @@
 <div class="email-container">
     <div class="content">
         Vážený admin, <br>
-        bola upravená pracovná cesta.
-        {{ $messageText }}
+        bola upravená pracovná cesta. <br>
+        {!! nl2br(e($messageText)) !!}
     </div>
     <div class="footer">
         S pozdravom,<br>
