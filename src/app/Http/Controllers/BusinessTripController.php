@@ -495,6 +495,23 @@ class BusinessTripController extends Controller
             }
         }
 
+        // Sending mails
+        $sofiaID = $trip->sofia_id ?? '0000';
+        $message = 'ID pridanej cesty: ' . $sofiaID
+        . ' Meno a priezvisko cestujúceho: ' . $trip->user->fullName();
+        foreach (User::getAdminEmails() as $recipient) {
+            // Create an instance of the SimpleMail class
+            $email = new SimpleMail(
+                $message,
+                $recipient,
+                'emails.updated_trip_admin',
+                'Pracovné cesty - upravená cesta'
+            );
+
+            // Send the email
+            Mail::to($recipient)->send($email);
+        }
+
         if (self::isSyncRequired($oldTripData, $trip->getAttributes())) {
             if ($trip->user->pritomnostUser()->first()) {
                 $status = SynchronizationController::updateSingleBusinessTrip($trip->id);
