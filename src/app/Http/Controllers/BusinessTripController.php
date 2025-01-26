@@ -36,7 +36,7 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use App\Enums\PritomnostAbsenceConfirmedStatus;
 use App\Models\PritomnostUser;
-
+use App\Mail\MailMessageTexts;
 
 class BusinessTripController extends Controller
 {
@@ -249,10 +249,7 @@ class BusinessTripController extends Controller
         }
 
         // Sending mails
-        $sofiaID = $trip->sofia_id ?? '0000';
-        $message ='ID pridanej cesty: ' . $sofiaID
-            . ' Meno a priezvisko cestujúceho: ' . $trip->user->fullName();
-
+        $message = MailMessageTexts::getDefaultMessageTextAdmin($trip);
         foreach (User::getAdminEmails() as $recipient) {
             // Create an instance of the SimpleMail class
             $email = new SimpleMail(
@@ -493,20 +490,21 @@ class BusinessTripController extends Controller
                     ->route('trip.edit', ['trip' => $trip])
                     ->with('message', 'Údaje o ceste neboli kvôli chybe aktualizované. Skúste to neskôr, prosím.');
             }
+        }
 
-            // Sending mails
-            foreach (User::getAdminEmails() as $recipient) {
-                // Create an instance of the SimpleMail class
-                $email = new SimpleMail(
-                    '',
-                    $recipient,
-                    'emails.new_trip_admin',
-                    'Pracovné cesty - pridaná nová cesta'
-                );
+        // Sending mails
+        $message = MailMessageTexts::getDefaultMessageTextAdmin($trip);
+        foreach (User::getAdminEmails() as $recipient) {
+            // Create an instance of the SimpleMail class
+            $email = new SimpleMail(
+                $message,
+                $recipient,
+                'emails.updated_trip_admin',
+                'Pracovné cesty - upravená cesta'
+            );
 
-                // Send the email
-                Mail::to($recipient)->send($email);
-            }
+            // Send the email
+            Mail::to($recipient)->send($email);
         }
 
         if (self::isSyncRequired($oldTripData, $trip->getAttributes())) {
@@ -563,15 +561,11 @@ class BusinessTripController extends Controller
         $trip->country->decrementTripsCount();
 
         //Send cancellation email to user
-
         // Retrieve user's email associated with the trip
+        $message = MailMessageTexts::getDefaultMessageTextUser($trip)
+        . ' bola stornovaná.';
         $recipient = $trip->user->email;
-        $sofiaID = $trip->sofia_id ?? '0000';
-        $message = 'Chceme vás informovať, že vaša pracovná cesta s ID ' .  $sofiaID
-        . ' naplánovaná na ' . $trip->datetime_start
-        . ' s miestom konania ' . $trip->place . ' bola stornovaná.';
         $viewTemplate = 'emails.cancellation_user';
-
         // Create an instance of the SimpleMail class
         $email = new SimpleMail($message, $recipient, $viewTemplate, 'Pracovné cesty - stornovaná cesta');
 
@@ -639,14 +633,13 @@ class BusinessTripController extends Controller
         }
 
         $recipient = $trip->user->email;
-        $message = 'Vaša pracovná cesta '
-        . ' naplánovaná na ' . $trip->datetime_start
-        . ' s miestom konania ' . $trip->place
-        . ' bola úspešne spracovaná administrátorom a bol jej pridelený identifikátor. Prosíme Vás, aby ste sa dostavili na podpísanie cestovného príkazu.';
+        $message = MailMessageTexts::getDefaultMessageTextUser($trip)
+        . ' bola úspešne spracovaná administrátorom a bol jej pridelený identifikátor.' . PHP_EOL
+        . 'Prosíme Vás, aby ste sa dostavili na podpísanie cestovného príkazu.';
         $viewTemplate = 'emails.sign_request_user';
 
         // Create an instance of the SimpleMail class
-        $email = new SimpleMail($message, $recipient, $viewTemplate, 'Pracovné cesty - pridelenie identifikátora');
+        $email = new SimpleMail($message, $recipient, $viewTemplate, 'Pracovné cesty - potvrdená cesta');
 
         // Send the email
         Mail::to($recipient)->send($email);
@@ -661,13 +654,13 @@ class BusinessTripController extends Controller
             }
 
             // Duplicitny mail z Aplikácia/class/day.php
-            $subjectLine = 'Žiadosť o schválenie neprítomnosti (' . $trip->datetime_start->format('d.m.Y') . ')';
             $message = 'Nová žiadosť na schválenie ' . PHP_EOL
             . 'Žiadateľ*ka: ' . $trip->user->pritomnostUser->name . ' ' . $trip->user->pritomnostUser->surname . PHP_EOL
-            . 'Typ neprítomnosti: ' . $trip->type->inSlovak() . PHP_EOL
+            . 'Typ neprítomnosti: ' . $trip->type->inSlovak() . ' pracovná cesta' . PHP_EOL
             . 'Dátum: ' . $trip->datetime_start->format('d.m.Y') . PHP_EOL
-            . 'Pre schválenie pokračujte do systému Prítomnosť na Pracovisku.';
+            . 'Pre schválenie žiadosti pokračujte do systému Prítomnosť na Pracovisku.';
             $viewTemplate = 'emails.synced_trip_request_admin';
+            $subjectLine = 'Žiadosť o schválenie neprítomnosti (' . $trip->datetime_start->format('d.m.Y') . ')';
 
             foreach (PritomnostUser::getRequestValidators() as $requestValidator) {
                 $recipient = $requestValidator->email;
@@ -696,10 +689,9 @@ class BusinessTripController extends Controller
         $trip->update(['state' => TripState::CLOSED]);
 
         $recipient = $trip->user->email;
-        $message = 'Vaša pracovná cesta '
-        . ' ukončená ' . $trip->datetime_end
-        . ' s miestom konania ' . $trip->place
-        . ' bola vyúčtovaná administrátorom. Prosíme Vás, aby ste sa so všetkými potrebnými dokladmi dostavili na podpísanie vyúčtovania pracovnej cesty.';
+        $message = MailMessageTexts::getDefaultMessageTextUser($trip)
+        . ' bola vyúčtovaná administrátorom.' . PHP_EOL .
+        'Prosíme Vás, aby ste sa so všetkými potrebnými dokladmi dostavili na podpísanie vyúčtovania pracovnej cesty.';
         $viewTemplate = 'emails.accounting_sign_request_user';
 
         // Create an instance of the SimpleMail class
@@ -730,11 +722,7 @@ class BusinessTripController extends Controller
             $trip->update($validatedData);
 
             // Send email notification to the admin
-
-            $sofiaID = $trip->sofia_id ?? '0000';
-            $message = 'ID pracovnej cesty: ' . $sofiaID
-                . ' Meno a priezvisko cestujúceho: ' . $trip->user->fullName();
-
+            $message = MailMessageTexts::getDefaultMessageTextAdmin($trip);
             foreach (User::getAdminEmails() as $recipient) {
                 // Create an instance of the SimpleMail class
                 $email = new SimpleMail(
@@ -768,11 +756,8 @@ class BusinessTripController extends Controller
         // Update the trip's note with the new comment
         $trip->update($validatedData);
 
-        // Send email notification to the
-        $sofiaID = $trip->sofia_id ?? '0000';
-        $message = 'ID Cesty ku ktorej bola pridaná poznámka: ' . $sofiaID
-            . ' Meno a priezvisko cestujúceho: ' . $trip->user->fullName();
-
+        // Send email notification to the admin
+        $message = MailMessageTexts::getDefaultMessageTextAdmin($trip);
         foreach (User::getAdminEmails() as $recipient) {
             // Create an instance of the SimpleMail class
             $email = new SimpleMail(
@@ -1450,5 +1435,4 @@ class BusinessTripController extends Controller
             $trip->update(['not_reimbursed_meals' => $notReimbursedMeals]);
         }
     }
-
 }

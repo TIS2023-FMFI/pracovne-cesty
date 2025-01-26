@@ -13,6 +13,8 @@ use Exception;
 use Illuminate\Support\Facades\DB;
 use Throwable;
 use App\Enums\PritomnostAbsenceConfirmedStatus;
+use App\Enums\PritomnostUserStatus;
+use App\Enums\UserStatus;
 
 class SynchronizationController extends Controller
 {
@@ -60,7 +62,7 @@ class SynchronizationController extends Controller
                     'first_name' => $userToSync->name,
                     'last_name' => $userToSync->surname,
                     'email' => $userToSync->email,
-                    'status' => (($userToSync->status > 0)?1:0),
+                    'status' => $userToSync->status->value > PritomnostUserStatus::DISABLED->value ? UserStatus::ACTIVE : UserStatus::INACTIVE,
                     'last_login' => $userToSync->last_login,
                     // Other values are not defined
                 ]);
