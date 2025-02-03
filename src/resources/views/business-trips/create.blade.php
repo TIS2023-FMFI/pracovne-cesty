@@ -21,8 +21,8 @@
     $sppSymbolsQuery = SppSymbol::where('status', SppStatus::ACTIVE)->orderBy('spp_symbol', 'ASC');
 
     $spp_symbols = $sppSymbolsQuery
-        ->get()
-        ->mapWithKeys(fn ($spp) => [$spp->id => $spp->spp_symbol . ' - ' . $spp->agency. ', ' . $spp->acronym . ', ' . $spp->grantee ]);
+    ->get()
+    ->mapWithKeys(fn ($spp) => [$spp->id => $spp->spp_symbol . ' - ' . $spp->agency. ', ' . $spp->acronym . ', ' . ($spp->granteeUser ? $spp->granteeUser->first_name . ' ' . $spp->granteeUser->last_name : 'Unknown') ]);
 
     $user = $selectedUser ?? Auth::user();
     $userType = $user->user_type;
