@@ -89,8 +89,18 @@ $isEditMode = isset($editing_spp);
                                         value="{{ $isEditMode ? $editing_spp->financial_centre : old('financial_centre') }}"></x-simple-input>
                     </div>
                     <div class="col-md-6 col-12">
-                        <x-simple-input name="grantee" label="Zodpovedný riešiteľ:"
-                                        value="{{ $isEditMode ? $editing_spp->grantee : old('grantee') }}"></x-simple-input>
+                        <label for="grantee">Zodpovedný riešiteľ:</label>
+                        <select class="form-control" id="grantee">
+                            @foreach($all_users as $user)
+                            <option value="{{ $user->id }}"
+                                    {{ $isEditMode && $editing_spp->grantee == $user->id ? 'selected' : '' }}>
+                                {{ $user->first_name . ' ' . $user->last_name }}
+                                @if($user->academic_degrees)
+                                ({{ $user->academic_degrees }})
+                                @endif
+                            </option>
+                            @endforeach
+                        </select>
                     </div>
                 </div>
                 <div class="form-row">
