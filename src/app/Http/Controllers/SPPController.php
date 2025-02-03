@@ -52,7 +52,7 @@ class SPPController extends Controller
             'spp_symbol' => 'required|string|max:30|unique:spp_symbols,spp_symbol',
             'functional_region' => 'required|string|max:10',
             'financial_centre' => 'required|string|max:10',
-            'grantee' => 'required|string|max:100',
+            'grantee' => 'required|exists:users,id',
             'agency' => 'max:100',
             'acronym' => 'max:10',
             ],$customMessages, $customAttributes);
@@ -101,7 +101,7 @@ class SPPController extends Controller
             'spp_symbol' => 'required|string|max:30|unique:spp_symbols,spp_symbol,' . $id,
             'functional_region' => 'required|string|max:10',
             'financial_centre' => 'required|string|max:10',
-            'grantee' => 'required|string|max:100',
+            'grantee' => 'required|exists:users,id',
             'agency' => 'max:100',
             'acronym' => 'max:10',
         ], $customMessages, $customAttributes);

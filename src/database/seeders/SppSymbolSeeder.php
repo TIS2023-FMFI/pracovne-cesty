@@ -16,21 +16,21 @@ class SppSymbolSeeder extends Seeder
             [
                 'spp_symbol' => '0771100',
                 'functional_region' => '09413',
-                'grantee' => 'doc. RNDr. Tatiana Jajcayová, PhD.',
+                'grantee' => $defaultUser->id ?? 1,
                 'agency' => 'Ministerstvo školstva',
                 'acronym' => 'MŠ'
             ],
             [
                 'spp_symbol' => 'O-06-107/0008-00',
                 'functional_region' => '09413',
-                'grantee' => 'doc. RNDr. Tatiana Jajcayová, PhD.',
+                'grantee' => $defaultUser->id ?? 1,
                 'agency' => 'Agentúra životného prostredia',
                 'acronym' => 'AZP'
             ],
             [
                 'spp_symbol' => 'Z-22-107/0001-04',
                 'functional_region' => '09413',
-                'grantee' => 'prof. Ing. Igor Farkaš, Dr.',
+                'grantee' => $defaultUser->id ?? 1,
                 'agency' => 'Výskumný fond',
                 'acronym' => 'VF'
             ]
