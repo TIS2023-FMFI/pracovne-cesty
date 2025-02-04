@@ -100,4 +100,16 @@ class User extends Authenticatable
         $affectedRows = self::where("id", $id)->update(["status" => UserStatus::INACTIVE]);
         return $affectedRows > 0;
     }
+
+    public static function getFullNameOfUserWithID($id):string{
+        $user = self::where("id", $id)->first();
+        if($user == null){
+            return '';
+        }
+        $degrees = '';
+        if($user->academic_degrees !== null){
+            $degrees = $user->academic_degrees;
+        }
+        return $degrees . ' ' . $user->first_name . ' ' . $user->last_name;
+    }
 }

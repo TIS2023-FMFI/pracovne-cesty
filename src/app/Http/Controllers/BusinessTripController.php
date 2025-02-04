@@ -856,7 +856,7 @@ class BusinessTripController extends Controller
                     'financialCentre' => $trip->sppSymbol->financial_centre ?? "",
                     'sppSymbol' => $trip->sppSymbol->spp_symbol ?? "",
                     'account' => $trip->type === TripType::DOMESTIC ? '631001' : '631002',
-                    'grantee' => $trip->sppSymbol->grantee ?? "",
+                    'grantee' => User::getFullNameOfUserWithID($trip->sppSymbol->grantee) ?? "",
                     'iban' => $trip->iban,
                     'incumbentNameA' => $dean->incumbent_name ?? "",
                     'incumbentNameB' => $secretary->incumbent_name ?? "",
