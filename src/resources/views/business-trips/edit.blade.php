@@ -36,8 +36,19 @@ $sppSymbolsQuery = $sppSymbolsQuery->orWhere('id', $trip->reimbursement->sppSymb
 
 $spp_symbols = $sppSymbolsQuery
 ->get()
-->mapWithKeys(fn ($spp) => [$spp->id => $spp->spp_symbol . ' - ' . $spp->agency. ', ' . $spp->acronym . ', ' . ($spp->granteeUser ? $spp->granteeUser->first_name . ' ' . $spp->granteeUser->last_name : 'Unknown') ]);
+->mapWithKeys(function ($spp) {
+    $details = array_filter([$spp->agency, $spp->acronym]);
 
+    $grantee = $spp->granteeUser
+    ? $spp->granteeUser->first_name . ' ' . $spp->granteeUser->last_name
+    : 'Unknown';
+
+    if ($spp->granteeUser?->academic_degrees) {
+    $grantee .= ' (' . $spp->granteeUser->academic_degrees . ')';
+    }
+
+    return [$spp->id => $spp->spp_symbol . ' - ' . (count($details) ? implode(', ', $details) . ', ' : '') . $grantee];
+});
 
 $tripType = $trip->type;
 $tripState = $trip->state;
