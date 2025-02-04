@@ -1,17 +1,4 @@
 @php
-<<<<<<< HEAD
-    use App\Models\Country;
-    use App\Models\Transport;
-    use App\Models\TripPurpose;
-    use App\Models\Contribution;
-    use App\Models\SppSymbol;
-    use App\Enums\TripType;
-    use App\Enums\TripState;
-    use App\Enums\DocumentType;
-    use App\Enums\SppStatus;
-    use App\Enums\UserType;
-    use Illuminate\Support\Facades\Auth;
-=======
 use App\Models\Country;
 use App\Models\Transport;
 use App\Models\TripPurpose;
@@ -23,7 +10,6 @@ use App\Enums\DocumentType;
 use App\Enums\SppStatus;
 use App\Enums\UserType;
 use Illuminate\Support\Facades\Auth;
->>>>>>> 0e11bcd (Change grantee from string to users(id))
 
 $isAdmin = Auth::user()->hasRole('admin');
 
