@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use App\Enums\SppStatus;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use App\Models\User;
 
 
 class SppSymbolFactory extends Factory
@@ -22,7 +23,7 @@ class SppSymbolFactory extends Factory
             ]),
             'functional_region' => fake()->numerify('0####'),
             'financial_centre' => '107240',
-            'grantee' => fake('sk_SK')->name(),
+            'grantee' => User::factory(),
             'status' => fake()->randomElement(SppStatus::cases()),
             'agency' => fake()->company(),
             'acronym' => fake()->regexify('[A-Z]-\d{4}')
