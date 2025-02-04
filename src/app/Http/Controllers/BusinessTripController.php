@@ -1274,7 +1274,7 @@ class BusinessTripController extends Controller
             $data = [
                 'amount_eur' => $expenseData[$name . '_expense_eur'],
                 'amount_foreign' => $trip->type === TripType::FOREIGN ? $expenseData[$name . '_expense_foreign'] : null,
-                'reimburse' => !array_key_exists($name . '_expense_not_reimburse', $expenseData),
+                'reimburse' => null === $expenseData[$name . '_expense_not_reimburse'],
             ];
             $expense = $trip->{$name . 'Expense'};
             if ($expense == null) {
