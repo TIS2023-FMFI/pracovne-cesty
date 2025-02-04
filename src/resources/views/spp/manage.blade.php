@@ -90,7 +90,7 @@ $isEditMode = isset($editing_spp);
                     </div>
                     <div class="col-md-6 col-12">
                         <label for="grantee">Zodpovedný riešiteľ:</label>
-                        <select class="form-control" id="grantee">
+                        <select class="form-control" id="grantee" name="grantee">
                             @foreach($all_users as $user)
                             <option value="{{ $user->id }}"
                                     {{ $isEditMode && $editing_spp->grantee == $user->id ? 'selected' : '' }}>
