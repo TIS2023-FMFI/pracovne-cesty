@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\SppSymbol;
+use App\Models\User;
 use App\Enums\SppStatus;
 use Illuminate\Http\Request;
 use \Illuminate\Http\RedirectResponse;
@@ -16,12 +17,15 @@ class SPPController extends Controller
      * Sending all active spp symbols
      */
     public function manage() {
-        return view('spp.manage', ['spp_symbols' =>
-            SppSymbol::where('status', SppStatus::ACTIVE)
-                ->pluck('spp_symbol', 'id'),
-                'deactivated_symbols' =>
+        return view('spp.manage', [
+            'spp_symbols' =>
+                SppSymbol::where('status', SppStatus::ACTIVE)
+                    ->pluck('spp_symbol', 'id'),
+            'deactivated_symbols' =>
                 SppSymbol::where('status', SppStatus::DEACTIVATED)
-                    ->pluck('spp_symbol', 'id')]);
+                    ->pluck('spp_symbol', 'id'),
+            'all_users' => User::select('id', 'first_name', 'last_name', 'academic_degrees')
+                ->get()]);
     }
 
     /**
@@ -55,7 +59,7 @@ class SPPController extends Controller
             'grantee' => 'required|exists:users,id',
             'agency' => 'max:100',
             'acronym' => 'max:10',
-            ],$customMessages, $customAttributes);
+        ],$customMessages, $customAttributes);
 
         SppSymbol::create($validatedData);
 
@@ -75,8 +79,10 @@ class SPPController extends Controller
             'spp_symbols' => SppSymbol::where('status', SppStatus::ACTIVE)
                 ->pluck('spp_symbol', 'id'),
             'deactivated_symbols' => SppSymbol::where('status', SppStatus::DEACTIVATED)
-                            ->pluck('spp_symbol', 'id'),
-            'editing_spp' => $sppSymbol // Pass selected SPP Symbol for editing
+                ->pluck('spp_symbol', 'id'),
+            'editing_spp' => $sppSymbol, // Pass selected SPP Symbol for editing
+            'all_users' => User::select('id', 'first_name', 'last_name', 'academic_degrees')
+                ->get(),
         ]);
     }
 
@@ -112,8 +118,6 @@ class SPPController extends Controller
 
         return redirect()->route('spp.manage')->with('message', 'ŠPP prvok bol úspešne aktualizovaný.');
     }
-
-
 
     /**
      * Input parameter of type Request and the spp symbol
