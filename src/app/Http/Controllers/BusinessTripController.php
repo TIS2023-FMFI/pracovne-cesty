@@ -805,6 +805,8 @@ class BusinessTripController extends Controller
         $templateName = $docType->fileName();
         $templatePath = "latex.$templateName";
 
+        $SECRETARY_ID = 13;   // this should probably better go to some config...
+	
         $data = [];
         switch ($docType) {
             case DocumentType::FOREIGN_TRIP_AFFIDAVIT:
@@ -835,6 +837,11 @@ class BusinessTripController extends Controller
                 $dean = Staff::where('position', PositionTitle::DEAN)->first();
                 $secretary = Staff::where('position', PositionTitle::SECRETARY)->first();
 
+		$grantee_id = $trip->sppSymbol->grantee;
+                $grantee_name = "";
+		if ($grantee_id != $SECRETARY_ID) // secretary is used for SPP that should have the field empty to be filled manually
+                   $grantee_name = User::getFullNameOfUserWithID($grantee_id);
+
                 $data = [
                     'firstName' => $trip->user->first_name,
                     'lastName' => $trip->user->last_name,
@@ -856,7 +863,7 @@ class BusinessTripController extends Controller
                     'financialCentre' => $trip->sppSymbol->financial_centre ?? "",
                     'sppSymbol' => $trip->sppSymbol->spp_symbol ?? "",
                     'account' => $trip->type === TripType::DOMESTIC ? '631001' : '631002',
-                    'grantee' => User::getFullNameOfUserWithID($trip->sppSymbol->grantee),
+                    'grantee' => $grantee_name,
                     'iban' => $trip->iban,
                     'incumbentNameA' => $dean->incumbent_name ?? "",
                     'incumbentNameB' => $secretary->incumbent_name ?? "",
@@ -877,6 +884,11 @@ class BusinessTripController extends Controller
                 $fin_director = Staff::where('position', PositionTitle::FINANCIAL_DIRECTOR)->first();
                 $secretary = Staff::where('position', PositionTitle::SECRETARY)->first();
 
+		$grantee_id = $trip->sppSymbol->grantee;
+                $grantee_name = "";
+		if ($grantee_id != $SECRETARY_ID) // secretary is used for SPP that should have the field empty to be filled manually
+                   $grantee_name = User::getFullNameOfUserWithID($grantee_id);
+
                 $data = [
                     'amount' => $trip->conferenceFee->amount ?? "",
                     'source' => "",
@@ -887,7 +899,7 @@ class BusinessTripController extends Controller
                     'daiChair' => $dai_chair->incumbent_name ?? "",
                     'finDirector' => $fin_director->incumbent_name ?? "",
                     'secretary' => $secretary->incumbent_name ?? "",
-                    'pi' => User::getFullNameOfUserWithID($trip->sppSymbol->grantee)
+                    'pi' => $grantee_name
                 ];
                 break;
 
