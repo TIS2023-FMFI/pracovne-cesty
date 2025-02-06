@@ -59,11 +59,11 @@ $isEditMode = isset($editing_spp);
                     <div class="col-md-6 col-12">
                         <label for="existing_spp">Výber ŠPP prvku:</label>
                         <select class="form-control" id="existing_spp" onchange="location = this.value;">
-                            <option value="{{ route('spp.manage') }}" {{ !$isEditMode ? 'selected' : '' }}>
+                            <option value="{{ str_replace('http://localhost:8097', 'https://kempelen.dai.fmph.uniba.sk/cesty', route('spp.manage')) }}" {{ !$isEditMode ? 'selected' : '' }}>
                             Nový prvok
                             </option>
                             @foreach($spp_symbols as $id => $symbol)
-                            <option value="{{ route('spp.edit', $id) }}"
+                            <option value="{{ str_replace('http://localhost:8097', 'https://kempelen.dai.fmph.uniba.sk/cesty', route('spp.edit', $id)) }}"
                                     {{ $isEditMode && $editing_spp->id == $id ? 'selected' : '' }}>
                                 {{ $symbol }}
                             </option>
