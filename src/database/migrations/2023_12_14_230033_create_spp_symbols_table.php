@@ -17,7 +17,7 @@ return new class extends Migration {
             $table->string('spp_symbol', 30);
             $table->string('functional_region', 10);
             $table->string('financial_centre', 10)->default('107240');
-            $table->string('grantee', 100);
+            $table->foreignId('grantee')->constrained('users');
             $table->unsignedSmallInteger('status')->default(SppStatus::ACTIVE->value);
 
             $table->timestamps();

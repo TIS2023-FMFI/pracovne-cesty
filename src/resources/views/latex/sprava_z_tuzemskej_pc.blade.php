@@ -7,6 +7,7 @@
 \usepackage{tabularx}
 \usepackage{setspace}
 \usepackage{xcolor}
+\usepackage{amssymb}
 
 \geometry{a4paper,left=20mm,right=20mm,top=20mm,bottom=20mm}
 \setlength\parindent{0pt}
@@ -141,3 +142,4 @@
     @endif
 
 \end{document}
+

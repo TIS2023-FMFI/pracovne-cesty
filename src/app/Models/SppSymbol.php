@@ -39,4 +39,10 @@ class SppSymbol extends Model
     {
         return $this->hasMany(Reimbursement::class, 'spp_symbol_id');
     }
+
+    public function granteeUser()
+    {
+        return $this->belongsTo(User::class, 'grantee');
+    }
+
 }

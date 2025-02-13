@@ -8,7 +8,7 @@
 <div class="email-container">
     <div class="content">
         Vážený používateľ, <br>
-        {{ $messageText }}
+        {!! nl2br(e($messageText)) !!}
     </div>
     <div class="footer">
         S pozdravom,<br>

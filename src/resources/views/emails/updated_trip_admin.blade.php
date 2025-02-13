@@ -1,13 +1,14 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Podpis cestovného príkazu</title>
+    <title>Nová cesta</title>
     @include('emails.partials.email_styles')
 </head>
 <body>
 <div class="email-container">
     <div class="content">
-        Vážený používateľ, <br>
+        Vážený admin, <br>
+        bola upravená pracovná cesta. <br>
         {!! nl2br(e($messageText)) !!}
     </div>
     <div class="footer">
