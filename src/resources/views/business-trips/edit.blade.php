@@ -546,9 +546,9 @@ if (is_null($old_sofia_id)) $old_sofia_id = $trip->sofia_id;
                                 $shouldCheckLunch = 'false';
                                 $shouldCheckDinner = 'false';
 
-                                $startCheckBreakfast = ($meals[$i * 3] === '1') ? 'true' : 'false';
-                                $startCheckLunch = ($meals[$i * 3 + 1] === '1') ? 'true' : 'false';
-                                $startCheckDinner = ($meals[$i * 3 + 2] === '1') ? 'true' : 'false';
+                                $startCheckBreakfast = (isset($meals[$i * 3]) && $meals[$i * 3] === '1') ? 'true' : 'false';
+                                $startCheckLunch = (isset($meals[$i * 3 + 1]) && $meals[$i * 3 + 1] === '1') ? 'true' : 'false';
+                                $startCheckDinner = (isset($meals[$i * 3 + 2]) && $meals[$i * 3 + 2] === '1') ? 'true' : 'false';
 
                                 if ($isFirstDay) {
                                 if (strtotime($currentTime) > strtotime('16:00')) {
@@ -565,9 +565,9 @@ if (is_null($old_sofia_id)) $old_sofia_id = $trip->sofia_id;
                                 $shouldCheckDinner = 'true';
                                 }
                                 } else {
-                                $shouldCheckBreakfast = ($meals[$i * 3] === '1') ? 'true' : 'false';
-                                $shouldCheckLunch = ($meals[$i * 3 + 1] === '1') ? 'true' : 'false';
-                                $shouldCheckDinner = ($meals[$i * 3 + 2] === '1') ? 'true' : 'false';
+                                $shouldCheckBreakfast = (isset($meals[$i * 3]) && $meals[$i * 3] === '1') ? 'true' : 'false';
+                                $shouldCheckLunch = (isset($meals[$i * 3 + 1]) && $meals[$i * 3 + 1] === '1') ? 'true' : 'false';
+                                $shouldCheckDinner = (isset($meals[$i * 3 + 2]) && $meals[$i * 3 + 2] === '1') ? 'true' : 'false';
                                 }
 
 
