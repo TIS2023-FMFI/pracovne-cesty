@@ -8,13 +8,29 @@ Projekt vznikol v rámci predmetu Tvorba informačných systémov na FMFI UK BA 
 
 ## Inštalácia a konfigurácia
 Pre inštaláciu z tohto repozitára postupujte, prosím, podľa nasledujúcich inštrukcií.
-Aplikácia pre správne fungovanie vyžaduje balík `pdftk-java >= 3.3.0` 
-([repozitár](https://gitlab.com/pdftk-java/pdftk)).
 
-V rámci inštalácie je potrebné stiahnuť si najnovšiu verziu projektu:
+Aplikácia potrebuje:
+- PHP 8.1 alebo novšie s rozšíreniami `pdo_mysql`, `mbstring`, `intl`, `gd`, `zip`, `bcmath` a Composer 2;
+- MySQL 8 s dvoma databázami **na tom istom serveri**: vlastnou a databázou systému Pritomnosť.
+  Prihlasovanie ich spája v jednom dotaze, preto musí mať používateľ vlastnej databázy právo čítať
+  tabuľku `users` a zapisovať do tabuľky `absence` v databáze Pritomnosti a obe databázy musia
+  používať rovnaké porovnávanie znakov (`utf8mb4_unicode_ci`);
+- `pdflatex` v `/usr/bin/pdflatex` (cesta sa nastavuje v `src/config/laratex.php`) – ním sa tlačia
+  dokumenty. Z TeX Live treba balíky `tabularx`, `array`, `multirow`, `xcolor`, `geometry`,
+  `setspace`, `float`, `graphicx`, `amssymb`, `lmodern` a slovenské znaky (`fontenc` T1, `inputenc`);
+  na Debiane ich prinesú `texlive-latex-base`, `texlive-latex-recommended`, `texlive-latex-extra`
+  a `lmodern`;
+- plánovač úloh (cron), ktorý každú minútu spustí `php artisan schedule:run` – posiela pripomienky
+  správ z ciest a maže neplatné pozvánky.
+
+Pôvodne uvádzaný balík `pdftk-java` súčasný kód nepoužíva.
+
+Pri prvej inštalácii si stiahnite projekt:
 ```sh
-git pull origin main
+git clone https://github.com/TIS2023-FMFI/pracovne-cesty.git
+cd pracovne-cesty
 ```
+Pri aktualizácii existujúcej inštalácie stačí `git pull origin main`.
 
 Následne aplikáciu treba nakonfigurovať pre dané prostredie pomocou `src/.env`:
 ```sh
@@ -29,15 +45,13 @@ APP_DEBUG=false
 APP_URL=
 
 # DB connection for this app
-DB_CONNECTION=mysql
 DB_HOST=
 DB_PORT=
 DB_DATABASE=
 DB_USERNAME=
 DB_PASSWORD=
 
-# DB connection for Pritomnost
-PRITOMNOST_DB_CONNECTION=mysql
+# DB connection for Pritomnost (the same MySQL server as above)
 PRITOMNOST_DB_HOST=
 PRITOMNOST_DB_PORT=
 PRITOMNOST_DB_DATABASE=
@@ -55,16 +69,23 @@ MAIL_FROM_ADDRESS=
 MAIL_FROM_NAME=
 ```
 
+Premenné `DB_CONNECTION` a `PRITOMNOST_DB_CONNECTION` zo vzorového `.env` sa nepoužívajú: obe spojenia
+sú typu MySQL a sú pevne pomenované v `src/config/database.php` (`cesty` a `dochadzka`).
+
 Ďalej je potrebné nainštalovať závislosti:
 ```sh
 composer install --optimize-autoloader --no-dev
 ```
 
-Pokiaľ databáza ešte nebola naplnená, je potrebné spustiť databázové migrácie:
+Pokiaľ databáza ešte nebola naplnená, je potrebné vygenerovať kľúč aplikácie a spustiť databázové migrácie:
 ```sh
+php artisan key:generate
 php artisan migrate
 php artisan db:seed
 ```
+Na úplne prázdnej databáze `db:seed` zlyhá na vzorových ŠPP prvkoch, kým neexistuje používateľ s ID 1
+(pozri `docs/poznamky.md`, bod K2). Dovtedy najprv vytvorte prvého používateľa – postup je nižšie
+v časti o lokálnom vývoji.
 
 Nakoniec je možné v rámci optimalizácie uložiť aktuálnu konfiguráciu do cache:
 ```sh
@@ -93,7 +114,7 @@ V `src/.env` nastavte:
 ```dotenv
 APP_NAME="Pracovné cesty"
 DB_HOST=mysql
-DB_DATABASE=cesty          # názov musí byť "cesty" (synchronizácia s Pritomnosťou s ním počíta)
+DB_DATABASE=cesty
 DB_USERNAME=sail
 DB_PASSWORD=password
 FORWARD_DB_PORT=3307       # port MySQL na hostiteľovi, ak je 3306 obsadený
