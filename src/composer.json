@@ -76,11 +76,11 @@
                     },
                     "PKSA-3r5d-mb8f-1qw9": {
                         "on-audit": false,
-                        "reason": "CRLF in the email rule - e-mail inputs get an app-level check against control characters. No fix exists for Laravel 10 (fixed in 12.60+). Remove with the framework upgrade."
+                        "reason": "CRLF in the email rule - not mitigated yet; an app-level check of e-mail inputs against control characters is planned. No fix exists for Laravel 10 (fixed in 12.60+). Remove with the framework upgrade."
                     },
                     "PKSA-mdq4-51ck-6kdq": {
                         "on-audit": false,
-                        "reason": "CRLF in the email rule - e-mail inputs get an app-level check against control characters. No fix exists for Laravel 10 (fixed in 12.60+). Remove with the framework upgrade."
+                        "reason": "CRLF in the email rule - not mitigated yet; an app-level check of e-mail inputs against control characters is planned. No fix exists for Laravel 10 (fixed in 12.60+). Remove with the framework upgrade."
                     }
                 }
             }

@@ -69,8 +69,8 @@ MAIL_FROM_ADDRESS=
 MAIL_FROM_NAME=
 ```
 
-Premenné `DB_CONNECTION` a `PRITOMNOST_DB_CONNECTION` zo vzorového `.env` sa nepoužívajú: obe spojenia
-sú typu MySQL a sú pevne pomenované v `src/config/database.php` (`cesty` a `dochadzka`).
+Premenné `DB_CONNECTION` a `PRITOMNOST_DB_CONNECTION` zo vzorového `.env` nemajú na databázové spojenia
+vplyv: obe sú typu MySQL a sú pevne pomenované v `src/config/database.php` (`cesty` a `dochadzka`).
 
 Ďalej je potrebné nainštalovať závislosti:
 ```sh

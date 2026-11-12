@@ -69,10 +69,13 @@ class DocumentExportSmokeTest extends DatabaseTestCase
         $response->assertOk();
         $response->assertHeader('content-type', 'application/pdf');
         $pdfPath = $response->baseResponse->getFile()->getPathname();
-        $this->assertStringStartsWith(self::PDF_SIGNATURE, file_get_contents($pdfPath));
 
-        // The application deletes the file once it has been sent, which never happens in a test.
-        File::delete($pdfPath);
+        try {
+            $this->assertStringStartsWith(self::PDF_SIGNATURE, file_get_contents($pdfPath));
+        } finally {
+            // LaraTeX removes the file only when the PHP process ends, i.e. after the whole test run.
+            File::delete($pdfPath);
+        }
     }
 
     private static function tripWithConferenceFee(): BusinessTripFactory
