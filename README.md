@@ -18,8 +18,8 @@ Aplikácia potrebuje:
 - `pdflatex` v `/usr/bin/pdflatex` (cesta sa nastavuje v `src/config/laratex.php`) – ním sa tlačia
   dokumenty. Z TeX Live treba balíky `tabularx`, `array`, `multirow`, `xcolor`, `geometry`,
   `setspace`, `float`, `graphicx`, `amssymb`, `lmodern` a slovenské znaky (`fontenc` T1, `inputenc`);
-  na Debiane ich prinesú `texlive-latex-base`, `texlive-latex-recommended`, `texlive-latex-extra`
-  a `lmodern`;
+  na Debiane ich prinesú `texlive-latex-base`, `texlive-latex-recommended`, `texlive-latex-extra`,
+  `lmodern` a `cm-super` (bez neho sa nevytlačia správy z ciest a čestné vyhlásenie);
 - plánovač úloh (cron), ktorý každú minútu spustí `php artisan schedule:run` – posiela pripomienky
   správ z ciest a maže neplatné pozvánky.
 
