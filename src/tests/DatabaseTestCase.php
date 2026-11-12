@@ -4,6 +4,7 @@ namespace Tests;
 
 use Database\Seeders\CodebookSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Support\TestDatabaseGuard;
 use Tests\Support\UsesPritomnostTestDatabase;
 
 /**
@@ -29,6 +30,8 @@ abstract class DatabaseTestCase extends TestCase
      */
     protected function beforeRefreshingDatabase(): void
     {
+        TestDatabaseGuard::assertDisposable(config('database.connections.'.config('database.default').'.database'));
+
         $this->preparePritomnostTestDatabase();
     }
 }

@@ -3,19 +3,20 @@
 namespace Tests\Support;
 
 use Illuminate\Support\Facades\DB;
-use LogicException;
+use Illuminate\Support\Facades\Schema;
 
 /**
  * Gives tests a private, disposable stand-in for the external Pritomnost database.
  *
  * The stand-in is built from the same schema file as the local development copy
  * (docker/mysql/pritomnost-schema.sql), in a separate database named in phpunit.xml.
+ *
+ * Assumes what the application itself assumes: both databases live on one MySQL server
+ * (user synchronisation joins them in a single query) and the Cesty user may create the stand-in.
  */
 trait UsesPritomnostTestDatabase
 {
     private const PRITOMNOST_CONNECTION = 'dochadzka';
-
-    private const TEST_DATABASE_SUFFIX = '_testing';
 
     private const SCHEMA_FILE = 'docker/mysql/pritomnost-schema.sql';
 
@@ -23,7 +24,7 @@ trait UsesPritomnostTestDatabase
 
     protected function preparePritomnostTestDatabase(): void
     {
-        $this->refuseToRunAgainstRealPritomnostData();
+        TestDatabaseGuard::assertDisposable($this->pritomnostDatabaseName());
 
         if (! self::$pritomnostSchemaIsFresh) {
             $this->rebuildPritomnostSchema();
@@ -31,22 +32,6 @@ trait UsesPritomnostTestDatabase
         }
 
         $this->letPritomnostConnectionSeeUncommittedCestyRows();
-    }
-
-    /**
-     * The schema below is dropped and re-created, so a misconfigured run must never reach
-     * the development copy, let alone the production database.
-     */
-    private function refuseToRunAgainstRealPritomnostData(): void
-    {
-        $database = $this->pritomnostDatabaseName();
-
-        if (! str_ends_with($database, self::TEST_DATABASE_SUFFIX)) {
-            throw new LogicException(
-                "Tests must use a Pritomnost database ending with '".self::TEST_DATABASE_SUFFIX."', "
-                ."but PRITOMNOST_DB_DATABASE is '{$database}'. Check phpunit.xml."
-            );
-        }
     }
 
     private function rebuildPritomnostSchema(): void
@@ -57,9 +42,8 @@ trait UsesPritomnostTestDatabase
             .'CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci'
         );
 
-        $pritomnost = DB::connection(self::PRITOMNOST_CONNECTION);
-        $pritomnost->statement('DROP TABLE IF EXISTS absence, users');
-        $pritomnost->unprepared(file_get_contents(base_path(self::SCHEMA_FILE)));
+        Schema::connection(self::PRITOMNOST_CONNECTION)->dropAllTables();
+        DB::connection(self::PRITOMNOST_CONNECTION)->unprepared(file_get_contents(base_path(self::SCHEMA_FILE)));
     }
 
     /**
@@ -67,6 +51,8 @@ trait UsesPritomnostTestDatabase
      * Pritomnost connection. Rows a test has written through the Cesty connection are not
      * committed (they sit in the test's transaction), so that query would not see them
      * under the default isolation level.
+     *
+     * The setting belongs to the current session: a test that reconnects to Pritomnost loses it.
      */
     private function letPritomnostConnectionSeeUncommittedCestyRows(): void
     {

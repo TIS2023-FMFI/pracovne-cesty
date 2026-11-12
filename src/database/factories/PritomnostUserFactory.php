@@ -50,9 +50,4 @@ class PritomnostUserFactory extends Factory
             'email' => $user->email,
         ]);
     }
-
-    public function disabled(): static
-    {
-        return $this->state(['status' => PritomnostUserStatus::DISABLED]);
-    }
 }

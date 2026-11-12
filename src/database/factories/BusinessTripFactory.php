@@ -108,7 +108,7 @@ class BusinessTripFactory extends Factory
                 ->where('name', '!=', self::HOME_COUNTRY)
                 ->inRandomOrder()
                 ->value('id'),
-            'place' => fake()->city(),
+            'place' => static fn () => fake()->city(),
         ]);
     }
 
@@ -119,6 +119,7 @@ class BusinessTripFactory extends Factory
 
     /**
      * The trip in the given state, for tests that walk through all of them.
+     * Like the named state methods below, it is meant to be applied once, to a trip that is still new.
      */
     public function inState(TripState $state): static
     {
@@ -139,7 +140,7 @@ class BusinessTripFactory extends Factory
     {
         return $this->state([
             'state' => TripState::CONFIRMED,
-            'sofia_id' => fake()->unique()->numerify('########'),
+            'sofia_id' => static fn () => fake()->unique()->numerify('########'),
         ]);
     }
 
@@ -149,7 +150,7 @@ class BusinessTripFactory extends Factory
     public function completed(): static
     {
         return $this->confirmed()
-            ->state(['state' => TripState::COMPLETED, 'conclusion' => fake()->sentence(12)])
+            ->state(['state' => TripState::COMPLETED, 'conclusion' => static fn () => fake()->sentence(12)])
             ->afterCreating(static fn (BusinessTrip $trip) => self::fileReportOf($trip));
     }
 
@@ -165,7 +166,7 @@ class BusinessTripFactory extends Factory
     {
         return $this->state([
             'state' => TripState::CANCELLATION_REQUEST,
-            'cancellation_reason' => fake()->sentence(8),
+            'cancellation_reason' => static fn () => fake()->sentence(8),
         ]);
     }
 

@@ -23,7 +23,16 @@ class PritomnostTestDatabaseTest extends DatabaseTestCase
 
         $this->expectException(LogicException::class);
 
-        $this->preparePritomnostTestDatabase();
+        $this->beforeRefreshingDatabase();
+    }
+
+    public function test_misconfigured_run_is_stopped_before_it_wipes_real_cesty_data(): void
+    {
+        config(['database.connections.cesty.database' => 'cesty']);
+
+        $this->expectException(LogicException::class);
+
+        $this->beforeRefreshingDatabase();
     }
 
     public function test_every_test_starts_with_empty_pritomnost_tables(): void

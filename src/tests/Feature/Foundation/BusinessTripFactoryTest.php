@@ -39,6 +39,24 @@ class BusinessTripFactoryTest extends DatabaseTestCase
         $this->assertNotSame(Country::getIdOf('Slovensko'), $trip->country_id);
     }
 
+    public function test_border_crossing_times_arrive_only_with_the_report(): void
+    {
+        $submitted = BusinessTrip::factory()->foreign()->create()->fresh();
+        $reported = BusinessTrip::factory()->foreign()->completed()->create()->fresh();
+
+        $this->assertNull($submitted->datetime_border_crossing_start);
+        $this->assertNull($submitted->datetime_border_crossing_end);
+        $this->assertTrue($reported->datetime_border_crossing_start->isAfter($reported->datetime_start));
+        $this->assertTrue($reported->datetime_border_crossing_end->isBefore($reported->datetime_end));
+    }
+
+    public function test_trips_created_in_bulk_get_distinct_identifiers(): void
+    {
+        $identifiers = BusinessTrip::factory()->count(3)->confirmed()->create()->pluck('sofia_id');
+
+        $this->assertCount(3, $identifiers->unique());
+    }
+
     #[DataProvider('tripStates')]
     public function test_owner_and_secretariat_can_open_a_trip_in_every_state(TripState $state): void
     {
