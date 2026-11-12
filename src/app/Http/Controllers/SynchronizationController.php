@@ -37,7 +37,7 @@ class SynchronizationController extends Controller
         )
             ->where("{$dochadzkaDatabase}.users.username", $username)
             ->where("{$dochadzkaDatabase}.users.personal_id", "<", 10790002)
-            ->select("{$dochadzkaDatabase}.users.*", "{$cestyDatabase}.users.id as {$cestyDatabase}_user_id")
+            ->select("{$dochadzkaDatabase}.users.*", "{$cestyDatabase}.users.id as cesty_user_id")
             ->first();
 
         // Update user details in the Cesty database based on the Pritomnost database

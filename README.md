@@ -133,7 +133,11 @@ $u->user_type = App\Enums\UserType::ADMIN; $u->save();'
 | Mailpit (odoslané e-maily) | http://localhost:8025 |
 | MySQL (`sail` / `password`, DB `cesty`, `dochadzka`) | `localhost:3307` |
 
-Testy bežia nad samostatnou databázou `testing`: `./vendor/bin/sail test`.
+Testy sa spúšťajú príkazom `./vendor/bin/sail test`. Bežia nad samostatnými databázami `testing`
+a `dochadzka_testing` (náhrada Pritomnosti, testy si ju vytvoria samy), takže lokálne údaje nemenia.
+Testy pracujúce s databázou dedia z `Tests\DatabaseTestCase`; číselníky a roly majú pripravené,
+používateľov a cesty si vyrábajú cez továrne (`User::factory()->employee()`,
+`BusinessTrip::factory()->confirmed()`, `PritomnostUser::factory()->matching($user)`).
 
 Poznámky k prostrediu:
 - `src/docker/app/Dockerfile` nahrádza štandardný Sail runtime (ten sťahuje PHP z Launchpad PPA).
