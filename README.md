@@ -79,3 +79,65 @@ Všetky požiadavky z webového servera by mali byť smerované na `src/public/i
 Ďalšie detaily ku konfigurácii je možné nájsť v [Laravel dokumentácii](https://laravel.com/docs/10.x/deployment).
 
 
+
+## Lokálny vývoj (Laravel Sail)
+Pre lokálny vývoj je pripravené prostredie v Dockeri cez [Laravel Sail](https://laravel.com/docs/10.x/sail).
+Lokálne nie je potrebné PHP ani Composer, stačí Docker.
+
+```sh
+cd src
+cp .env.example .env
+```
+
+V `src/.env` nastavte:
+```dotenv
+APP_NAME="Pracovné cesty"
+DB_HOST=mysql
+DB_DATABASE=cesty          # názov musí byť "cesty" (synchronizácia s Pritomnosťou s ním počíta)
+DB_USERNAME=sail
+DB_PASSWORD=password
+FORWARD_DB_PORT=3307       # port MySQL na hostiteľovi, ak je 3306 obsadený
+
+PRITOMNOST_DB_CONNECTION=mysql
+PRITOMNOST_DB_HOST=mysql
+PRITOMNOST_DB_PORT=3306
+PRITOMNOST_DB_DATABASE=dochadzka
+PRITOMNOST_DB_USERNAME=sail
+PRITOMNOST_DB_PASSWORD=password
+```
+
+Inštalácia závislostí, spustenie a príprava databázy:
+```sh
+docker run --rm -u "$(id -u):$(id -g)" -v "$(pwd):/var/www/html" -w /var/www/html \
+    laravelsail/php83-composer:latest composer install --ignore-platform-reqs
+./vendor/bin/sail up -d
+./vendor/bin/sail artisan key:generate
+./vendor/bin/sail artisan migrate
+./vendor/bin/sail npm install && ./vendor/bin/sail npm run build
+```
+
+`SppSymbolSeeder` vyžaduje existujúceho používateľa s ID 1, preto pred seedom vytvorte admina:
+```sh
+./vendor/bin/sail artisan tinker --execute='
+$u = App\Models\User::create(["first_name"=>"Admin","last_name"=>"Lokálny","personal_id"=>"1",
+  "username"=>"admin","email"=>"admin@example.com","password"=>Hash::make("password"),
+  "status"=>App\Enums\UserStatus::ACTIVE,"department"=>"KAI"]);
+$u->user_type = App\Enums\UserType::ADMIN; $u->save();'
+./vendor/bin/sail artisan db:seed
+./vendor/bin/sail artisan tinker --execute='App\Models\User::find(1)->assignRole("admin");'
+```
+
+| Služba | Adresa |
+|---|---|
+| Aplikácia (login `admin` / `password`) | http://localhost/home |
+| Mailpit (odoslané e-maily) | http://localhost:8025 |
+| MySQL (`sail` / `password`, DB `cesty`, `dochadzka`) | `localhost:3307` |
+
+Testy bežia nad samostatnou databázou `testing`: `./vendor/bin/sail test`.
+
+Poznámky k prostrediu:
+- `src/docker/app/Dockerfile` nahrádza štandardný Sail runtime (ten sťahuje PHP z Launchpad PPA).
+  Je postavený na oficiálnom `php:8.3` obraze a obsahuje aj `pdflatex` a `pdftk` pre export PDF.
+- Databáza Pritomnosť (`dochadzka`) je lokálne len náhradná schéma
+  (`src/docker/mysql/pritomnost-schema.sql`) s tabuľkami a stĺpcami, ktoré aplikácia používa.
+  Vytvorí sa automaticky pri prvom štarte MySQL s prázdnym volume.
