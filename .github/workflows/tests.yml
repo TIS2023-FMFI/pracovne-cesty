@@ -8,10 +8,16 @@ on:
 permissions:
   contents: read
 
+# A newer push to the same branch makes the run for the older one pointless.
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   tests:
     name: Automated tests
     runs-on: ubuntu-latest
+    timeout-minutes: 20
 
     defaults:
       run:
@@ -28,7 +34,7 @@ jobs:
         ports:
           - 3306:3306
         options: >-
-          --health-cmd="mysqladmin ping -h 127.0.0.1 -ppassword"
+          --health-cmd="mysqladmin ping -h 127.0.0.1 --silent"
           --health-interval=10s
           --health-timeout=5s
           --health-retries=10
@@ -75,9 +81,10 @@ jobs:
     name: Code style of changed files
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
-    # Older files do not follow the Pint preset yet, so a finding here does not block the pull request.
-    # Make this check mandatory once the code base has been formatted in one go.
-    continue-on-error: true
+    timeout-minutes: 10
+    # Older files do not follow the Pint preset yet, so do not make this a required check in the branch
+    # protection until the code base has been formatted in one go: a finding then shows on the pull
+    # request without blocking it.
 
     defaults:
       run:
@@ -100,6 +107,7 @@ jobs:
         env:
           BASE_REF: ${{ github.base_ref }}
         run: |
+          git rev-parse --verify --quiet "origin/${BASE_REF}" > /dev/null
           mapfile -t files < <(git diff --relative --name-only --diff-filter=ACMR "origin/${BASE_REF}...HEAD" -- '*.php')
           if [ "${#files[@]}" -eq 0 ]; then
             echo "No PHP files changed."
