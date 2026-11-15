@@ -13,7 +13,7 @@ by bez úprav nefungoval.
 
 | # | Problém | Miesto | Dôsledok |
 |---|---|---|---|
-| K1 | Hlavná DB sa musí volať `cesty`: alias stĺpca sa skladá z názvu DB (`{$cestyDatabase}_user_id`), ale číta sa napevno `cesty_user_id`. | `app/Http/Controllers/SynchronizationController.php` (`syncSingleUser`) | Pri inom názve DB nefunguje prihlásenie / synchronizácia používateľov. |
+| K1 | **Opravené** (alias je už pevný). Pôvodne: hlavná DB sa musí volať `cesty`: alias stĺpca sa skladá z názvu DB (`{$cestyDatabase}_user_id`), ale číta sa napevno `cesty_user_id`. | `app/Http/Controllers/SynchronizationController.php` (`syncSingleUser`) | Pri inom názve DB nefunguje prihlásenie / synchronizácia používateľov. |
 | K2 | `SppSymbolSeeder` priraďuje symboly používateľovi s ID 1 (`$defaultUser` nie je definovaný). | `database/seeders/SppSymbolSeeder.php` | `php artisan db:seed` na čistej DB spadne na cudzom kľúči `spp_symbols_grantee_foreign`. |
 | K3 | Produkčná URL je napevno v kóde (`http://localhost:8097` → `https://kempelen.dai.fmph.uniba.sk/cesty`). | `app/Http/Controllers/UserController.php:150`, `resources/views/spp/manage.blade.php:62,66` | Na inej adrese sú nesprávne odkazy v e-mailoch a v správe SPP. Malo by stačiť `APP_URL`. |
 | K4 | `tests/Feature/ExampleTest` očakáva 200 na `/`, aplikácia presmeruje na `/home` (302). | `tests/Feature/ExampleTest.php` | Test padá; je to pozostatok z Laravel šablóny. |

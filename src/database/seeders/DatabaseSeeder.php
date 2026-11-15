@@ -14,12 +14,7 @@ class DatabaseSeeder extends Seeder
         // Run in the hierarchical order
         $this->call([
             // Factory-less
-            CountrySeeder::class,
-            TransportSeeder::class,
-            ContributionSeeder::class,
-            TripPurposeSeeder::class,
-            StaffSeeder::class,
-            RoleAndPermissionSeeder::class,
+            CodebookSeeder::class,
             SppSymbolSeeder::class,
 
             // For development only

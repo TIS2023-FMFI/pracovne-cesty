@@ -3,12 +3,15 @@
 namespace App\Models;
 
 use App\Enums\PritomnostUserStatus;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class PritomnostUser extends Model
 {
+    use HasFactory;
+
     private const REQUEST_VALIDATOR_ID = 822;   # Udaj z PritomnostNaPracovisku/Aplikácia/include/config.php
     protected $connection = 'dochadzka';
     protected $table = 'users';

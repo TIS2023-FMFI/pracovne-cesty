@@ -29,4 +29,9 @@ class SppSymbolFactory extends Factory
             'acronym' => fake()->regexify('[A-Z]-\d{4}')
         ];
     }
+
+    public function active(): static
+    {
+        return $this->state(['status' => SppStatus::ACTIVE]);
+    }
 }
