@@ -16,7 +16,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         libzip-dev libicu-dev libpng-dev libonig-dev \
         nodejs npm \
         texlive-latex-base texlive-latex-recommended texlive-latex-extra \
-        texlive-fonts-recommended lmodern \
+        texlive-fonts-recommended lmodern cm-super \
         pdftk-java \
     && docker-php-ext-install pdo_mysql zip intl gd bcmath mbstring exif pcntl \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
